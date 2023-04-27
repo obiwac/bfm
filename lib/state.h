@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdlib.h>
 // XXX separate file?
 
 typedef struct {
