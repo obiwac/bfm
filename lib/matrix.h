@@ -30,13 +30,17 @@ typedef struct {
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
 	size_t m;
-	size_t n;
 
 	union {
 		bfm_matrix_full_t full;
 		bfm_matrix_band_t band;
 	};
 } bfm_matrix_t;
+
+typedef struct {
+	size_t n;
+	double *data;
+} bfm_vec_t;
 
 /**
  * @brief Create a matrix of size mxn
@@ -82,6 +86,6 @@ int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
 int bfm_matrix_lu(bfm_matrix_t* matrix);
 
-int bfm_matrix_lu_solve(bfm_matrix_t* matrix, double *y);
+int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
 
-int bfm_matrix_solve(bfm_matrix_t* matrix, double *y);
+int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
