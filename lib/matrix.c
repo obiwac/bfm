@@ -2,19 +2,6 @@
 
 // full matrix
 
-static int matrix_full_create(bfm_matrix_t* matrix) {
-	bfm_state_t* const state = matrix->state;
-
-	size_t const size = matrix->m * matrix->m * sizeof *matrix->full.data;
-	matrix->full.data = state->alloc(size);
-
-	if (matrix->full.data == NULL)
-		return -1;
-
-	memset(matrix->full.data, 0, size);
-	return 0;
-}
-
 static int matrix_full_destroy(bfm_matrix_t* matrix) {
 	bfm_state_t* const state = matrix->state;
 
@@ -105,15 +92,6 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 }
 
 // band matrix routines
-
-static int matrix_band_create(bfm_matrix_t* matrix, size_t k) {
-	bfm_state_t* const state = matrix->state;
-	matrix->band.k = k;
-	// matrix->band.symmetric = symmetric;
-
-	size_t const size = matrix->m * (k * 2 + 1) * sizeof *matrix->band.data;
-	matrix->band.data = state->alloc(size);
-}
 
 static int matrix_band_destroy(bfm_matrix_t *matrix) {
 	bfm_state_t* const state = matrix->state;
@@ -221,23 +199,6 @@ static int matrix_band_lu_solve(bfm_matrix_t *matrix, bfm_vec_t *vec) {
 
 // generic matrix routines
 
-int bfm_matrix_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_kind_t kind, bfm_matrix_major_t major, size_t m, size_t n) {
-	matrix->state = state;
-
-	matrix->kind = kind;
-	matrix->major = major;
-
-	matrix->m = m;
-
-	if (kind == BFM_MATRIX_KIND_FULL)
-		return matrix_full_create(matrix);
-
-	// if (matrix->kind == BFM_MATRIX_KIND_BAND)
-		// return matrix_band_create(matrix);
-
-	return -1;
-}
-
 int bfm_matrix_destroy(bfm_matrix_t* matrix) {
 	if (matrix->kind == BFM_MATRIX_KIND_FULL)
 		return matrix_full_destroy(matrix);
@@ -298,5 +259,44 @@ int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 	if (bfm_matrix_lu_solve(matrix, vec) < 0)
 		return -1;
 
+	return 0;
+}
+
+// creation functions
+
+static int matrix_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_kind_t kind, bfm_matrix_major_t major, size_t m) {
+	matrix->state = state;
+
+	matrix->kind = kind;
+	matrix->major = major;
+	matrix->m = m;
+
+	return -1;
+}
+
+int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m) {
+	matrix_create(matrix, state, BFM_MATRIX_KIND_FULL, major, m);
+
+	size_t const size = m * m * sizeof *matrix->full.data;
+	matrix->full.data = state->alloc(size);
+
+	if (matrix->full.data == NULL)
+		return -1;
+
+	memset(matrix->full.data, 0, size);
+	return 0;
+}
+
+int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m, size_t k) {
+	matrix_create(matrix, state, BFM_MATRIX_KIND_FULL, major, m);
+	matrix->band.k = k;
+
+	size_t const size = m * (k * 2 + 1) * sizeof *matrix->band.data;
+	matrix->band.data = state->alloc(size);
+
+	if (matrix->band.data == NULL)
+		return -1;
+
+	memset(matrix->full.data, 0, size);
 	return 0;
 }
