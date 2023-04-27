@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include "state.h"
 
-#define BFM_PIVOT_EPS 1e-20
-
 typedef enum {
 	BFM_MATRIX_KIND_FULL,
 	BFM_MATRIX_KIND_BAND,
@@ -33,7 +31,7 @@ typedef struct {
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
 	size_t m;
-	// TODO property for symmetric matrices
+	// TODO
 
 	union {
 		bfm_matrix_full_t full;
@@ -59,7 +57,7 @@ int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 
 /**
  * @brief Create a band square matrix of size mxn
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @param state, pointer to state struct
  * @param major, the way the matrix is represented in memory (order)
@@ -71,7 +69,7 @@ int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 
 /**
  * @brief Destroy a matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @return int, 0 if succes, -1 if failure
  */
@@ -79,7 +77,7 @@ int bfm_matrix_destroy(bfm_matrix_t* matrix);
 
 /**
  * @brief Get value at index (i,j) in the matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
@@ -89,7 +87,7 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
 
 /**
  * @brief Set value at index (i,j) of the matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
