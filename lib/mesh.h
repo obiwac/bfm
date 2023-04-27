@@ -13,6 +13,15 @@ typedef struct {
 	bfm_element_type_t type;
 
 	size_t *elem;
-	size_t *coords;
+	double *coords;
 } bfm_mesh_t;
+
+
+typedef struct {
+	size_t n_local_nodes;
+	bfm_element_type_t type;
+
+	size_t *nodes;
+	double *coords;
+} bfm_local_element;
 
