@@ -96,3 +96,16 @@ int bfm_matrix_full_solve(bfm_matrix_full_t *full_matrix, double *y) {
     bfm_matrix_full_lu(full_matrix);
     bfm_matrix_full_lu_solve(full_matrix, y);
 }
+
+int bfm_matrix_band_allocate(bfm_matrix_band_t *band_matrix, int m, int k) {
+    band_matrix->k = k;
+    band_matrix->m = m;
+    band_matrix->data = calloc(m * k, sizeof(double));
+    if (band_matrix->data == NULL)
+        return -1;
+    return 0;
+}
+
+int bfm_matrix_band_free(bfm_matrix_band_t *band_matrix) {
+    free(band_matrix->data);
+}

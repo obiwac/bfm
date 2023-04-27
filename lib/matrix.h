@@ -25,7 +25,6 @@ typedef struct {
 
 typedef struct {
 	size_t m;
-	size_t n;
 	size_t k;
 
 	double* data;
