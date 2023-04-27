@@ -1,111 +1,188 @@
 #include "matrix.h"
 
-int bfm_matrix_full_allocate(bfm_matrix_full_t *full_matrix, size_t m, size_t n, bfm_matrix_major_t major) {
-    full_matrix->m = m;
-    full_matrix->n = n;
-    full_matrix->major = major;
-    full_matrix->data = calloc(n * m, sizeof(double));
+// full matrix
 
-    if (full_matrix->data == NULL)
-        return -1;
-    return 0;
+static int matrix_full_create(bfm_matrix_t* matrix) {
+	bfm_state_t* const state = matrix->state;
+
+	matrix->full.data = state->alloc(n * m * sizeof *full_matrix->data);
+	memset(matrix->full.data, 0, n * m * sizeof *full_matrix->data);
+
+	if (matrix->full.data == NULL)
+		return -1;
+
+	return 0;
 }
 
-int bfm_matrix_full_free(bfm_matrix_full_t *full_matrix) {
-    free(full_matrix->data);
-    return 0;
+static int matrix_full_destroy(bfm_matrix_t* matrix) {
+	bfm_state_t* const state = matrix->state;
+
+	state->free(matrix->full.data);
+	return 0;
 }
 
-double bfm_matrix_full_get(bfm_matrix_full_t *full_matrix, int i, int j) {
-    // TODO handle out of bound;
-    int idx;
-    if (full_matrix->major == BFM_MATRIX_MAJOR_ROW)
-        idx = i * full_matrix->n + j;
-    else
-        idx = i + j * full_matrix->m;
-    return full_matrix->data[idx];
+static double matrix_full_get(bfm_matrix_t* matrix, size_t i, size_t j) {
+	if (i < 0 || i >= matrix->n || j < 0 || j <= matrix->m)
+		return 0.0 / 0.0; // NaN
+
+	int const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
+		i * matrix->n + j :
+		i + j * matrix->m;
+
+	return matrix->full.data[idx];
 }
 
-int bfm_matrix_full_set(bfm_matrix_full_t *full_matrix, int i, int j, double value) {
-    if (0 > i || i >= full_matrix->n || 0 > j || j <= full_matrix->m)
-        return -1;
+static int matrix_full_set(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
+	if (i < 0 || i >= matrix->n || j < 0 || j <= matrix->m)
+		return -1;
 
-    int idx;
-    if (full_matrix->major == BFM_MATRIX_MAJOR_ROW)
-        idx = i * full_matrix->n + j;
-    else
-        idx = i + full_matrix->m + j;
-    full_matrix->data[idx] = value;
-    return 0;
+	int const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
+		i * matrix->n + j :
+		i + j * matrix->m;
+
+	matrix->full.data[idx] = val;
+	return 0;
 }
 
-int bfm_matrix_full_lu(bfm_matrix_full_t *full_matrix) {
-    size_t m = full_matrix->m;
-    size_t n = full_matrix->n;
+static int matrix_full_lu(bfm_matrix_t* matrix) {
+	size_t const m = matrix->m;
+	size_t const n = matrix->n;
 
-    int err;
+	for (size_t k = 0; k < m - 1; k++) {
+		// TODO handle error case and non square matrix
 
-    for (int k = 0; k < m - 1; k++) {
-        // TODO Handle error case and non square matrix
-        double pivot_value = bfm_matrix_full_get(full_matrix, k, k);
-        if (fabs(pivot_value) < PIVOT_EPS)
-            return -1;
-        
-        for (int i = k + 1; i < m; i++) {
-            double row_value = bfm_matrix_full_get(full_matrix, i, k);
-            row_value /= pivot_value;
-            // Set pivot to one
-            err = bfm_matrix_full_set(full_matrix, i, k, row_value);
-            if (err != 0)
-                return err;
-            for (int j = k + 1; j < n; j++) {
-                double value = bfm_matrix_full_get(full_matrix, i, j);
-                double value_row_pivot = bfm_matrix_full_get(full_matrix, k, j);
-                // A[i][j] -= A[i][k] * A[k][j]
-                err = bfm_matrix_full_set(full_matrix, i, j, value - row_value * value_row_pivot);
-                if (err != 0)
-                    return err;
-            }
-        }
-    }
-    return 0;
+		double const pivot = matrix_full_get(matrix, k, k);
+
+		if (fabs(pivot) < BFM_PIVOT_EPS)
+			return -1;
+
+		for (size_t i = k + 1; i < m; i++) {
+			double const row_val = matrix_full_get(matrix, i, k);
+			row_val /= pivot;
+
+			// set pivot to one
+
+			if (matrix_full_set(matrix, i, k, row_val) < 0)
+				return -1;
+
+			for (size_t j = k + 1; j < n; j++) {
+				double const val = matrix_full_get(matrix, i, j);
+				double const val_row_pivot = matrix_full_get(matrix, k, j);
+
+				// A[i][j] -= A[i][k] * A[k][j]
+
+				if (matrix_full_set(matrix, i, j, val - row_val * val_row_pivot) < 0)
+					return -1;
+			}
+		}
+	}
+
+	return 0;
 }
 
-int bfm_matrix_full_lu_solve(bfm_matrix_full_t *full_matrix, double *y) {
-    size_t m = full_matrix->m;
-    
-    // Forward substitution Lx = y 
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < i; j++) {
-            double value = bfm_matrix_full_get(full_matrix, i, j);
-            y[i] -= value * y[j];
-        }
-    }
+static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
+	double* const y = vec->data;
 
-    // Backward substitution Ux = L^-1 y
-    for (int i = m - 1; i >= 0; i--) {
-        for (int j = i + 1; j < m; j++) {
-            double value = bfm_matrix_full_get(full_matrix, i, j);
-            y[i] -= value * y[j];
-        }
-    }
-    return 0;
+	// forward substitution Lx = y
+
+	for (size_t i = 0; i < matrix->m; i++) {
+		for (size_t j = 0; j < i; j++) {
+			double const val = matrix_full_get(matrix, i, j);
+			y[i] -= val * y[j];
+		}
+	}
+
+	// backward substitution Ux = L^-1 y
+
+	for (size_t i = m - 1; i >= 0; i--) {
+		for (size_t j = i + 1; j < matrix->m; j++) {
+			double const val = matrix_full_get(matrix, i, j);
+			y[i] -= val * y[j];
+		}
+	}
+
+	return 0;
 }
 
-int bfm_matrix_full_solve(bfm_matrix_full_t *full_matrix, double *y) {
-    bfm_matrix_full_lu(full_matrix);
-    bfm_matrix_full_lu_solve(full_matrix, y);
+// generic matrix routines
+
+int bfm_matrix_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_kind_t kind, bfm_matrix_major_t major, size_t m, size_t n) {
+	matrix->state = state;
+
+	matrix->kind = kind;
+	matrix->major = major;
+
+	matrix->m = m;
+	matrix->n = n;
+
+	if (kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_create(matrix);
+
+	// if (kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_create(matrix);
+
+	return -1;
 }
 
-int bfm_matrix_band_allocate(bfm_matrix_band_t *band_matrix, int m, int k) {
-    band_matrix->k = k;
-    band_matrix->m = m;
-    band_matrix->data = calloc(m * k, sizeof(double));
-    if (band_matrix->data == NULL)
-        return -1;
-    return 0;
+int bfm_matrix_destroy(bfm_matrix_t* matrix) {
+	if (matrix->kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_destroy(matrix);
+
+	// if (matrix->kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_destroy(matrix);
+
+	return -1;
 }
 
-int bfm_matrix_band_free(bfm_matrix_band_t *band_matrix) {
-    free(band_matrix->data);
+double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j) {
+	if (kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_get(matrix, i, j);
+
+	// if (kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_get(matrix, i, j);
+
+	return -1;
+}
+
+int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
+	if (kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_set(matrix, i, j, val);
+
+	// if (kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_set(matrix, i, j, val);
+
+	return -1;
+}
+
+int bfm_matrix_lu(bfm_matrix_t* matrix) {
+	if (kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_lu(matrix);
+
+	// if (kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_lu(matrix);
+
+	return -1;
+}
+
+int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
+	if (full_matrix->m != vec->n)
+		return -1;
+
+	if (kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_lu_solve(matrix);
+
+	// if (kind == BFM_MATRIX_KIND_BAND)
+	// 	return matrix_band_lu_solve(matrix);
+
+	return -1;
+}
+
+int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
+	if (bfm_matrix_lu(matrix) < 0)
+		return -1;
+
+	if (bfm_matrix_lu_solve(matrix, vec) < 0)
+		return -1;
+
+	return 0;
 }

@@ -2,7 +2,8 @@
 
 #include <math.h>
 #include "state.h"
-#define PIVOT_EPS 1e-20
+
+#define BFM_PIVOT_EPS 1e-20
 
 typedef enum {
 	BFM_MATRIX_KIND_FULL,
@@ -15,18 +16,10 @@ typedef enum {
 } bfm_matrix_major_t;
 
 typedef struct {
-	size_t m;
-	size_t n;
-
-	bfm_matrix_major_t major;
-
-	double* data; // don't access this directly; there are accessor functions for this
+	double* data;
 } bfm_matrix_full_t;
 
 typedef struct {
-	size_t m;
-	size_t k;
-
 	double* data;
 } bfm_matrix_band_t;
 
@@ -34,7 +27,7 @@ typedef struct {
 	bfm_state_t* state;
 
 	bfm_matrix_kind_t kind;
-	bfm_matrix_major_t major;
+	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
 	size_t m;
 	size_t n;
@@ -46,47 +39,49 @@ typedef struct {
 } bfm_matrix_t;
 
 /**
- * @brief Allocate a matrix of size mxn
+ * @brief Create a matrix of size mxn
  * 
- * @param Pointer to a full matrix
+ * @param matrix, pointer to matrix struct
+ * @param state, pointer to state struct
+ * @param kind, the matrix representation kind
+ * @param major, the way the matrix is represented in memory (order)
  * @param m, number of rows
  * @param n, number of columns
- * @param major, the way the matrix is represented in memory
  * @return int, 0 if success, -1 if failure
  */
-int bfm_matrix_full_allocate(bfm_matrix_full_t *full_matrix, size_t m, size_t n, bfm_matrix_major_t major);
+int bfm_matrix_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_kind_t kind, bfm_matrix_major_t major, size_t m, size_t n);
 
 /**
- * @brief Free the memory taken by full_matrix
+ * @brief Destroy a matrix
  * 
- * @param Pointer to a full matrix
+ * @param matrix, pointer to matrix struct
  * @return int, 0 if succes, -1 if failure
  */
-int bfm_matrix_full_free(bfm_matrix_full_t *full_matrix);
+int bfm_matrix_destroy(bfm_matrix_t* matrix);
 
 /**
  * @brief Get value at index (i,j) in the matrix
  * 
- * @param Pointer to a full matrix
+ * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
- * @return double, value stored at index (i,j)
+ * @return double, value stored at index (i,j), NaN if failure
  */
-double bfm_matrix_full_get(bfm_matrix_full_t *full_matrix, int i, int j);
+double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
 
 /**
  * @brief Set value at index (i,j) of the matrix
  * 
- * @param Pointer to a full matrix
+ * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
  * @param value, to store at index (i,j)
  * @return int, 0 if succes, -1 if failure
  */
-int bfm_matrix_full_set(bfm_matrix_full_t *full_matrix, int i, int j, double value);
+int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
-int bfm_matrix_full_lu(bfm_matrix_full_t *full_matrix);
+int bfm_matrix_lu(bfm_matrix_t* matrix);
 
-int bfm_matrix_full_lu_solve(bfm_matrix_full_t *full_matrix, double *y);
+int bfm_matrix_lu_solve(bfm_matrix_t* matrix, double *y);
 
-int bfm_matrix_full_solve(bfm_matrix_full_t *full_matrix, double *y);
+int bfm_matrix_solve(bfm_matrix_t* matrix, double *y);
