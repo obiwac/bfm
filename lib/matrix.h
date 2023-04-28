@@ -31,7 +31,7 @@ typedef struct {
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
 	size_t m;
-	// TODO
+	// TODO property for symmetric matrices
 
 	union {
 		bfm_matrix_full_t full;
