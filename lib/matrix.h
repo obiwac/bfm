@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include "state.h"
 
-#define BFM_PIVOT_EPS 1e-20
-
 typedef enum {
 	BFM_MATRIX_KIND_FULL,
 	BFM_MATRIX_KIND_BAND,
@@ -23,7 +21,6 @@ typedef struct {
 
 typedef struct {
 	size_t k; // Size of the band
-	// bool symmetric;
 	double* data;
 } bfm_matrix_band_t;
 
@@ -33,7 +30,8 @@ typedef struct {
 	bfm_matrix_kind_t kind;
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
-	size_t m; // Size of row and column
+	size_t m;
+	// TODO
 
 	union {
 		bfm_matrix_full_t full;
@@ -47,21 +45,31 @@ typedef struct {
 } bfm_vec_t;
 
 /**
- * @brief Create a matrix of size mxn
- * 
+ * @brief Create a full square matrix of size mxn
+ *
  * @param matrix, pointer to matrix struct
  * @param state, pointer to state struct
- * @param kind, the matrix representation kind
  * @param major, the way the matrix is represented in memory (order)
- * @param m, number of rows
- * @param n, number of columns
+ * @param m, number of rows/columns
  * @return int, 0 if success, -1 if failure
  */
-int bfm_matrix_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_kind_t kind, bfm_matrix_major_t major, size_t m, size_t n);
+int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m);
+
+/**
+ * @brief Create a band square matrix of size mxn
+ *
+ * @param matrix, pointer to matrix struct
+ * @param state, pointer to state struct
+ * @param major, the way the matrix is represented in memory (order)
+ * @param m, number of rows/columns
+ * @param k, bandwidth of the matrix
+ * @return int, 0 if success, -1 if failure
+ */
+int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m, size_t k);
 
 /**
  * @brief Destroy a matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @return int, 0 if succes, -1 if failure
  */
@@ -69,7 +77,7 @@ int bfm_matrix_destroy(bfm_matrix_t* matrix);
 
 /**
  * @brief Get value at index (i,j) in the matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
@@ -79,7 +87,7 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
 
 /**
  * @brief Set value at index (i,j) of the matrix
- * 
+ *
  * @param matrix, pointer to matrix struct
  * @param i, index of row
  * @param j, index of column
