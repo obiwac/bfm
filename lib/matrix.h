@@ -22,7 +22,7 @@ typedef struct {
 } bfm_matrix_full_t;
 
 typedef struct {
-	size_t k;
+	size_t k; // Size of the band
 	// bool symmetric;
 	double* data;
 } bfm_matrix_band_t;
@@ -33,7 +33,7 @@ typedef struct {
 	bfm_matrix_kind_t kind;
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
-	size_t m;
+	size_t m; // Size of row and column
 
 	union {
 		bfm_matrix_full_t full;
@@ -88,8 +88,28 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
  */
 int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
+/**
+ * @brief Apply LU decompition to a matrix; store it in place
+ * 
+ * @param A matrix 
+ * @return int, 0 if succes, -1 if failure
+ */
 int bfm_matrix_lu(bfm_matrix_t* matrix);
 
+/**
+ * @brief solve a LUx = y system inplace
+ * 
+ * @param A LU matrix
+ * @param y, a vector 
+ * @return int, 0 if succes, -1 if failure 
+ */
 int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
 
+/**
+ * @brief solve a Ax = y system using lu decomposition
+ * 
+ * @param A, a matrix 
+ * @param y
+ * @return int 
+ */
 int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
