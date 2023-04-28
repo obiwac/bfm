@@ -1,6 +1,8 @@
 #pragma once
 
 #include <math.h>
+#include <sys/types.h>
+#include <stdbool.h>
 #include "state.h"
 
 #define BFM_PIVOT_EPS 1e-20
@@ -20,6 +22,8 @@ typedef struct {
 } bfm_matrix_full_t;
 
 typedef struct {
+	size_t k;
+	// bool symmetric;
 	double* data;
 } bfm_matrix_band_t;
 
