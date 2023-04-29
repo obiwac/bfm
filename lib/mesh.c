@@ -64,14 +64,22 @@ int bfm_build_elasticity_system_local(bfm_local_element_t* element, bfm_rule_t *
 
         for (size_t j = 0; j < element->n_local_nodes; j++) {
             // int const index_i = 2 * map[j] + 1;
-            // B[index_i] += det_J * weight * phi[j] * -g * rho;
+            // B[index_i] += det_jacobian * weight * phi[j] * -g * rho;
         }
 
         for (size_t j = 0; j < element->n_local_nodes; j++) {
             int const index_i = 2 * map[j];
             for (size_t k = 0; k < element->n_local_nodes; k++) {
                 int const index_j = 2 * map[k];
-                
+                // double const f_11 = a * dphi_dx[j] * dphi_dx[k] + c * dphi_dy[j] * dphi_dy[k];
+                // double const f_12 = b * dphi_dx[j] * dphi_dy[k] + c * dphi_dy[j] * dphi_dx[k];
+                // double const f_21 = b * dphi_dy[j] * dphi_dx[k] + c * dphi_dx[j] * dphi_dy[k];
+                // double const f_22 = a * dphi_dy[j] * dphi_dy[k] + c * dphi_dx[j] * dphi_dx[k];
+
+                // A[index_i + 0][index_j + 0] += det_jacobian * weight * f_11;
+                // A[index_i + 0][index_j + 1] += det_jacobian * weight * f_12;
+                // A[index_i + 1][index_j + 0] += det_jacobian * weight * f_21;
+                // A[index_i + 1][index_j + 1] += det_jacobian * weight * f_22;   
             }
         }
     }
