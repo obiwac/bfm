@@ -10,20 +10,21 @@ typedef enum {
 } bfm_element_type_t;
 
 typedef enum {
-	BFM_PLANAR_STRAINS;
-} bfm_problem_type;
+	BFM_PLANAR_STRAINS,
+} bfm_problem_type_t;
 
 typedef struct {
 	double young_modulus;
 	double poisson_ratio;
 	double mass_density;
 	double gravity;
-	bfm_problem_t type;
+	bfm_problem_type_t type;
 	bfm_mesh_t *mesh;
 } bfm_problem_t;
 
 typedef struct {
 	size_t n_elems;
+	size_t n_nodes;
 	size_t n_local_nodes;
 	// size_t dim;
 	bfm_element_type_t type;
