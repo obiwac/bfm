@@ -9,6 +9,19 @@ typedef enum {
 	BFM_TRIANGLES
 } bfm_element_type_t;
 
+typedef enum {
+	BFM_PLANAR_STRAINS;
+} bfm_problem_type;
+
+typedef struct {
+	double young_modulus;
+	double poisson_ratio;
+	double mass_density;
+	double gravity;
+	bfm_problem_t type;
+	bfm_mesh_t *mesh;
+} bfm_problem_t;
+
 typedef struct {
 	size_t n_elems;
 	size_t n_local_nodes;
