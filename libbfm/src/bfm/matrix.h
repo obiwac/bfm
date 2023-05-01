@@ -3,7 +3,9 @@
 #include <math.h>
 #include <sys/types.h>
 #include <stdbool.h>
-#include "state.h"
+
+#include <bfm/bfm.h>
+#include <bfm/math.h>
 
 typedef enum {
 	BFM_MATRIX_KIND_FULL,
@@ -40,8 +42,10 @@ typedef struct {
 } bfm_matrix_t;
 
 typedef struct {
+	bfm_state_t* state;
+
 	size_t n;
-	double *data;
+	double* data;
 } bfm_vec_t;
 
 /**

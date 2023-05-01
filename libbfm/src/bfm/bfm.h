@@ -1,9 +1,10 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdlib.h>
-// XXX separate file?
 
 typedef struct {
+	bool has;
 	char* msg;
 
 	char const* file;
@@ -25,6 +26,6 @@ int bfm_state_create(bfm_state_t* state);
 int bfm_state_destroy(bfm_state_t* state);
 
 int bfm_set_alloc(bfm_state_t* state, bfm_alloc_t alloc);
-int bfm_set_free(bfm_state_t* state, bfm_alloc_t free);
+int bfm_set_free(bfm_state_t* state, bfm_free_t free);
 
 int bfm_err_print(bfm_state_t* state);

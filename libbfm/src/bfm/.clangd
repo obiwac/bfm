@@ -1,0 +1,14 @@
+CompileFlags:
+  Add:
+    - -xc
+    - -std=c99
+    - -Wall
+    - -Wextra
+    - -I/usr/local/include
+    - -I..
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: modernize*
+InlayHints:
+  ParameterNames: No
