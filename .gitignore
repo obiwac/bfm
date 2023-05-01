@@ -53,3 +53,4 @@ dkms.conf
 
 *.sw[nop]
 *.vscode
+pybfm/libbfm
