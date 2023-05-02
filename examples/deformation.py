@@ -17,7 +17,7 @@ mesh.mesh()
 # Young's modulus (E): 71.7 GPa
 # Poisson's ratio (nu): 0.33
 # there are other properties such as tensile strength we could consider but this is enough for now
-# for the material used in the LEPL1110 course: Material(rho=7.85e3, E=211.e9, nu=0.3)
+# for the material used in the LEPL1110 course: Material("Steel", rho=7.85e3, E=211.e9, nu=0.3)
 
 material = Material.AA7075
 obj = Obj(mesh, material)
