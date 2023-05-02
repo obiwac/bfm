@@ -1,7 +1,4 @@
-from pybfm.bfm import Bfm
-from pybfm.mesh import Mesh
-from pybfm.material import Material
-from pybfm.obj import Obj
+from pybfm import Bfm, Mesh, Material, Obj
 
 # create initial BFM context
 

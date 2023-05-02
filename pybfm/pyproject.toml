@@ -6,3 +6,10 @@ authors = [
 	{name = "Alexandre Dewilde", email = "alexandredewilde.contact@gmail.com"},
 	{name = "Aymeric Wibo", email = "obiwac@gmail.com"},
 ]
+dependencies = [
+	"pyglet",
+]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"

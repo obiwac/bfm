@@ -1,6 +1,4 @@
 class Material:
-	AA7075 = Material("AA7075", 2.81e3, 71.7e9, 0.33, (0.667, 0.439, 0.459))
-
 	def __init__(self, name: str, rho: float, E: float, nu: float, colour: tuple[float] = (1, 1, 1)):
 		self.name = name
 
@@ -9,3 +7,6 @@ class Material:
 		self.nu = nu # Poisson's ratio
 
 		self.colour = colour
+
+	def __init_subclass__(cls):
+		AA7075 = cls("AA7075", 2.81e3, 71.7e9, 0.33, (0.667, 0.439, 0.459))
