@@ -25,15 +25,15 @@ typedef struct {
 	bfm_state_t* state;
 
 	size_t dim;
+	bfm_elem_kind_t kind;
 
 	size_t n_elems;
 	size_t n_nodes;
-	size_t n_local_nodes;
-	bfm_elem_kind_t kind;
+
+	double* coords;
+	size_t* elems;
 
 	bfm_rule_t* rule;
-	size_t* elems;
-	double* coords;
 } bfm_mesh_t;
 
 typedef struct {

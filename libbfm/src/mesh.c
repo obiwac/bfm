@@ -50,8 +50,17 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	return 0;
 }
 
+int bfm_mesh_destroy(bfm_mesh_t* mesh) {
+	bfm_state_t* const state = mesh->state;
+
+	state->free(mesh->coords);
+	state->free(mesh->elems);
+
+	return 0;
+}
+
 static int get_local_element(bfm_mesh_t* mesh, size_t e, bfm_local_element_t* element) {
-	size_t const n_local_nodes = mesh->n_local_nodes;
+	size_t const n_local_nodes = mesh->kind;
 
 	size_t* const elems = mesh->elems;
 
@@ -73,7 +82,7 @@ int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system, double y
 	bfm_matrix_t* A = system->A;
 
 	bfm_local_element_t element = {
-		.n_local_nodes = mesh->n_local_nodes,
+		.n_local_nodes = mesh->kind,
 	};
 
 	for (size_t i = 0; i < mesh->n_elems; i++) {
