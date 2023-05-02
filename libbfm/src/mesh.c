@@ -3,6 +3,25 @@
 
 #include <bfm/mesh.h>
 
+int bfm_mesh_create_generic(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
+	memset(mesh, 0, sizeof *mesh);
+	mesh->state = state;
+
+	mesh->dim = dim;
+	mesh->kind = kind;
+
+	return 0;
+}
+
+int bfm_mesh_destroy(bfm_mesh_t* mesh) {
+	bfm_state_t* const state = mesh->state;
+
+	state->free(mesh->coords);
+	state->free(mesh->elems);
+
+	return 0;
+}
+
 int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
 	mesh->state = state;
 	mesh->dim = 2; // LEPL1110 only looks at 2D meshes
@@ -47,15 +66,6 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		fscanf(fp, "%zu : %zu %zu %zu %zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
 	fclose(fp);
-	return 0;
-}
-
-int bfm_mesh_destroy(bfm_mesh_t* mesh) {
-	bfm_state_t* const state = mesh->state;
-
-	state->free(mesh->coords);
-	state->free(mesh->elems);
-
 	return 0;
 }
 
