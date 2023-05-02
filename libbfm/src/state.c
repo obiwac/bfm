@@ -5,6 +5,10 @@
 
 int bfm_state_create(bfm_state_t* state) {
 	memset(state, 0, sizeof *state);
+
+	state->alloc = malloc;
+	state->free = free;
+
 	return 0;
 }
 
