@@ -6,7 +6,6 @@ project(bfm VERSION 0.1.0 DESCRIPTION "Big F'ing Matrix")
 add_library(bfm
 	src/matrix.c
 	src/mesh.c
-	src/parse.c
 	src/state.c
 )
 
