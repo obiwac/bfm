@@ -1,10 +1,10 @@
-#include "../lib/mesh.h"
-#include "../lib/parse.h"
-#include "../lib/matrix.h"
-#include "../lib/parse.h"
+#include <bfm/bfm.h>
+#include <bfm/mesh.h>
+#include <bfm/parse.h>
+#include <bfm/matrix.h>
+#include <bfm/parse.h>
 
-
-int main() {
+int main(void) {
     bfm_problem_t problem;
     bfm_parse_problem_file("problem.txt", &problem);
     bfm_parse_mesh_file("mesh.txt", &problem);
@@ -15,4 +15,6 @@ int main() {
 
 
     bfm_free_mesh_file(&problem);
+
+	 return EXIT_SUCCESS;
 }
