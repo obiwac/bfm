@@ -35,22 +35,10 @@ typedef struct {
 } bfm_mesh_t;
 
 typedef struct {
-	bfm_state_t* state;
-
-	double young_modulus;
-	double poisson_ratio;
-	double mass_density;
-	double gravity;
-
-	bfm_problem_type_t type;
-	bfm_mesh_t* mesh;
-} bfm_problem_t;
-
-typedef struct {
 	size_t n_local_nodes;
 	size_t* map;
 	double* x;
 	double* y;
 } bfm_local_element_t;
 
-int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system);
+int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system, double young_modulus, double poisson_ratio, double rho, double force);
