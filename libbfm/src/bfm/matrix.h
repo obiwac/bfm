@@ -48,6 +48,11 @@ typedef struct {
 	double* data;
 } bfm_vec_t;
 
+typedef struct {
+	bfm_matrix_t *A;
+	bfm_vec_t *B;
+} bfm_system_t;
+
 /**
  * @brief Create a full square matrix of size mxn
  *
@@ -124,4 +129,4 @@ int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
  * @param y
  * @return int 
  */
-int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
+int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t* y);

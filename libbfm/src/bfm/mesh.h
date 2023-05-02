@@ -53,4 +53,4 @@ typedef struct {
 	double* y;
 } bfm_local_element_t;
 
-int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_matrix_t* A, bfm_vec_t* B);
+int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system);

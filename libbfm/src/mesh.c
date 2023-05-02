@@ -19,9 +19,8 @@ static int get_local_element(bfm_mesh_t* mesh, size_t e, bfm_local_element_t* el
 	 return 0;
 }
 
-int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_matrix_t* A, bfm_vec_t* B) {
-	(void) A;
-	(void) B;
+int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system) {
+	bfm_matrix_t* A = system->A;
 
 	bfm_local_element_t element = {
 		.n_local_nodes = mesh->n_local_nodes,
