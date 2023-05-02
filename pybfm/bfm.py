@@ -5,6 +5,8 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
+from obj import Obj
+
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
@@ -44,6 +46,9 @@ class Bfm:
 	def __init__(self):
 		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
 		self.window = Window(config = self.config, width = 800, height = 480, caption = "BFM", resizable = True, vsync = False)
+
+	def add(self, obj: Obj):
+		...
 
 	def show(self):
 		pyglet.app.run()

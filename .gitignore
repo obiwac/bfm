@@ -55,3 +55,5 @@ dkms.conf
 *.vscode
 pybfm/libbfm
 build
+*.egg-info
+__pycache__
