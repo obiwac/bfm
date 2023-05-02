@@ -13,7 +13,7 @@ set_target_properties(bfm PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(bfm PROPERTIES SOVERSION 1)
 
 set_target_properties(bfm PROPERTIES PUBLIC_HEADER
-	"src/bfm/bfm.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/parse.h"
+	"src/bfm/bfm.h;src/bfm/math.h;src/bfm/matrix.h;src/bfm/mesh.h"
 )
 
 # private include directories
