@@ -34,7 +34,7 @@ class Window(pyglet.window.Window):
 		self.on_mouse_motion(x, y, delta_x, delta_y)
 
 	def on_key_press(self, key, modifiers):
-		if key == pyglet.key.window.ESCAPE:
+		if key == pyglet.window.key.ESCAPE:
 			pyglet.app.exit()
 
 	def on_key_release(self, key, modifiers):
