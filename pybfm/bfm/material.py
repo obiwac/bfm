@@ -8,6 +8,9 @@ class __Material:
 
 		self.colour = colour
 
+	def __repr__(self):
+		return f"BFM_Material({name})"
+
 	def __init_subclass__(cls):
 		cls.AA7075 = cls("AA7075", 2.81e3, 71.7e9, 0.33, (0.667, 0.439, 0.459))
 
