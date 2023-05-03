@@ -1,4 +1,4 @@
-from bfm import Bfm, Mesh, Material, Obj
+from bfm import Bfm, Mesh_lepl1110, Material, Obj
 
 # create initial BFM context
 
@@ -7,10 +7,12 @@ bfm = Bfm()
 # create a 2D simplex mesh
 # this is simply a horizontal bar 1 unit wide and 0.2 units tall
 
-mesh = Mesh(2, Mesh.SIMPLEX)
+# mesh = Mesh(2, Mesh.SIMPLEX)
+#
+# mesh.rect((0, 0), (1, 0.2))
+# mesh.mesh()
 
-mesh.rect((0, 0), (1, 0.2))
-mesh.mesh()
+mesh = Mesh_lepl1110("~/lepl1110/ass/6/data/msh2.txt")
 
 # create object out of 7075-series aluminium:
 # density (rho): 2.81 g/cm^3
