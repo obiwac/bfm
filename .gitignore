@@ -53,7 +53,7 @@ dkms.conf
 
 *.sw[nop]
 *.vscode
-pybfm/libbfm
+pybfm/bfm/libbfm
 build
 *.egg-info
 __pycache__

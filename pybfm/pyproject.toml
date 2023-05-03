@@ -13,3 +13,6 @@ dependencies = [
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+bfm = ["*.so"]

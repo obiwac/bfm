@@ -16,7 +16,7 @@ if __name__ == "__main__":
 	"""
 
 	ffi.set_source(
-		"pybfm.libbfm.libbfm",
+		"pybfm.bfm.libbfm.libbfm",
 		includes,
 		libraries=["bfm"],
 		extra_compile_args=["-I/usr/local/include"]
