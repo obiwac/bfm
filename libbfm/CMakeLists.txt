@@ -4,8 +4,10 @@ project(bfm VERSION 0.1.0 DESCRIPTION "Big F'ing Matrix")
 # library setup
 
 add_library(bfm SHARED
+	src/material.c
 	src/matrix.c
 	src/mesh.c
+	src/obj.c
 	src/state.c
 )
 
@@ -13,7 +15,7 @@ set_target_properties(bfm PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(bfm PROPERTIES SOVERSION 1)
 
 set_target_properties(bfm PROPERTIES PUBLIC_HEADER
-	"src/bfm/bfm.h;src/bfm/math.h;src/bfm/matrix.h;src/bfm/mesh.h"
+	"src/bfm/bfm.h;src/bfm/math.h;src/bfm/material.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/obj.h"
 )
 
 # private include directories
