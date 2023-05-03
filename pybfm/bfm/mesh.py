@@ -38,7 +38,7 @@ class Mesh:
 	def indices(self):
 		indices = []
 
-		for i in range(self._mesh.n_elems):
+		for i in range(self._mesh.n_elems * self.kind):
 			indices.append(self._mesh.elems[i])
 
 		return indices
