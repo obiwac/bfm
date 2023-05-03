@@ -23,6 +23,8 @@ int bfm_mesh_destroy(bfm_mesh_t* mesh) {
 }
 
 int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
+	int rv = -1;
+
 	mesh->state = state;
 	mesh->dim = 2; // LEPL1110 only looks at 2D meshes
 
@@ -31,7 +33,7 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	FILE* const fp = fopen(name, "r");
 
 	if (fp == NULL)
-		return -1; // TODO error message
+		goto err_fopen; // TODO error message
 
 	// read nodes
 
@@ -41,12 +43,12 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	size_t _;
 
 	for (size_t i = 0; i < mesh->n_nodes; i++)
-		fscanf(fp, "%zu : %lf %lf", &_, &mesh->coords[i * 2], &mesh->coords[i * 2 + 1]);
+		fscanf(fp, "\t%zu :\t%lf\t%lf\n", &_, &mesh->coords[i * 2], &mesh->coords[i * 2 + 1]);
 
 	// read elements
 
 	char kind_str[16];
-	fscanf(fp, "Number of %15s : %zu\n", kind_str, &mesh->n_elems);
+	fscanf(fp, "Number of %15s %zu\n", kind_str, &mesh->n_elems);
 
 	if (strcmp(kind_str, "triangles") == 0)
 		mesh->kind = BFM_ELEM_KIND_SIMPLEX;
@@ -55,18 +57,27 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		mesh->kind = BFM_ELEM_KIND_QUAD;
 
 	else
-		return -1; // TODO error message
+		goto err_kind; // TODO error message
 
 	mesh->elems = state->alloc(mesh->n_elems * mesh->kind * sizeof *mesh->elems);
 
 	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_SIMPLEX && i < mesh->n_elems; i++)
-		fscanf(fp, "%zu : %zu %zu %zu\n", &_, &mesh->elems[i * 3], &mesh->elems[i * 3 + 1], &mesh->elems[i * 3 + 2]);
+		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 3], &mesh->elems[i * 3 + 1], &mesh->elems[i * 3 + 2]);
 
 	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
-		fscanf(fp, "%zu : %zu %zu %zu %zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
+		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
+
+	// success
+
+	rv = 0;
+
+err_kind:
 
 	fclose(fp);
-	return 0;
+
+err_fopen:
+
+	return rv;
 }
 
 static int get_local_element(bfm_mesh_t* mesh, size_t e, bfm_local_element_t* element) {
