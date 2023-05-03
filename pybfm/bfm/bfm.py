@@ -7,6 +7,8 @@ import pyglet.gl as gl
 
 from .obj import Obj
 
+global_bfm = None
+
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
@@ -19,8 +21,11 @@ class Window(pyglet.window.Window):
 		gl.glEnable(gl.GL_DEPTH_TEST)
 		# gl.glEnable(gl.GL_CULL_FACE)
 
-		gl.glClearColor(0.0, 0.0, 0.0, 0.0)
+		gl.glClearColor(0.0, 0.2, 0.4, 0.0)
 		self.clear()
+
+		for obj in global_bfm.objs:
+			obj.draw()
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -47,12 +52,13 @@ class Bfm:
 		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
 		self.window = Window(config = self.config, width = 800, height = 480, caption = "BFM", resizable = True, vsync = False)
 
+		self.objs: list[Obj] = []
+
+		global global_bfm
+		global_bfm = self
+
 	def add(self, obj: Obj):
-		...
+		self.objs.append(obj)
 
 	def show(self):
 		pyglet.app.run()
-
-if __name__ == "__main__":
-	bfm = Bfm()
-	bfm.show()

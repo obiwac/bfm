@@ -12,7 +12,8 @@ bfm = Bfm()
 # mesh.rect((0, 0), (1, 0.2))
 # mesh.mesh()
 
-mesh = Mesh_lepl1110("~/lepl1110/ass/6/data/msh2.txt")
+mesh = Mesh_lepl1110("/home/obiwac/lepl1110/ass/5/data/gear60.txt")
+mesh.gen_buffers()
 
 # create object out of 7075-series aluminium:
 # density (rho): 2.81 g/cm^3
