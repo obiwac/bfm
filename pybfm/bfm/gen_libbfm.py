@@ -10,6 +10,7 @@ if __name__ == "__main__":
 
 	headers = [
 		"bfm/bfm.h",
+		"bfm/material.h",
 		"bfm/math.h",
 		"bfm/matrix.h",
 		"bfm/mesh.h",

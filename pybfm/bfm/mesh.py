@@ -9,13 +9,13 @@ class Mesh:
 
 	def __init__(self, dim: int, kind: int):
 		self._mesh = ffi.new("bfm_mesh_t*")
-		lib.bfm_mesh_create_generic(self._mesh, default_state, dim, kind)
+		assert not lib.bfm_mesh_create_generic(self._mesh, default_state, dim, kind)
 
 		self.dim = dim
 		self.kind = kind
 
 	def __del__(self):
-		lib.bfm_mesh_destroy(self._mesh)
+		assert not lib.bfm_mesh_destroy(self._mesh)
 
 	def rect(self, first: tuple[float], second: tuple[float], cut: bool = False):
 		...
@@ -46,7 +46,7 @@ class Mesh_lepl1110(Mesh):
 		self._mesh = ffi.new("bfm_mesh_t*")
 
 		c_str = ffi.new("char[]", bytes(name, "utf-8"))
-		lib.bfm_mesh_read_lepl1110(self._mesh, default_state, c_str)
+		assert not lib.bfm_mesh_read_lepl1110(self._mesh, default_state, c_str)
 
 		self.dim = self._mesh.dim
 		self.kind = self._mesh.kind
