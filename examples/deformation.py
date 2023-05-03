@@ -1,4 +1,9 @@
-from bfm import Bfm, Mesh_lepl1110, Material, Obj
+import faulthandler
+faulthandler.enable()
+
+import math
+
+from bfm import Bfm, Condition, Mesh_lepl1110, Material, Obj
 
 # create initial BFM context
 
@@ -13,6 +18,12 @@ bfm = Bfm()
 # mesh.mesh()
 
 mesh = Mesh_lepl1110("/home/obiwac/lepl1110/ass/5/data/gear60.txt")
+
+# create Dirichlet boundary conditions for mesh
+# add all nodes close to the centre
+
+boundary_condition = Condition(mesh)
+boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in coord)) < 0.1)
 
 # create object out of 7075-series aluminium:
 # density (rho): 2.81 g/cm^3

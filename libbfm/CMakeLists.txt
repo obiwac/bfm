@@ -24,7 +24,6 @@ set_target_properties(bfm PROPERTIES PUBLIC_HEADER
 target_include_directories(bfm PRIVATE src)
 
 # install rule
-# TODO are public headers installed to bfm/bfm.h or bfm.h?
 # TODO is this respectful to *BSD systems?
 
 include(GNUInstallDirs)

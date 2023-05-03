@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bfm/condition.h>
 #include <bfm/material.h>
 #include <bfm/mesh.h>
 

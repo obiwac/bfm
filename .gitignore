@@ -58,3 +58,4 @@ build
 *.egg-info
 __pycache__
 libbfm.c
+*.core
