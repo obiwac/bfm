@@ -3,7 +3,7 @@ project(bfm VERSION 0.1.0 DESCRIPTION "Big F'ing Matrix")
 
 # library setup
 
-add_library(bfm
+add_library(bfm SHARED
 	src/matrix.c
 	src/mesh.c
 	src/state.c
