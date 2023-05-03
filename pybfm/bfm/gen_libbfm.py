@@ -8,18 +8,31 @@ from cffi import FFI
 if __name__ == "__main__":
 	ffi = FFI()
 
-	includes = """
-		#include <bfm/bfm.h>
-		#include <bfm/math.h>
-		#include <bfm/matrix.h>
-		#include <bfm/mesh.h>
-	"""
+	headers = [
+		"bfm/bfm.h",
+		"bfm/math.h",
+		"bfm/matrix.h",
+		"bfm/mesh.h",
+	]
+
+	includes = ""
+
+	for header in headers:
+		includes += f"#include <{header}>\n"
+
+		with open(f"libbfm/src/{header}") as f:
+			src = f.read()
+
+			src = re.sub("#include.*", "", src)
+			src = re.sub("#define.*", "", src)
+
+			ffi.cdef(src)
 
 	ffi.set_source(
-		"pybfm.bfm.libbfm.libbfm",
+		"pybfm.bfm.libbfm",
 		includes,
 		libraries=["bfm"],
-		extra_compile_args=["-I/usr/local/include"]
+		include_dirs=["/usr/local/include"],
 	)
 
 	ffi.compile(verbose=True)
