@@ -14,6 +14,7 @@ if __name__ == "__main__":
 		"bfm/math.h",
 		"bfm/matrix.h",
 		"bfm/mesh.h",
+		"bfm/obj.h",
 	]
 
 	includes = ""

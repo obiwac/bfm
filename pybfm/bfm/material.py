@@ -3,19 +3,19 @@ from .state import default_state
 
 class __Material:
 	def __init__(self, name: str, rho: float, E: float, nu: float, colour: tuple[float] = (1, 1, 1, 1)):
-		self._material = ffi.new("bfm_material_t*")
+		self.c_material = ffi.new("bfm_material_t*")
 
 		c_str = ffi.new("char[]", bytes(name, "utf-8"))
-		assert not lib.bfm_material_create(self._material, default_state, c_str, rho, E, nu)
+		assert not lib.bfm_material_create(self.c_material, default_state, c_str, rho, E, nu)
 
-		assert not lib.bfm_material_set_colour(self._material, *colour)
+		assert not lib.bfm_material_set_colour(self.c_material, *colour)
 
 	def __del__(self):
-		assert not lib.bfm_material_destroy(self._material)
+		assert not lib.bfm_material_destroy(self.c_material)
 
 	@property
 	def name(self):
-		return ffi.string(self._material.name)
+		return ffi.string(self.c_material.name)
 
 	def __repr__(self):
 		return f"BFM_Material({name})"
