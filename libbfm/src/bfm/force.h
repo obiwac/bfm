@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bfm/bfm.h>
+#include <bfm/matrix.h>
 
 typedef enum {
 	BFM_FORCE_KIND_NONE,
