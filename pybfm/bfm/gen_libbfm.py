@@ -10,12 +10,15 @@ if __name__ == "__main__":
 
 	headers = [
 		"bfm/bfm.h",
+		"bfm/force.h",
 		"bfm/material.h",
 		"bfm/math.h",
 		"bfm/matrix.h",
 		"bfm/mesh.h",
 		"bfm/condition.h",
 		"bfm/obj.h",
+		"bfm/instance.h",
+		"bfm/sim.h",
 	]
 
 	includes = ""
