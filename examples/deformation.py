@@ -3,9 +3,10 @@ faulthandler.enable()
 
 import math
 
-from bfm import Bfm, Condition, Mesh_lepl1110, Material, Obj
+from bfm import Bfm, Condition, Force, Instance, Mesh_lepl1110, Material, Obj, Sim
 
 # create initial BFM context
+# TODO should this be renamed something a little clearer, e.g. Scene?
 
 bfm = Bfm()
 
@@ -34,13 +35,30 @@ boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in co
 
 material = Material.AA7075
 obj = Obj(mesh, material)
-bfm.add(obj)
 
-# TODO create setup from object and force field (default field types, like gravity field?)
-# TODO add Dirichlet boundary condition to problem (with anonymous function to discriminate?)
-# TODO create elasticity matrix and force vector from integration rule
-# TODO solve problem proper, maybe this could be animated element-by-element so it isn't boring to wait?
+# create instance from object and boundary conditions
+# add the instance to the state
+
+instance = Instance(obj)
+instance.add_condition(boundary_condition)
+
+bfm.add(instance)
+
+# create basic gravity force field
+
+gravity = Force.EARTH_GRAVITY
+
+# create simulation
+# run the simulation
+
+sim = Sim(Sim.DEFORMATION)
+
+sim.add_instance(instance)
+sim.add_force(force)
+
+sim.run()
 
 # display results
+# resulting effects from the simulation will automatically be applied to the instance we added to our scene previously
 
 bfm.show()
