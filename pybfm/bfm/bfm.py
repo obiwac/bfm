@@ -7,6 +7,7 @@ import pyglet.gl as gl
 
 from .instance import Instance
 from .obj import Obj
+from .shader import Shader
 
 global_bfm = None
 
@@ -26,8 +27,7 @@ class Window(pyglet.window.Window):
 		self.clear()
 
 		for instance in global_bfm.instances:
-			obj: Obj = instance.obj
-			obj.draw()
+			instance.draw()
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
