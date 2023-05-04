@@ -42,15 +42,8 @@ typedef struct {
 } bfm_matrix_t;
 
 typedef struct {
-	bfm_state_t* state;
-
-	size_t n;
-	double* data;
-} bfm_vec_t;
-
-typedef struct {
-	bfm_matrix_t *A;
-	bfm_vec_t *B;
+	bfm_matrix_t* A;
+	bfm_vec_t* B;
 } bfm_system_t;
 
 /**
