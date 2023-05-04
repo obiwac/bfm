@@ -5,6 +5,11 @@
 
 int bfm_state_create(bfm_state_t* state) {
 	memset(state, 0, sizeof *state);
+
+	state->alloc = malloc;
+	state->realloc = realloc;
+	state->free = free;
+
 	return 0;
 }
 
@@ -15,6 +20,11 @@ int bfm_state_destroy(bfm_state_t* state) {
 
 int bfm_set_alloc(bfm_state_t* state, bfm_alloc_t alloc) {
 	state->alloc = alloc;
+	return 0;
+}
+
+int bfm_set_realloc(bfm_state_t* state, bfm_realloc_t realloc) {
+	state->realloc = realloc;
 	return 0;
 }
 
