@@ -42,8 +42,6 @@ obj = Obj(mesh, material)
 instance = Instance(obj)
 instance.add_condition(boundary_condition)
 
-bfm.add(instance)
-
 # create basic gravity force field
 
 gravity = Force_linear.EARTH_GRAVITY
@@ -61,4 +59,4 @@ sim.run()
 # display results
 # resulting effects from the simulation will automatically be applied to the instance we added to our scene previously
 
-bfm.show()
+bfm.show(sim)

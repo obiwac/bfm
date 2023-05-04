@@ -5,9 +5,7 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
-from .instance import Instance
-from .obj import Obj
-from .shader import Shader
+from .sim import Sim
 
 global_bfm = None
 
@@ -26,8 +24,8 @@ class Window(pyglet.window.Window):
 		gl.glClearColor(0.0, 0.2, 0.4, 0.0)
 		self.clear()
 
-		for instance in global_bfm.instances:
-			instance.draw()
+		if global_bfm.current_sim is not None:
+			global_bfm.current_sim.draw()
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -54,7 +52,7 @@ class Bfm:
 		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
 		self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
 
-		self.instances: list[Instance] = []
+		self.current_sim: Sim = None
 
 		global global_bfm
 		global_bfm = self
@@ -62,5 +60,7 @@ class Bfm:
 	def add(self, instance: Instance):
 		self.instances.append(instance)
 
-	def show(self):
+	def show(self, sim: Sim):
+		sim.show()
+		global_bfm.current_sim = sim
 		pyglet.app.run()

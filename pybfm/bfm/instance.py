@@ -1,7 +1,6 @@
 from .libbfm import lib, ffi
 from .condition import Condition
 from .obj import Obj
-from .shader import Shader
 from .state import default_state
 
 import functools
