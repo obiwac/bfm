@@ -4,9 +4,12 @@ project(bfm VERSION 0.1.0 DESCRIPTION "Big F'ing Matrix")
 # library setup
 
 add_library(bfm
+	src/force.c
+	src/instance.c
 	src/matrix.c
 	src/mesh.c
 	src/parse.c
+	src/sim.c
 	src/state.c
 )
 
@@ -14,7 +17,7 @@ set_target_properties(bfm PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(bfm PROPERTIES SOVERSION 1)
 
 set_target_properties(bfm PROPERTIES PUBLIC_HEADER
-	"src/bfm/bfm.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/parse.h"
+	"src/bfm/bfm.h;src/bfm/force.h;src/bfm/instance.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/parse.h;src/bfm/sim.h"
 )
 
 # private include directories
