@@ -5,6 +5,7 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
+from .instance import Instance
 from .obj import Obj
 
 global_bfm = None
@@ -24,7 +25,8 @@ class Window(pyglet.window.Window):
 		gl.glClearColor(0.0, 0.2, 0.4, 0.0)
 		self.clear()
 
-		for obj in global_bfm.objs:
+		for instance in global_bfm.instances:
+			obj: Obj = instance.obj
 			obj.draw()
 
 	def on_resize(self, width, height):
@@ -52,13 +54,13 @@ class Bfm:
 		self.config = gl.Config(major_version = 3, minor_version = 3, depth_size = 16)
 		self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
 
-		self.objs: list[Obj] = []
+		self.instances: list[Instance] = []
 
 		global global_bfm
 		global_bfm = self
 
-	def add(self, obj: Obj):
-		self.objs.append(obj)
+	def add(self, instance: Instance):
+		self.instances.append(instance)
 
 	def show(self):
 		pyglet.app.run()
