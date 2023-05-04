@@ -21,20 +21,20 @@ int bfm_force_set_none(bfm_force_t* force) {
 	return 0;
 }
 
-int bfm_force_set_linear(bfm_force_t* force, bfm_vec_t force) {
+int bfm_force_set_linear(bfm_force_t* force, bfm_vec_t* vec) {
 	force->kind = BFM_FORCE_KIND_LINEAR;
 
 	// check force vector dimension is correct
 
-	if (force.n != force->dim)
+	if (vec->n != force->dim)
 		return -1;
 
-	force->linear.force = force;
+	memcpy(&force->linear.force, vec, sizeof *vec); // TODO proper copy
 
 	return 0;
 }
 
-int bfm_force_set_funky(bfm_force_t* force, bfm_funky_func_t func, void* data) {
+int bfm_force_set_funky(bfm_force_t* force, bfm_force_funky_func_t func, void* data) {
 	force->kind = BFM_FORCE_KIND_FUNKY;
 
 	force->funky.func = func;

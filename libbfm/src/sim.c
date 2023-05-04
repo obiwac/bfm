@@ -12,7 +12,7 @@ int bfm_sim_create(bfm_sim_t* sim, bfm_state_t* state, bfm_sim_kind_t kind) {
 }
 
 int bfm_sim_destroy(bfm_sim_t* sim) {
-	bfm_state_t* const state = instance->state;
+	bfm_state_t* const state = sim->state;
 
 	if (sim->instances)
 		state->free(sim->instances);
