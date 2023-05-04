@@ -37,8 +37,9 @@ if __name__ == "__main__":
 	ffi.set_source(
 		"pybfm.bfm.libbfm",
 		includes,
-		libraries=["bfm"],
+		library_dirs=["/usr/local/lib"],
 		include_dirs=["/usr/local/include"],
+		libraries=["bfm"],
 	)
 
 	ffi.compile(verbose=True)
