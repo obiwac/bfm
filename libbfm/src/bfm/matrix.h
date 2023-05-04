@@ -41,13 +41,6 @@ typedef struct {
 	};
 } bfm_matrix_t;
 
-typedef struct {
-	bfm_state_t* state;
-
-	size_t n;
-	double* data;
-} bfm_vec_t;
-
 /**
  * @brief Create a full square matrix of size mxn
  *
