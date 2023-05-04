@@ -15,6 +15,11 @@ This uses CMake:
 mkdir -p libbfm/build
 cd libbfm/build
 cmake ..
+```
+
+To install the library and its headers, run this (as a superuser):
+
+```console
 make install
 ```
 
