@@ -14,9 +14,10 @@ class Sim:
 		self.instances: list[Instance] = []
 
 		# create shader, depending on simulation kind
+		# TODO in fine, make these package resources
 
 		if kind == Sim.DEFORMATION:
-			self.shader = Shader("sim/deformation.vert", "sim/deformation.frag")
+			self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
 
 	def __del__(self):
 		assert not lib.bfm_sim_destroy(self.c_sim)
