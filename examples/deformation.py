@@ -46,7 +46,7 @@ bfm.add(instance)
 
 # create basic gravity force field
 
-gravity = Force.EARTH_GRAVITY
+gravity = Force_linear.EARTH_GRAVITY
 
 # create simulation
 # run the simulation
