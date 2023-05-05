@@ -49,7 +49,7 @@ int bfm_sim_add_instance(bfm_sim_t* sim, bfm_instance_t* instance) {
 	if (!sim->instances)
 		return -1;
 
-	sim->instances[sim->n_instances] = NULL;
+	sim->instances[sim->n_instances - 1] = instance;
 
 	return 0;
 }
@@ -80,7 +80,7 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 	if (!sim->forces)
 		return -1;
 
-	sim->forces[sim->n_forces] = NULL;
+	sim->forces[sim->n_forces - 1] = force;
 
 	return 0;
 }
@@ -88,9 +88,28 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 // simulation run functions per kind
 
 static int run_deformation(bfm_sim_t* sim) {
-	(void) sim;
+	// TODO make this actually compute deformation
+	//      currently, this is only displacing condition nodes
 
-	// TODO
+	for (size_t i = 0; i < sim->n_instances; i++) {
+		bfm_instance_t* const instance = sim->instances[i];
+		memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
+
+		bfm_obj_t* const obj = instance->obj;
+		bfm_mesh_t* const mesh = obj->mesh;
+
+		for (size_t j = 0; j < instance->n_conditions; j++) {
+			bfm_condition_t* const condition = instance->conditions[i];
+
+			for (size_t k = 0; k < mesh->n_nodes; k++) {
+				if (!condition->nodes[k])
+					continue;
+
+				instance->effects[k * 2 + 0] = 1;
+				instance->effects[k * 2 + 2] = 1;
+			}
+		}
+	}
 
 	return 0;
 }

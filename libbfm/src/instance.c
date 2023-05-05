@@ -8,6 +8,17 @@ int bfm_instance_create(bfm_instance_t* instance, bfm_state_t* state, bfm_obj_t*
 	instance->state = state;
 	instance->obj = obj;
 
+	bfm_mesh_t* const mesh = obj->mesh;
+	instance->n_effects = mesh->n_nodes * mesh->dim;
+
+	size_t const size = instance->n_effects * sizeof *instance->effects;
+	instance->effects = state->alloc(size);
+
+	if (instance->effects == NULL)
+		return -1;
+
+	memset(instance->effects, 0, size);
+
 	return 0;
 }
 
@@ -49,7 +60,7 @@ int bfm_instance_add_condition(bfm_instance_t* instance, bfm_condition_t* condit
 	if (!instance->conditions)
 		return -1;
 
-	instance->conditions[instance->n_conditions] = NULL;
+	instance->conditions[instance->n_conditions - 1] = condition;
 
 	return 0;
 }
