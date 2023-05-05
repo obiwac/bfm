@@ -18,7 +18,7 @@ class Instance:
 		# TODO maybe delete buffers idk
 		assert not lib.bfm_instance_destroy(self.c_instance)
 
-	def add_condition(self, condition: Condition)
+	def add_condition(self, condition: Condition):
 		assert not lib.bfm_instance_add_condition(self.c_instance, condition.c_condition
 
 	# visualisation stuff

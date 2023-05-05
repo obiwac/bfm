@@ -16,14 +16,14 @@ class __Force:
 
 # different kinds of forces
 
-class Force_none(Force):
+class Force_none(__Force):
 	def __init__(self, dim: int):
-		super().__init__(self, dim)
+		super().__init__(dim)
 		assert not lib.bfm_force_set_none(self.c_force)
 
-class __Force_linear(Force):
+class __Force_linear(__Force):
 	def __init__(self, dim: int, vec: tuple[float]):
-		super().__init__(self, dim)
+		super().__init__(dim)
 		assert not lib.bfm_force_set_linear(self.c_force, vec)
 
 	def __init_subclass__(cls):
