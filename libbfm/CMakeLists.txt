@@ -13,6 +13,7 @@ add_library(bfm SHARED
 	src/obj.c
 	src/sim.c
 	src/state.c
+	src/vec.c
 )
 
 set_target_properties(bfm PROPERTIES VERSION ${PROJECT_VERSION})

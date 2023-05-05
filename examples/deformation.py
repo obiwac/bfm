@@ -3,7 +3,7 @@ faulthandler.enable()
 
 import math
 
-from bfm import Bfm, Condition, Force, Instance, Mesh_lepl1110, Material, Obj, Sim
+from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Material, Obj, Sim
 
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
@@ -18,7 +18,7 @@ bfm = Bfm()
 # mesh.rect((0, 0), (1, 0.2))
 # mesh.mesh()
 
-mesh = Mesh_lepl1110("/home/obiwac/lepl1110/ass/5/data/gear60.txt")
+mesh = Mesh_lepl1110("meshes/gear60.lepl1110")
 
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
@@ -52,7 +52,7 @@ gravity = Force_linear.EARTH_GRAVITY
 sim = Sim(Sim.DEFORMATION)
 
 sim.add_instance(instance)
-sim.add_force(force)
+sim.add_force(gravity)
 
 sim.run()
 

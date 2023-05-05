@@ -1,9 +1,13 @@
-from .libbfm import lib, ffi
 from .condition import Condition
+from .libbfm import lib, ffi
+from .mesh import Mesh
 from .obj import Obj
 from .state import default_state
 
+import ctypes
 import functools
+
+import pyglet.gl as gl
 
 class Instance:
 	def __init__(self, obj: Obj):
@@ -19,7 +23,7 @@ class Instance:
 		assert not lib.bfm_instance_destroy(self.c_instance)
 
 	def add_condition(self, condition: Condition):
-		assert not lib.bfm_instance_add_condition(self.c_instance, condition.c_condition
+		assert not lib.bfm_instance_add_condition(self.c_instance, condition.c_condition)
 
 	# visualisation stuff
 
@@ -82,7 +86,7 @@ class Instance:
 
 	def update_effects(self):
 		gl.glBindVertexArray(self.vao)
-		gl.glBindBuffer(self.effects_vbo)
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.effects_vbo)
 
 		effects_t = gl.GLfloat * len(self.effects)
 
@@ -92,6 +96,7 @@ class Instance:
 			gl.GL_STATIC_DRAW)
 
 	def draw(self):
+		mesh = self.obj.mesh
 		gl.glBindVertexArray(self.vao)
 
 		if mesh.kind == Mesh.SIMPLEX:

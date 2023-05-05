@@ -7,8 +7,8 @@ out vec3 transformed;
 out vec3 colour;
 
 void main(void) {
-	transformed = node + effect; // displacement
-	colour = effect;
+	transformed = vec3(node + effect, 1.0); // displacement
+	colour = vec3(effect, 1.0);
 
-	gl_Position = vec4(transformed, 1.0, 1.0);
+	gl_Position = vec4(transformed, 1.0);
 }

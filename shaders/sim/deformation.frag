@@ -6,5 +6,5 @@ in vec3 transformed;
 in vec3 colour;
 
 void main(void) {
-	out_colour = colour;
+	out_colour = vec4(colour, 1.0);
 }

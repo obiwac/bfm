@@ -3,10 +3,6 @@ from .material import Material
 from .mesh import Mesh
 from .state import default_state
 
-import ctypes
-
-import pyglet.gl as gl
-
 # TODO move these to separate files (package resource)
 
 class Obj:

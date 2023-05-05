@@ -5,6 +5,7 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
+from .instance import Instance
 from .sim import Sim
 
 global_bfm = None
