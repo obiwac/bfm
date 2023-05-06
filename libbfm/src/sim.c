@@ -109,16 +109,11 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
 		bfm_matrix_solve(system.A, system.B);
 
-		for (size_t j = 0; j < instance->n_conditions; j++) {
-			bfm_condition_t* const condition = instance->conditions[i];
+		
 
-			for (size_t k = 0; k < mesh->n_nodes; k++) {
-				printf("%lf %lf\n", system.B->data[k * 2 + 0], system.B->data[k * 2 + 1]);
-				// if (condition->nodes[k])
-					// continue;
-				instance->effects[k * 2 + 0] = system.B->data[k * 2 + 0];
-				instance->effects[k * 2 + 1] = system.B->data[k * 2 + 1];
-			}
+		for (size_t k = 0; k < mesh->n_nodes; k++) {
+			instance->effects[k * 2 + 0] = system.B->data[k * 2 + 0];
+			instance->effects[k * 2 + 1] = system.B->data[k * 2 + 1];
 		}
 		// WOuld be easier with a func for system
 		bfm_vec_destroy(system.B);

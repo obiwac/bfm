@@ -114,6 +114,7 @@ static int build_elasticity_system_local(bfm_local_element_t* element, bfm_insta
 static int apply_constrain(bfm_system_t* system, size_t node, double value) {
 	// TODO deal with band matrix ??
 	for (size_t i = 0; i < system->A->m; i++) {
+		// TODO work with cond != 0
 		system->B->data[i] -= value;// * bfm_matrix_get(system->A, i, node);
 		bfm_matrix_set(system->A, i, node, 0.);
 	}
@@ -142,10 +143,14 @@ int bfm_build_elasticity_system(bfm_instance_t* instance, bfm_force_t** forces, 
         build_elasticity_system_local(&element, instance, forces, n_forces, system, a, b, c);
 	}
 
-	for (size_t i = 0; i < mesh->n_edges; i++) {
-		if (mesh->edges[i].elems[1] == -1) {
-			apply_constrain(system, mesh->edges[i].nodes[0] * 2 + 1, 0.);
-			// apply_constrain(system, mesh->edges[i].nodes[1], 0.);
+	for (size_t i = 0; i < instance->n_conditions; i++) {
+		bfm_condition_t* const condition = instance->conditions[i];
+		for (size_t j = 0; j < mesh->n_nodes; j++) {
+			if (condition->nodes[j]) {
+				// TODO deal with dirilect != 0
+				apply_constrain(system, j * 2, 0);
+				apply_constrain(system, j * 2 + 1, 0);
+			}
 		}
 	}
 
