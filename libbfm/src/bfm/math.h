@@ -17,4 +17,5 @@ typedef struct {
 } bfm_vec_t;
 
 int bfm_vec_create(bfm_vec_t* vec, bfm_state_t* state, size_t n);
+int bfm_vec_copy(bfm_vec_t* vec, bfm_vec_t* src);
 int bfm_vec_destroy(bfm_vec_t* vec);
