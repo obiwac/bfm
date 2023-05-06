@@ -29,8 +29,9 @@ int bfm_force_set_linear(bfm_force_t* force, bfm_vec_t* vec) {
 	if (vec->n != force->dim)
 		return -1;
 
-	memcpy(&force->linear.force, vec, sizeof *vec); // TODO proper copy
-	// memcpy(force->linear.force.data, vec->data, vec->n * sizeof *vec->data);
+	if (bfm_vec_copy(&force->linear.force, vec) < 0)
+		return -1;
+
 	return 0;
 }
 
@@ -55,11 +56,10 @@ int eval_none(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 }
 
 int eval_linear(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
-	(void) force;
-	(void) pos;
-	(void) force_ref;
-	// memcpy(force_ref, force->linear.force.data, force_ref->n * sizeof *force_ref->data); 
-	// TODO copy vector (there should be a separate routine for this, this should not be done manually!)
+	(void) pos; // linear forces don't care about the position they're evaluated at
+
+	if (bfm_vec_copy(force_ref, &force->linear.force) < 0)
+		return -1;
 
 	return -1;
 }
