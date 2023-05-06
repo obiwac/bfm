@@ -22,6 +22,10 @@ class Mesh:
 
 	def mesh(self):
 		...
+	
+	@property
+	def edges(self):
+		return self.c_mesh.edges
 
 	@functools.cached_property
 	def coords(self):

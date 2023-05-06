@@ -22,6 +22,14 @@ typedef struct {
 } bfm_rule_t;
 
 typedef struct {
+	// src (nodes[0]) <-> dst (nodes[1]) 
+	// maybe rename src and dst ?
+	size_t nodes[2];
+	// the two faces that are adjacent to the edges, elem[1] is -1 if the edges is on the boundary
+	size_t elems[2];
+} bfm_edge_t;
+
+typedef struct {
 	bfm_state_t* state;
 
 	size_t dim;
@@ -29,9 +37,12 @@ typedef struct {
 
 	size_t n_elems;
 	size_t n_nodes;
+	size_t n_edges;
 
 	double* coords;
 	size_t* elems;
+	bfm_edge_t* edges;
+	// bool* boundary_nodes;
 
 	bfm_rule_t* rule;
 } bfm_mesh_t;

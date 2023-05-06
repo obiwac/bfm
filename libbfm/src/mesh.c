@@ -18,7 +18,77 @@ int bfm_mesh_destroy(bfm_mesh_t* mesh) {
 
 	state->free(mesh->coords);
 	state->free(mesh->elems);
+	state->free(mesh->edges);
 
+	return 0;
+}
+
+static int cmp_edge(const void* e1, const void* e2) {
+	bfm_edge_t* edge1 = (bfm_edge_t*) e1;
+	bfm_edge_t* edge2 = (bfm_edge_t*) e2;
+	// Can I use unsigned int for m1, m2 with substraction afterwards?
+	int m1 = BFM_MIN(edge1->nodes[0], edge1->nodes[1]);
+	int m2 = BFM_MIN(edge2->nodes[0], edge2->nodes[1]);
+	int diff = m1 - m2;
+	if (diff > 0)
+		return -1;
+	if (diff < 0)
+		return 1;
+
+	int M1 = BFM_MAX(edge1->nodes[0], edge1->nodes[1]);
+	int M2 = BFM_MAX(edge2->nodes[0], edge2->nodes[1]);
+
+	return M1 - M2;
+}
+
+static int compute_edges(bfm_mesh_t* mesh) {
+	size_t n_elems = mesh->n_elems;
+	size_t n_local_nodes = mesh->kind;
+	size_t n_edges = n_elems * n_local_nodes;
+
+	mesh->edges = mesh->state->alloc(n_elems * n_local_nodes * sizeof(bfm_edge_t));
+	if (!mesh->edges)
+		return -1;
+
+	for (size_t elem = 0; elem < n_elems; elem++) {
+		for (size_t j = 0; j < n_local_nodes; j++) {
+			mesh->edges[elem * n_local_nodes + j].nodes[0] = mesh->elems[elem * n_local_nodes + j];
+			mesh->edges[elem * n_local_nodes + j].nodes[1] = mesh->elems[elem * n_local_nodes + (j + 1) % n_local_nodes];
+			mesh->edges[elem * n_local_nodes + j].elems[0] = elem;
+            mesh->edges[elem * n_local_nodes + j].elems[1] = -1;
+		}
+	}
+
+	qsort(mesh->edges, n_edges, sizeof *mesh->edges, cmp_edge);
+
+
+	size_t current = 0;
+	for (size_t i = 1; i < n_edges; i++) {
+		if ((mesh->edges[i - 1].nodes[0] == mesh->edges[i].nodes[1] && mesh->edges[i - 1].nodes[1] == mesh->edges[i].nodes[0])) {
+			mesh->edges[current] = mesh->edges[i - 1];
+			mesh->edges[current].elems[1] = mesh->edges[i].elems[0];
+			i++;
+		}
+		else {
+			mesh->edges[current] = mesh->edges[i - 1];
+		}
+		current++;
+	}
+	mesh->n_edges = current;
+	mesh->edges = mesh->state->realloc(mesh->edges, current * sizeof(bfm_edge_t));
+	if (!mesh->edges)
+		return -1;
+	
+	// mesh->boundary_nodes = mesh->state->alloc(mesh->n_nodes * sizeof *mesh->boundary_nodes);
+	// if (!mesh->boundary_nodes)
+		// return -1;
+	// memset(mesh->boundary_nodes, 0, mesh->n_nodes);
+	// for (size_t i = 0; i < current; i++) {
+	// 	if (mesh->edges[i].elems[1] == -1) {
+	// 		mesh->boundary_nodes[mesh->edges[i].nodes[0]] = true;
+	// 		mesh->boundary_nodes[mesh->edges[i].nodes[1]] = true;
+	// 	}
+	// }
 	return 0;
 }
 
@@ -67,8 +137,12 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
+	int err = compute_edges(mesh);
+	if (err != 0) {
+		free(mesh->elems);
+		goto err_kind;
+	}
 	// success
-
 	rv = 0;
 
 err_kind:
@@ -182,7 +256,7 @@ int bfm_build_elasticity_system_local(bfm_local_element_t* element, bfm_rule_t* 
 				// A[index_i + 0][index_j + 0] += det_jacobian * weight * f_11;
 				// A[index_i + 0][index_j + 1] += det_jacobian * weight * f_12;
 				// A[index_i + 1][index_j + 0] += det_jacobian * weight * f_21;
-				// A[index_i + 1][index_j + 1] += det_jacobian * weight * f_22;   
+				// A[index_i + 1][index_j + 1] += det_jacobian * weight * f_22;
 			}
 		}
 	}
