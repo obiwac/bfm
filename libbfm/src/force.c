@@ -30,7 +30,7 @@ int bfm_force_set_linear(bfm_force_t* force, bfm_vec_t* vec) {
 		return -1;
 
 	memcpy(&force->linear.force, vec, sizeof *vec); // TODO proper copy
-
+	// memcpy(force->linear.force.data, vec->data, vec->n * sizeof *vec->data);
 	return 0;
 }
 
@@ -58,8 +58,7 @@ int eval_linear(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 	(void) force;
 	(void) pos;
 	(void) force_ref;
-	#include <stdio.h>
-	printf("helmlo");
+	// memcpy(force_ref, force->linear.force.data, force_ref->n * sizeof *force_ref->data); 
 	// TODO copy vector (there should be a separate routine for this, this should not be done manually!)
 
 	return -1;
@@ -71,7 +70,6 @@ int eval_funky(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 
 int bfm_force_eval(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 	// check force vector dimension is correct
-
 	if (force_ref->n != force->dim)
 		return -1;
 

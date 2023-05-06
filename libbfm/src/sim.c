@@ -104,12 +104,9 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_elems * 2);
 		system.B = state.alloc(sizeof *system.B);
 		bfm_vec_create(system.B, &state, mesh->n_elems * 2);
-
 		// Build the system and solve it
 		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
 		bfm_matrix_solve(system.A, system.B);
-
-		
 
 		for (size_t k = 0; k < mesh->n_nodes; k++) {
 			instance->effects[k * 2 + 0] = system.B->data[k * 2 + 0];

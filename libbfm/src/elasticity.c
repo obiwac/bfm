@@ -37,8 +37,8 @@ static int build_elasticity_system_local(bfm_local_element_t* element, bfm_insta
 
 	bfm_vec_t pos;
 	bfm_vec_t force_on_point;
-	bfm_vec_create(&pos, instance->state, 2);
-	bfm_vec_create(&force_on_point, instance->state, 2);
+	bfm_vec_create(&pos, instance->state, 3);
+	bfm_vec_create(&force_on_point, instance->state, 3);
 
 	for (size_t i = 0; i < element->n_local_nodes; i++) {
 		pos.data[0] = x[i];
@@ -82,12 +82,11 @@ static int build_elasticity_system_local(bfm_local_element_t* element, bfm_insta
 		for (size_t j = 0; j < element->n_local_nodes; j++) {
 			int const index_i = 2 * map[j];
 			for (size_t k = 0; k < n_forces; k++) {
-				// bfm_force_t* force = forces[i];
-				// printf("%d", force->dim);
-				// bfm_force_eval(force, &pos, &force_on_point);
-            	// B->data[index_i + 0] = det_jacobian * weight * to[0] * obj->material->rho * phi[i];
+				bfm_force_t* force = forces[k];
+				bfm_force_eval(force, &pos, &force_on_point);
+            	B->data[index_i + 0] = det_jacobian * weight * force_on_point.data[0] * obj->material->rho * phi[i];
+				B->data[index_i + 1] = det_jacobian * weight * force_on_point.data[1] * obj->material->rho * phi[i];
 			}
-				B->data[index_i + 1] = det_jacobian * weight * -9.81 * obj->material->rho * phi[i];
 		}
 
 		for (size_t j = 0; j < element->n_local_nodes; j++) {
