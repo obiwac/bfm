@@ -3,6 +3,19 @@
 
 #include <bfm/mesh.h>
 
+// From lepl1110 fem.c
+static double const _gaussQuad4Xsi[4]    = {-0.577350269189626,-0.577350269189626, 0.577350269189626, 0.577350269189626};
+static double const _gaussQuad4Eta[4]    = { 0.577350269189626,-0.577350269189626,-0.577350269189626, 0.577350269189626};
+static double const _gaussQuad4Weight[4] = { 1.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000};
+static double const _gaussTri3Xsi[3]     = { 0.166666666666667, 0.666666666666667, 0.166666666666667};
+static double const _gaussTri3Eta[3]     = { 0.166666666666667, 0.166666666666667, 0.666666666666667};
+static double const _gaussTri3Weight[3]  = { 0.166666666666667, 0.166666666666667, 0.166666666666667};
+
+static double const xsi_triangles[3] = {0., 1., 0.};
+static double const eta_triangles[3] = {0., 0., 1.};
+static double const xsi_quads[4] = {1., -1., -1., 1.};
+static double const eta_quads[4] = {1., 1., -1., -1.};
+
 int bfm_mesh_create_generic(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
 	memset(mesh, 0, sizeof *mesh);
 	mesh->state = state;
@@ -78,7 +91,7 @@ static int compute_edges(bfm_mesh_t* mesh) {
 	mesh->edges = mesh->state->realloc(mesh->edges, current * sizeof(bfm_edge_t));
 	if (!mesh->edges)
 		return -1;
-	
+
 	// mesh->boundary_nodes = mesh->state->alloc(mesh->n_nodes * sizeof *mesh->boundary_nodes);
 	// if (!mesh->boundary_nodes)
 		// return -1;
@@ -90,6 +103,92 @@ static int compute_edges(bfm_mesh_t* mesh) {
 	// 	}
 	// }
 	return 0;
+}
+
+int create_rule(bfm_rule_t* rule, bfm_elem_kind_t kind) {
+    if (kind == BFM_ELEM_KIND_SIMPLEX) {
+        rule->eta = _gaussTri3Eta;
+		rule->xsi = _gaussTri3Xsi;
+		rule->weights = _gaussTri3Weight;
+    }
+    else if (kind == BFM_ELEM_KIND_QUAD) {
+		rule->eta = _gaussQuad4Eta;
+		rule->xsi = _gaussQuad4Xsi;
+		rule->weights = _gaussQuad4Weight;
+    }
+    else
+        return -1;
+    return 0;
+}
+
+static int triangle_phi(double xsi, double eta, double* phi) {
+	phi[0] = 1 - xsi - eta;
+	phi[1] = xsi;
+	phi[2] = eta;
+	return 0;
+}
+
+static int quads_phi(double xsi, double eta, double* phi) {
+	phi[0] = (1. + xsi) * (1 + eta) / 4.;
+	phi[1] = (1. - xsi) * (1 + eta) / 4.;
+	phi[2] = (1. - xsi) * (1 - eta) / 4.;
+	phi[3] = (1. + xsi) * (1 - eta) / 4.;
+	return 0;
+}
+
+static int triangle_dphideta(double xsi, double eta, double* dphideta) {
+	dphideta[0] = -1.;
+	dphideta[1] = 0.;
+	dphideta[2] = 1.;
+	return 0;
+}
+
+static int triangle_dphidxsi(double xsi, double eta, double* dphidxsi) {
+	dphidxsi[0] = -1.;
+	dphidxsi[1] = 1.;
+	dphidxsi[2] = 0.;
+	return 0;
+}
+
+static int quads_dphideta(double xsi, double eta, double* dphideta) {
+	dphideta[0] = (1. + xsi) / 4.;
+	dphideta[1] = (1. - xsi) / 4.;
+	dphideta[2] = - (1. - xsi) / 4.;
+	dphideta[3] = - (1. + xsi) / 4.;
+	return 0;
+}
+
+static int quads_dphidxsi(double xsi, double eta, double* dphidxsi) {
+	dphidxsi[0] = (1. + eta) / 4.;
+	dphidxsi[1] = - (1. + eta) / 4.;
+	dphidxsi[2] = - - (1. - eta) / 4.;
+	dphidxsi[3] = (1. - eta) / 4.;
+	return 0;
+}
+
+static int create_shape_functions(bfm_shape_functions_t* functions, bfm_elem_kind_t kind) {
+	if (kind == BFM_ELEM_KIND_SIMPLEX) {
+		functions->xsi = xsi_triangles;
+		functions->eta = eta_triangles;
+		
+		functions->get_phi = triangle_phi;
+		
+		functions->get_dphideta = triangle_dphideta;
+		functions->get_dphidxsi = triangle_dphidxsi;
+	}
+	else if (kind == BFM_ELEM_KIND_QUAD) {
+		functions->xsi = xsi_quads;
+		functions->eta = eta_quads;
+		
+		functions->get_phi = quads_phi;
+		
+		functions->get_dphideta = quads_dphideta;
+		functions->get_dphidxsi = quads_dphidxsi;
+	}
+	else
+		return -1;
+	return 0;
+	
 }
 
 int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
@@ -142,6 +241,9 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		free(mesh->elems);
 		goto err_kind;
 	}
+
+	create_rule(&mesh->rule, mesh->kind);
+	create_shape_functions(&mesh->functions, mesh->kind);
 	// success
 	rv = 0;
 
@@ -152,114 +254,4 @@ err_kind:
 err_fopen:
 
 	return rv;
-}
-
-static int get_local_element(bfm_mesh_t* mesh, size_t e, bfm_local_element_t* element) {
-	size_t const n_local_nodes = mesh->kind;
-
-	size_t* const elems = mesh->elems;
-
-	size_t* const map = element->map;
-	double* const x = element->x;
-	double* const y = element->y;
-
-	for (size_t i = 0; i < n_local_nodes; i++) {
-		map[i] = elems[e * n_local_nodes + i];
-
-		x[i] = mesh->coords[map[i] * 2];
-		y[i] = mesh->coords[map[i] * 2 + 1];
-	}
-
-	 return 0;
-}
-
-int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system, double young_modulus, double poisson_ratio, double rho, double force) {
-	bfm_matrix_t* A = system->A;
-
-	bfm_local_element_t element = {
-		.n_local_nodes = mesh->kind,
-	};
-
-	for (size_t i = 0; i < mesh->n_elems; i++) {
-		get_local_element(mesh, i, &element);
-	}
-
-	return 0;
-}
-
-
-int bfm_build_elasticity_system_local(bfm_local_element_t* element, bfm_rule_t* rule, bfm_matrix_t* A, bfm_vec_t* B) {
-	(void) A;
-	(void) B;
-
-	double* const x = element->x;
-	double* const y = element->y;
-
-	double* const dphi_dxsi = rule->dphi_dxsi;
-	double* const dphi_deta = rule->dphi_deta;
-
-	size_t* const map = element->map;
-
-	for (size_t i = 0; i < element->n_local_nodes; i++) {
-		double const weight = rule->weights[i];
-
-		double const xsi = rule->xsi[i];
-		double const eta = rule->eta[i];
-
-		(void) weight;
-
-		(void) xsi;
-		(void) eta;
-
-		double dx_dxsi = 0;
-		double dx_deta = 0;
-		double dy_dxsi = 0;
-		double dy_deta = 0;
-
-		for (size_t k = 0; k < element->n_local_nodes; k++) {
-			dx_dxsi += x[k] * dphi_dxsi[k];
-			dx_deta += x[k] * dphi_deta[k];
-			dy_dxsi += y[k] * dphi_dxsi[k];
-			dy_deta += y[k] * dphi_deta[k];
-		}
-
-		double det_jacobian = fabs(dx_dxsi*dy_deta - dx_deta*dy_dxsi);
-
-		double dphi_dx[4];
-		double dphi_dy[4];
-
-		for (size_t j = 0; j < element->n_local_nodes; j++) {
-			dphi_dx[j] = (dphi_dxsi[j] * dy_deta - dphi_deta[j] * dx_dxsi) / det_jacobian;
-			dphi_dy[j] = (dphi_deta[j] * dx_dxsi - dphi_dxsi[j] * dx_deta) / det_jacobian;
-		}
-
-		for (size_t j = 0; j < element->n_local_nodes; j++) {
-			// int const index_i = 2 * map[j] + 1;
-			// B[index_i] += det_jacobian * weight * phi[j] * -g * rho;
-		}
-
-		for (size_t j = 0; j < element->n_local_nodes; j++) {
-			size_t const index_i = 2 * map[j];
-
-			(void) index_i;
-
-			for (size_t k = 0; k < element->n_local_nodes; k++) {
-				size_t const index_j = 2 * map[k];
-
-				(void) index_j;
-
-				// double const f_11 = a * dphi_dx[j] * dphi_dx[k] + c * dphi_dy[j] * dphi_dy[k];
-				// double const f_12 = b * dphi_dx[j] * dphi_dy[k] + c * dphi_dy[j] * dphi_dx[k];
-				// double const f_21 = b * dphi_dy[j] * dphi_dx[k] + c * dphi_dx[j] * dphi_dy[k];
-				// double const f_22 = a * dphi_dy[j] * dphi_dy[k] + c * dphi_dx[j] * dphi_dx[k];
-
-				// A[index_i + 0][index_j + 0] += det_jacobian * weight * f_11;
-				// A[index_i + 0][index_j + 1] += det_jacobian * weight * f_12;
-				// A[index_i + 1][index_j + 0] += det_jacobian * weight * f_21;
-				// A[index_i + 1][index_j + 1] += det_jacobian * weight * f_22;
-			}
-		}
-	}
-
-	return 0;
 }

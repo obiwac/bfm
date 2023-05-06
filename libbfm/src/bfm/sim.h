@@ -2,6 +2,7 @@
 
 #include <bfm/force.h>
 #include <bfm/instance.h>
+#include <bfm/elasticity.h>
 
 typedef enum {
 	BFM_SIM_KIND_DEFORMATION,

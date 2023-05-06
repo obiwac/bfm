@@ -88,9 +88,6 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 // simulation run functions per kind
 
 static int run_deformation(bfm_sim_t* sim) {
-	// TODO make this actually compute deformation
-	//      currently, this is only displacing condition nodes
-
 	for (size_t i = 0; i < sim->n_instances; i++) {
 		bfm_instance_t* const instance = sim->instances[i];
 		memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
@@ -98,17 +95,36 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_obj_t* const obj = instance->obj;
 		bfm_mesh_t* const mesh = obj->mesh;
 
+		bfm_system_t system;
+		
+		bfm_state_t state;
+		bfm_state_create(&state);
+
+		// Allocate system, maybe write a function for this ?
+		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_elems * 2);
+		system.B = state.alloc(sizeof *system.B);
+		bfm_vec_create(system.B, &state, mesh->n_elems * 2);
+
+		// Build the system and solve it
+		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
+		bfm_matrix_solve(system.A, system.B);
+
 		for (size_t j = 0; j < instance->n_conditions; j++) {
 			bfm_condition_t* const condition = instance->conditions[i];
 
 			for (size_t k = 0; k < mesh->n_nodes; k++) {
-				if (!condition->nodes[k])
-					continue;
-
-				instance->effects[k * 2 + 0] = 1;
-				instance->effects[k * 2 + 2] = 1;
+				printf("%lf %lf\n", system.B->data[k * 2 + 0], system.B->data[k * 2 + 1]);
+				// if (condition->nodes[k])
+					// continue;
+				instance->effects[k * 2 + 0] = system.B->data[k * 2 + 0];
+				instance->effects[k * 2 + 1] = system.B->data[k * 2 + 1];
 			}
 		}
+		// WOuld be easier with a func for system
+		bfm_vec_destroy(system.B);
+		state.free(system.B);
+		bfm_matrix_destroy(system.A);
+		bfm_state_destroy(&state);
 	}
 
 	return 0;

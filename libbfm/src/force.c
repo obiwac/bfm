@@ -58,7 +58,8 @@ int eval_linear(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 	(void) force;
 	(void) pos;
 	(void) force_ref;
-
+	#include <stdio.h>
+	printf("helmlo");
 	// TODO copy vector (there should be a separate routine for this, this should not be done manually!)
 
 	return -1;

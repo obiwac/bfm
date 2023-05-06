@@ -14,15 +14,23 @@ typedef enum {
 } bfm_problem_type_t;
 
 typedef struct {
-	double* weights;
-	double* xsi;
-	double* eta;
-	double* dphi_dxsi;
-	double* dphi_deta;
+	double const* weights;
+	double const* xsi;
+	double const* eta;
 } bfm_rule_t;
 
 typedef struct {
-	// src (nodes[0]) <-> dst (nodes[1]) 
+	double const* xsi;
+	double const* eta;
+	
+	int (*get_phi) (double xsi, double eta, double* phi);
+	
+	int (*get_dphidxsi) (double xsi, double eta, double* dphidxsi);
+	int (*get_dphideta) (double xsi, double eta, double* dphideta);
+} bfm_shape_functions_t;
+
+typedef struct {
+	// src (nodes[0]) <-> dst (nodes[1])
 	// maybe rename src and dst ?
 	size_t nodes[2];
 	// the two faces that are adjacent to the edges, elem[1] is -1 if the edges is on the boundary
@@ -44,19 +52,21 @@ typedef struct {
 	bfm_edge_t* edges;
 	// bool* boundary_nodes;
 
-	bfm_rule_t* rule;
+	// TODO move rule from mesh to ??
+	bfm_rule_t rule;
+	// Should the shape function be stored in the mesh ?
+	bfm_shape_functions_t functions;
 } bfm_mesh_t;
 
 typedef struct {
 	size_t n_local_nodes;
-	size_t* map;
-	double* x;
-	double* y;
+	// Store only pointers ? and allocate ? 
+	size_t map[4];
+	double x[4];
+	double y[4];
 } bfm_local_element_t;
 
 int bfm_mesh_create_generic(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind);
 int bfm_mesh_destroy(bfm_mesh_t* mesh);
 
 int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* name);
-
-int bfm_build_elasticity_system(bfm_mesh_t* mesh, bfm_system_t* system, double young_modulus, double poisson_ratio, double rho, double force);

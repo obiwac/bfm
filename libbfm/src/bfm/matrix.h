@@ -98,6 +98,8 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
  */
 int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
+int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val);
+
 /**
  * @brief Apply LU decompition to a matrix; store it in place
  * 

@@ -5,6 +5,7 @@ project(bfm VERSION 0.1.0 DESCRIPTION "Big F'ing Matrix")
 
 add_library(bfm SHARED
 	src/condition.c
+	src/elasticity.c
 	src/force.c
 	src/instance.c
 	src/material.c
@@ -20,7 +21,7 @@ set_target_properties(bfm PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(bfm PROPERTIES SOVERSION 1)
 
 set_target_properties(bfm PROPERTIES PUBLIC_HEADER
-	"src/bfm/bfm.h;src/bfm/condition.h;src/bfm/force.h;src/bfm/instance.h;src/bfm/math.h;src/bfm/material.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/obj.h;src/bfm/sim.h"
+	"src/bfm/bfm.h;src/bfm/condition.h;src/bfm/elasticity.h;src/bfm/force.h;src/bfm/instance.h;src/bfm/math.h;src/bfm/material.h;src/bfm/matrix.h;src/bfm/mesh.h;src/bfm/obj.h;src/bfm/sim.h"
 )
 
 # private include directories
