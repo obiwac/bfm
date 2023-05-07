@@ -95,15 +95,18 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_obj_t* const obj = instance->obj;
 		bfm_mesh_t* const mesh = obj->mesh;
 
-		bfm_system_t system;
 		
 		bfm_state_t state;
 		bfm_state_create(&state);
 
 		// Allocate system, maybe write a function for this ?
+		bfm_system_t system;
+		bfm_matrix_t A;
+		bfm_vec_t B;
+		system.A = &A;
+		system.B = &B;
 		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_elems * 2);
-		system.B = state.alloc(sizeof *system.B);
-		bfm_vec_create(system.B, &state, mesh->n_elems * 2);
+		bfm_vec_create(&B, &state, mesh->n_elems * 2);
 		// Build the system and solve it
 		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
 		bfm_matrix_solve(system.A, system.B);
@@ -114,7 +117,6 @@ static int run_deformation(bfm_sim_t* sim) {
 		}
 		// WOuld be easier with a func for system
 		bfm_vec_destroy(system.B);
-		state.free(system.B);
 		bfm_matrix_destroy(system.A);
 		bfm_state_destroy(&state);
 	}

@@ -22,7 +22,8 @@ class Force_none(Force):
 class __Force_linear(Force):
 	def __init__(self, dim: int, vec: tuple[float]):
 		super().__init__(dim)
-		assert not lib.bfm_force_set_linear(self.c_force, Vec(vec).c_vec)
+		c_vector = Vec(vec)
+		assert not lib.bfm_force_set_linear(self.c_force, c_vector.c_vec)
 
 	def __init_subclass__(cls):
 		cls.EARTH_GRAVITY = cls(3, (0, -9.81, 0))
