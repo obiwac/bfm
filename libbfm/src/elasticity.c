@@ -151,9 +151,8 @@ int bfm_build_elasticity_system(bfm_instance_t* instance, bfm_force_t** forces, 
 		bfm_condition_t* const condition = instance->conditions[i];
 		for (size_t j = 0; j < mesh->n_nodes; j++) {
 			if (condition->nodes[j]) {
-				// TODO deal with Dirichlet != 0
-				// apply_constrain(system, j * 2, 0);
-				// apply_constrain(system, j * 2 + 1, 0);
+				apply_constrain(system, j * 2, 0);
+				apply_constrain(system, j * 2 + 1, 0);
 			}
 		}
 	}

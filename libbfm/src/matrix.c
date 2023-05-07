@@ -47,9 +47,9 @@ static int matrix_full_add(bfm_matrix_t* matrix, size_t i, size_t j, double val)
 }
 
 static int matrix_full_lu(bfm_matrix_t* matrix) {
-	size_t const m = matrix->m;
+	size_t const size = matrix->m;
 
-	for (size_t k = 0; k < m - 1; k++) {
+	for (size_t k = 0; k < size - 1; k++) {
 		// TODO handle error case and non square matrix
 
 		double const pivot = matrix_full_get(matrix, k, k);
@@ -57,22 +57,21 @@ static int matrix_full_lu(bfm_matrix_t* matrix) {
 		if (fabs(pivot) < BFM_PIVOT_EPS)
 			return -1;
 
-		for (size_t i = k + 1; i < m; i++) {
+		for (size_t i = k + 1; i < size; i++) {
 			double row_val = matrix_full_get(matrix, i, k);
-			row_val /= pivot;
+			double factor = row_val / pivot;
 
 			// set pivot to one
 
-			if (matrix_full_set(matrix, i, k, row_val) < 0)
+			if (matrix_full_set(matrix, i, k, factor) < 0)
 				return -1;
 
-			for (size_t j = k + 1; j < m; j++) {
-				double const val = matrix_full_get(matrix, i, j);
+			for (size_t j = k + 1; j < size; j++) {
 				double const val_row_pivot = matrix_full_get(matrix, k, j);
 
 				// A[i][j] -= A[i][k] * A[k][j]
 
-				if (matrix_full_set(matrix, i, j, val - row_val * val_row_pivot) < 0)
+				if (matrix_full_add(matrix, i, j, - factor * val_row_pivot) < 0)
 					return -1;
 			}
 		}
@@ -101,6 +100,7 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 			double const val = matrix_full_get(matrix, i, j);
 			y[i] -= val * y[j];
 		}
+		y[i] /= matrix_full_get(matrix, i, i);
 	}
 
 	return 0;
