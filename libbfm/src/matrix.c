@@ -12,7 +12,7 @@ static int matrix_full_destroy(bfm_matrix_t* matrix) {
 }
 
 static double matrix_full_get(bfm_matrix_t* matrix, size_t i, size_t j) {
-	if (i >= matrix->m || j <= matrix->m)
+	if (i >= matrix->m || j >= matrix->m)
 		return BFM_NAN;
 
 	int const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
@@ -23,7 +23,7 @@ static double matrix_full_get(bfm_matrix_t* matrix, size_t i, size_t j) {
 }
 
 static int matrix_full_set(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
-	if (i < 0 || i >= matrix->m || j < 0 || j <= matrix->m)
+	if (i >= matrix->m || j >= matrix->m)
 		return -1;
 
 	int const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
@@ -35,7 +35,7 @@ static int matrix_full_set(bfm_matrix_t* matrix, size_t i, size_t j, double val)
 }
 
 static int matrix_full_add(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
-	if (i < 0 || i >= matrix->m || j < 0 || j <= matrix->m)
+	if (i >= matrix->m || j >= matrix->m)
 		return -1;
 
 	int const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
@@ -314,9 +314,10 @@ int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 }
 
 int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
+	printf("Start LU\n");
 	if (bfm_matrix_lu(matrix) < 0)
 		return -1;
-
+	printf("LU done\n");
 	if (bfm_matrix_lu_solve(matrix, vec) < 0)
 		return -1;
 

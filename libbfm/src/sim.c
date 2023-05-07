@@ -105,8 +105,8 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_vec_t B;
 		system.A = &A;
 		system.B = &B;
-		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_elems * 2);
-		bfm_vec_create(&B, &state, mesh->n_elems * 2);
+		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_nodes * 2);
+		bfm_vec_create(&B, &state, mesh->n_nodes * 2);
 		// Build the system and solve it
 		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
 		bfm_matrix_solve(system.A, system.B);

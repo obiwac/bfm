@@ -13,6 +13,7 @@ int bfm_force_create(bfm_force_t* force, bfm_state_t* state, size_t dim) {
 
 int bfm_force_destroy(bfm_force_t* force) {
 	(void) force;
+	// TODO free linear vector
 	return 0;
 }
 

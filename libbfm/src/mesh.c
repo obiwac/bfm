@@ -161,7 +161,7 @@ static int quads_dphideta(double xsi, double eta, double* dphideta) {
 static int quads_dphidxsi(double xsi, double eta, double* dphidxsi) {
 	dphidxsi[0] = (1. + eta) / 4.;
 	dphidxsi[1] = - (1. + eta) / 4.;
-	dphidxsi[2] = - - (1. - eta) / 4.;
+	dphidxsi[2] = - (1. - eta) / 4.;
 	dphidxsi[3] = (1. - eta) / 4.;
 	return 0;
 }
