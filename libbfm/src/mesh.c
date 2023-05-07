@@ -107,11 +107,13 @@ static int compute_edges(bfm_mesh_t* mesh) {
 
 int create_rule(bfm_rule_t* rule, bfm_elem_kind_t kind) {
     if (kind == BFM_ELEM_KIND_SIMPLEX) {
+		rule->n = 3;
         rule->eta = _gaussTri3Eta;
 		rule->xsi = _gaussTri3Xsi;
 		rule->weights = _gaussTri3Weight;
     }
     else if (kind == BFM_ELEM_KIND_QUAD) {
+		rule->n = 4;
 		rule->eta = _gaussQuad4Eta;
 		rule->xsi = _gaussQuad4Xsi;
 		rule->weights = _gaussQuad4Weight;

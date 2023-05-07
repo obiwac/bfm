@@ -14,6 +14,7 @@ typedef enum {
 } bfm_problem_type_t;
 
 typedef struct {
+	size_t n; // Number of points of integrations
 	double const* weights;
 	double const* xsi;
 	double const* eta;

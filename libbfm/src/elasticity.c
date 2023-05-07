@@ -39,9 +39,7 @@ static int build_elasticity_system_local(bfm_local_element_t* element, bfm_insta
 	bfm_vec_create(&pos, instance->state, 3);
 	bfm_vec_create(&force_on_point, instance->state, 3);
 
-	for (size_t i = 0; i < element->n_local_nodes; i++) {
-		pos.data[0] = x[i];
-		pos.data[1] = y[i];
+	for (size_t i = 0; i < rule->n; i++) {
 
 		double const weight = rule->weights[i];
 
@@ -81,6 +79,8 @@ static int build_elasticity_system_local(bfm_local_element_t* element, bfm_insta
 		
 		for (size_t j = 0; j < element->n_local_nodes; j++) {
 			size_t const index_i = 2 * map[j];
+			pos.data[0] = x[j];
+			pos.data[1] = y[j];
 
 			for (size_t k = 0; k < n_forces; k++) {
 				bfm_force_t* const force = forces[k];
@@ -134,9 +134,15 @@ int bfm_build_elasticity_system(bfm_instance_t* instance, bfm_force_t** forces, 
 	bfm_mesh_t* const mesh = obj->mesh;
    	bfm_material_t* const material = obj->material;
 
+	// PLANAR_STRESS
    	double const a = material->E / (1 - material->nu * material->nu);
 	double const b = material->E * material->nu / (1 - material->nu * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
+
+	// PLANAR_STRAIN || AXISYM
+	// double const a = material->E * (1 - material->nu) / (1 -  2 * material->nu) / (1 + material->nu);
+	// double const b = material->E * material->nu / (1 - 2 * material->nu) / (1 + material->nu);
+	// double const c = material->E / (2 * (1 + material->nu));
 
 	bfm_local_element_t element = {
 		.n_local_nodes = mesh->kind,
