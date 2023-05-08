@@ -23,7 +23,7 @@ mesh = Mesh_lepl1110("meshes/gear60.lepl1110")
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
 
-boundary_condition = Condition(mesh)
+boundary_condition = Condition(mesh, Condition.DIRICHLET)
 boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in coord)) < 0.1)
 
 # create object out of 7075-series aluminium:
