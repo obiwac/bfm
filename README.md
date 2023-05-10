@@ -52,3 +52,5 @@ Assuming everything is built, you can run a simple example as such:
 ```console
 python examples/deformation.py
 ```
+
+That's it ;)
