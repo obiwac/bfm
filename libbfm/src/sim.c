@@ -88,16 +88,14 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 // simulation run functions per kind
 
 static int run_deformation(bfm_sim_t* sim) {
+	bfm_state_t* const state = sim->state;
+
 	for (size_t i = 0; i < sim->n_instances; i++) {
 		bfm_instance_t* const instance = sim->instances[i];
-		memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
+		// memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
 
 		bfm_obj_t* const obj = instance->obj;
 		bfm_mesh_t* const mesh = obj->mesh;
-
-		
-		bfm_state_t state;
-		bfm_state_create(&state);
 
 		// Allocate system, maybe write a function for this ?
 		bfm_system_t system;
@@ -105,8 +103,8 @@ static int run_deformation(bfm_sim_t* sim) {
 		bfm_vec_t B;
 		system.A = &A;
 		system.B = &B;
-		bfm_matrix_full_create(system.A, &state, BFM_MATRIX_MAJOR_ROW, mesh->n_nodes * 2);
-		bfm_vec_create(&B, &state, mesh->n_nodes * 2);
+		bfm_matrix_full_create(system.A, state, BFM_MATRIX_MAJOR_ROW, mesh->n_nodes * 2);
+		bfm_vec_create(&B, state, mesh->n_nodes * 2);
 		// Build the system and solve it
 		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
 		bfm_matrix_solve(system.A, system.B);
@@ -125,7 +123,6 @@ static int run_deformation(bfm_sim_t* sim) {
 		// WOuld be easier with a func for system
 		bfm_vec_destroy(system.B);
 		bfm_matrix_destroy(system.A);
-		bfm_state_destroy(&state);
 	}
 
 	return 0;
