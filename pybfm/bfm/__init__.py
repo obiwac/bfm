@@ -5,5 +5,6 @@ from .instance import Instance
 from .mesh import Mesh, Mesh_lepl1110
 from .material import Material
 from .obj import Obj
+from .rule import Rule, Rule_gauss_legendre
 from .sim import Sim
 from .vec import Vec
