@@ -39,8 +39,14 @@ int bfm_rule_create(bfm_rule_t* rule, bfm_state_t* state, size_t dim, bfm_elem_k
 		rule->points[i] = coords;
 	}
 
+	// create shape
+
+	if (bfm_shape_create(&rule->shape, state, dim, kind) < 0)
+		goto err_shape;
+
 	return 0;
 
+err_shape:
 err_coords:
 
 	for (size_t i = 0; i < dim; i++) {
@@ -68,20 +74,7 @@ int bfm_rule_destroy(bfm_rule_t* rule) {
 		state->free(rule->points[i]);
 
 	state->free(rule->points);
-
-	// shape functions
-
-	if (rule->phi)
-		state->free(rule->phi);
-
-	return 0;
-}
-
-int bfm_rule_populate_shape_funcs(bfm_rule_t* rule) {
-	// XXX for now, only 3/4 point serendipity shape functions are supported
-
-	if (rule->kind == BFM_ELEM_KIND_SIMPLEX) {
-	}
+	bfm_shape_destroy(&rule->shape);
 
 	return 0;
 }
