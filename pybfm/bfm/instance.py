@@ -97,12 +97,6 @@ class Instance:
 
 	def draw(self):
 		mesh = self.obj.mesh
+
 		gl.glBindVertexArray(self.vao)
-
-		if mesh.kind == Mesh.SIMPLEX:
-			mode = gl.GL_TRIANGLES
-
-		elif mesh.kind == Mesh.QUAD:
-			mode = gl.GL_QUADS
-
-		gl.glDrawElements(mode, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
+		gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
