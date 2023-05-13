@@ -14,16 +14,6 @@ typedef enum {
 } bfm_problem_type_t;
 
 typedef struct {
-	double const* xsi;
-	double const* eta;
-	
-	int (*get_phi) (double xsi, double eta, double* phi);
-	
-	int (*get_dphidxsi) (double xsi, double eta, double* dphidxsi);
-	int (*get_dphideta) (double xsi, double eta, double* dphideta);
-} bfm_shape_functions_t;
-
-typedef struct {
 	// src (nodes[0]) <-> dst (nodes[1])
 	// maybe rename src and dst ?
 	size_t nodes[2];
@@ -45,9 +35,6 @@ typedef struct {
 	size_t* elems;
 	bfm_edge_t* edges;
 	// bool* boundary_nodes;
-
-	// Should the shape function be stored in the mesh ?
-	bfm_shape_functions_t functions;
 } bfm_mesh_t;
 
 int bfm_mesh_create(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind);

@@ -97,76 +97,6 @@ static int compute_edges(bfm_mesh_t* mesh) {
 	return 0;
 }
 
-static int triangle_phi(double xsi, double eta, double* phi) {
-	phi[0] = 1 - xsi - eta;
-	phi[1] = xsi;
-	phi[2] = eta;
-	return 0;
-}
-
-static int quads_phi(double xsi, double eta, double* phi) {
-	phi[0] = (1. + xsi) * (1 + eta) / 4.;
-	phi[1] = (1. - xsi) * (1 + eta) / 4.;
-	phi[2] = (1. - xsi) * (1 - eta) / 4.;
-	phi[3] = (1. + xsi) * (1 - eta) / 4.;
-	return 0;
-}
-
-static int triangle_dphideta(double xsi, double eta, double* dphideta) {
-	dphideta[0] = -1.;
-	dphideta[1] = 0.;
-	dphideta[2] = 1.;
-	return 0;
-}
-
-static int triangle_dphidxsi(double xsi, double eta, double* dphidxsi) {
-	dphidxsi[0] = -1.;
-	dphidxsi[1] = 1.;
-	dphidxsi[2] = 0.;
-	return 0;
-}
-
-static int quads_dphideta(double xsi, double eta, double* dphideta) {
-	dphideta[0] = (1. + xsi) / 4.;
-	dphideta[1] = (1. - xsi) / 4.;
-	dphideta[2] = - (1. - xsi) / 4.;
-	dphideta[3] = - (1. + xsi) / 4.;
-	return 0;
-}
-
-static int quads_dphidxsi(double xsi, double eta, double* dphidxsi) {
-	dphidxsi[0] = (1. + eta) / 4.;
-	dphidxsi[1] = - (1. + eta) / 4.;
-	dphidxsi[2] = - (1. - eta) / 4.;
-	dphidxsi[3] = (1. - eta) / 4.;
-	return 0;
-}
-
-static int create_shape_functions(bfm_shape_functions_t* functions, bfm_elem_kind_t kind) {
-	if (kind == BFM_ELEM_KIND_SIMPLEX) {
-		functions->xsi = xsi_triangles;
-		functions->eta = eta_triangles;
-		
-		functions->get_phi = triangle_phi;
-		
-		functions->get_dphideta = triangle_dphideta;
-		functions->get_dphidxsi = triangle_dphidxsi;
-	}
-	else if (kind == BFM_ELEM_KIND_QUAD) {
-		functions->xsi = xsi_quads;
-		functions->eta = eta_quads;
-		
-		functions->get_phi = quads_phi;
-		
-		functions->get_dphideta = quads_dphideta;
-		functions->get_dphidxsi = quads_dphidxsi;
-	}
-	else
-		return -1;
-	return 0;
-	
-}
-
 int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
 	int rv = -1;
 
@@ -216,8 +146,6 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		free(mesh->elems); // TODO idiosyncratic
 		goto err_kind;
 	}
-
-	create_shape_functions(&mesh->functions, mesh->kind);
 
 	// success
 
