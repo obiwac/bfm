@@ -63,7 +63,10 @@ static void fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instanc
 	// go through integration points
 
 	for (size_t i = 0; i < rule->n_points; i++) {
-		// TODO integration point i
+		double const weight = rule->weights[i];
+
+		double const xsi = rule->points[0][i];
+		double const eta = rule->points[1][i];
 	}
 }
 
