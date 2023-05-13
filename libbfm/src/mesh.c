@@ -3,20 +3,12 @@
 
 #include <bfm/mesh.h>
 
-// From lepl1110 fem.c
-static double const _gaussQuad4Xsi[4]    = {-0.577350269189626,-0.577350269189626, 0.577350269189626, 0.577350269189626};
-static double const _gaussQuad4Eta[4]    = { 0.577350269189626,-0.577350269189626,-0.577350269189626, 0.577350269189626};
-static double const _gaussQuad4Weight[4] = { 1.000000000000000, 1.000000000000000, 1.000000000000000, 1.000000000000000};
-static double const _gaussTri3Xsi[3]     = { 0.166666666666667, 0.666666666666667, 0.166666666666667};
-static double const _gaussTri3Eta[3]     = { 0.166666666666667, 0.166666666666667, 0.666666666666667};
-static double const _gaussTri3Weight[3]  = { 0.166666666666667, 0.166666666666667, 0.166666666666667};
-
 static double const xsi_triangles[3] = {0., 1., 0.};
 static double const eta_triangles[3] = {0., 0., 1.};
 static double const xsi_quads[4] = {1., -1., -1., 1.};
 static double const eta_quads[4] = {1., 1., -1., -1.};
 
-int bfm_mesh_create_generic(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
+int bfm_mesh_create(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
 	memset(mesh, 0, sizeof *mesh);
 	mesh->state = state;
 
@@ -103,24 +95,6 @@ static int compute_edges(bfm_mesh_t* mesh) {
 	// 	}
 	// }
 	return 0;
-}
-
-int create_rule(bfm_rule_t* rule, bfm_elem_kind_t kind) {
-    if (kind == BFM_ELEM_KIND_SIMPLEX) {
-		rule->n = 3;
-        rule->eta = _gaussTri3Eta;
-		rule->xsi = _gaussTri3Xsi;
-		rule->weights = _gaussTri3Weight;
-    }
-    else if (kind == BFM_ELEM_KIND_QUAD) {
-		rule->n = 4;
-		rule->eta = _gaussQuad4Eta;
-		rule->xsi = _gaussQuad4Xsi;
-		rule->weights = _gaussQuad4Weight;
-    }
-    else
-        return -1;
-    return 0;
 }
 
 static int triangle_phi(double xsi, double eta, double* phi) {
@@ -238,15 +212,15 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
-	int err = compute_edges(mesh);
-	if (err != 0) {
-		free(mesh->elems);
+	if (compute_edges(mesh) < 0) {
+		free(mesh->elems); // TODO idiosyncratic
 		goto err_kind;
 	}
 
-	create_rule(&mesh->rule, mesh->kind);
 	create_shape_functions(&mesh->functions, mesh->kind);
+
 	// success
+
 	rv = 0;
 
 err_kind:

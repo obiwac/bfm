@@ -314,10 +314,9 @@ int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 }
 
 int bfm_matrix_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
-	printf("Start LU\n");
 	if (bfm_matrix_lu(matrix) < 0)
 		return -1;
-	printf("LU done\n");
+
 	if (bfm_matrix_lu_solve(matrix, vec) < 0)
 		return -1;
 

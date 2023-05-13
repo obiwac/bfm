@@ -41,11 +41,6 @@ typedef struct {
 	};
 } bfm_matrix_t;
 
-typedef struct {
-	bfm_matrix_t* A;
-	bfm_vec_t* B;
-} bfm_system_t;
-
 /**
  * @brief Create a full square matrix of size mxn
  *
@@ -73,7 +68,7 @@ int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
  * @brief Destroy a matrix
  *
  * @param matrix, pointer to matrix struct
- * @return int, 0 if succes, -1 if failure
+ * @return int, 0 if success, -1 if failure
  */
 int bfm_matrix_destroy(bfm_matrix_t* matrix);
 
@@ -94,17 +89,17 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
  * @param i, index of row
  * @param j, index of column
  * @param value, to store at index (i,j)
- * @return int, 0 if succes, -1 if failure
+ * @return int, 0 if success, -1 if failure
  */
 int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
 int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
 /**
- * @brief Apply LU decompition to a matrix; store it in place
+ * @brief Apply LU decomposition to a matrix; store it in place
  * 
  * @param A matrix 
- * @return int, 0 if succes, -1 if failure
+ * @return int, 0 if success, -1 if failure
  */
 int bfm_matrix_lu(bfm_matrix_t* matrix);
 
@@ -113,12 +108,12 @@ int bfm_matrix_lu(bfm_matrix_t* matrix);
  * 
  * @param A LU matrix
  * @param y, a vector 
- * @return int, 0 if succes, -1 if failure 
+ * @return int, 0 if success, -1 if failure
  */
 int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
 
 /**
- * @brief solve a Ax = y system using lu decomposition
+ * @brief solve a Ax = y system using LU decomposition
  * 
  * @param A, a matrix 
  * @param y

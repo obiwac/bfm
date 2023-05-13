@@ -16,10 +16,11 @@ if __name__ == "__main__":
 		"bfm/matrix.h",
 		"bfm/mesh.h",
 		"bfm/condition.h",
+		"bfm/rule.h",
 		"bfm/obj.h",
 		"bfm/instance.h",
 		"bfm/sim.h",
-		"bfm/elasticity.h"
+		"bfm/system.h",
 	]
 
 	includes = ""

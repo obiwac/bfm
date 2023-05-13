@@ -18,7 +18,7 @@ bfm = Bfm()
 # mesh.rect((0, 0), (1, 0.2))
 # mesh.mesh()
 
-mesh = Mesh_lepl1110("meshes/8.lepl1110")
+mesh = Mesh_lepl1110("meshes/gear12.lepl1110")
 
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
