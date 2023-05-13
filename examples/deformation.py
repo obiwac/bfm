@@ -3,7 +3,7 @@ faulthandler.enable()
 
 import math
 
-from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Material, Obj, Sim
+from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Material, Obj, Rule_gauss_legendre, Sim
 
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
@@ -34,7 +34,8 @@ boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in co
 # for the material used in the LEPL1110 course: Material("Steel", rho=7.85e3, E=211.e9, nu=0.3)
 
 material = Material.AA7075
-obj = Obj(mesh, material)
+rule = Rule_gauss_legendre(mesh.dim, mesh.kind)
+obj = Obj(mesh, material, rule)
 
 # create instance from object and boundary conditions
 # add the instance to the state
