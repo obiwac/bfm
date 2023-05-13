@@ -91,31 +91,25 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 static int run_deformation(bfm_sim_t* sim) {
 	for (size_t i = 0; i < sim->n_instances; i++) {
 		bfm_instance_t* const instance = sim->instances[i];
-		// memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
-
 		bfm_obj_t* const obj = instance->obj;
 		bfm_mesh_t* const mesh = obj->mesh;
+		size_t const dim = mesh->dim;
 
-		bfm_system_t system;
+		// create and solve elasticity system
+
+		bfm_system_t __attribute__((cleanup(bfm_system_destroy))) system;
 
 		if (bfm_system_create_elasticity(&system, instance, sim->n_forces, sim->forces) < 0)
 			return -1;
 
 		bfm_matrix_solve(&system.A, &system.b);
 
-		double m = 1e9;
-		double M = 0.;
+		// set instance effects to result of equation
 
-		for (size_t k = 0; k < mesh->n_nodes; k++) {
-			instance->effects[k * 2 + 0] = system.b.data[k * 2 + 0];
-			instance->effects[k * 2 + 1] = system.b.data[k * 2 + 1];
-			// printf("%lf\n", system.b.data[k * 2 + 1]);
-			double norm = sqrt(system.b.data[k * 2 + 0] * system.b.data[k * 2 + 0] + system.b.data[k * 2 + 1] * system.b.data[k * 2 + 1]);
-			m = BFM_MIN(m, norm);
-			M = BFM_MAX(M, norm);
+		for (size_t j = 0; j < mesh->n_nodes; j++) {
+			for (size_t k = 0; k < dim; k++)
+				instance->effects[j * dim + k] = system.b.data[j * dim + k];
 		}
-
-		bfm_system_destroy(&system);
 	}
 
 	return 0;
