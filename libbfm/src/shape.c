@@ -43,10 +43,10 @@ static int default_dphi(bfm_shape_t* shape, size_t wrt, double* point, double* d
 	}
 
 	if (shape->kind == BFM_ELEM_KIND_QUAD) {
-		dphi[0] = (wrt == 0 ? 1 + eta :  1 + xsi) / 4;
-		dphi[1] = (wrt == 0 ? 1 + eta :  1 - xsi) / 4;
-		dphi[2] = (wrt == 0 ? eta - 1 :  xsi - 1) / 4;
-		dphi[3] = (wrt == 0 ? 1 - eta : -1 - xsi) / 4;
+		dphi[0] = (wrt == 0 ?  1 + eta :  1 + xsi) / 4;
+		dphi[1] = (wrt == 0 ? -1 - eta :  1 - xsi) / 4;
+		dphi[2] = (wrt == 0 ? -1 + eta : -1 + xsi) / 4;
+		dphi[3] = (wrt == 0 ?  1 - eta : -1 - xsi) / 4;
 
 		return 0;
 	}

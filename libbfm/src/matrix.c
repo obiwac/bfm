@@ -100,6 +100,7 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 			double const val = matrix_full_get(matrix, i, j);
 			y[i] -= val * y[j];
 		}
+
 		y[i] /= matrix_full_get(matrix, i, i);
 	}
 
@@ -285,8 +286,10 @@ int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
 int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
 	if (matrix->kind == BFM_MATRIX_KIND_FULL)
 		return matrix_full_add(matrix, i, j, val);
+
 	else if (matrix->kind == BFM_MATRIX_KIND_BAND)
 		return matrix_band_add(matrix, i, j, val);
+
 	return -1;
 }
 
@@ -345,6 +348,7 @@ int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 		return -1;
 
 	memset(matrix->full.data, 0, size);
+
 	return 0;
 }
 
@@ -359,5 +363,6 @@ int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 		return -1;
 
 	memset(matrix->full.data, 0, size);
+
 	return 0;
 }
