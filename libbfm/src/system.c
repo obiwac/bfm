@@ -87,7 +87,7 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 		size_t* const map = elem->map;
 
 		double* const x = elem->coord[0];
-		double* const y = elem->coord[0];
+		double* const y = elem->coord[1];
 
 		// integration rule
 

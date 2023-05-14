@@ -30,6 +30,9 @@ int bfm_force_set_linear(bfm_force_t* force, bfm_vec_t* vec) {
 	if (vec->n != force->dim)
 		return -1;
 
+	if (bfm_vec_create(&force->linear.force, vec->state, vec->n) < 0)
+		return -1;
+
 	if (bfm_vec_copy(&force->linear.force, vec) < 0)
 		return -1;
 
@@ -71,6 +74,7 @@ int eval_funky(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 
 int bfm_force_eval(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref) {
 	// check force vector dimension is correct
+
 	if (force_ref->n != force->dim)
 		return -1;
 
