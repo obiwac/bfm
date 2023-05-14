@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include <bfm/sim.h>
+#include <bfm/system.h>
 
 int bfm_sim_create(bfm_sim_t* sim, bfm_state_t* state, bfm_sim_kind_t kind) {
 	memset(sim, 0, sizeof *sim);
@@ -88,41 +89,27 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 // simulation run functions per kind
 
 static int run_deformation(bfm_sim_t* sim) {
-	bfm_state_t* const state = sim->state;
-
 	for (size_t i = 0; i < sim->n_instances; i++) {
 		bfm_instance_t* const instance = sim->instances[i];
-		// memset(instance->effects, 0, instance->n_effects * sizeof *instance->effects);
-
 		bfm_obj_t* const obj = instance->obj;
 		bfm_mesh_t* const mesh = obj->mesh;
+		size_t const dim = mesh->dim;
 
-		// Allocate system, maybe write a function for this ?
-		bfm_system_t system;
-		bfm_matrix_t A;
-		bfm_vec_t B;
-		system.A = &A;
-		system.B = &B;
-		bfm_matrix_full_create(system.A, state, BFM_MATRIX_MAJOR_ROW, mesh->n_nodes * 2);
-		bfm_vec_create(&B, state, mesh->n_nodes * 2);
-		// Build the system and solve it
-		bfm_build_elasticity_system(instance, sim->forces, sim->n_forces, &system);
-		bfm_matrix_solve(system.A, system.B);
+		// create and solve elasticity system
 
-		double m = 1e9;
-		double M = 0.;
-		for (size_t k = 0; k < mesh->n_nodes; k++) {
-			instance->effects[k * 2 + 0] = system.B->data[k * 2 + 0];
-			instance->effects[k * 2 + 1] = system.B->data[k * 2 + 1];
-			// printf("%lf\n", system.B->data[k * 2 + 1]);
-			double norm = sqrt(system.B->data[k * 2 + 0] * system.B->data[k * 2 + 0] + system.B->data[k * 2 + 1] * system.B->data[k * 2 + 1]);
-			m = BFM_MIN(m, norm);
-			M = BFM_MAX(M, norm);
+		bfm_system_t __attribute__((cleanup(bfm_system_destroy))) system;
+
+		if (bfm_system_create_elasticity(&system, instance, sim->n_forces, sim->forces) < 0)
+			return -1;
+
+		bfm_matrix_solve(&system.A, &system.b);
+
+		// set instance effects to result of equation
+
+		for (size_t j = 0; j < mesh->n_nodes; j++) {
+			for (size_t k = 0; k < dim; k++)
+				instance->effects[j * dim + k] = system.b.data[j * dim + k];
 		}
-		printf("Min = %14.7e, Max = %14.7e\n", m, M);
-		// WOuld be easier with a func for system
-		bfm_vec_destroy(system.B);
-		bfm_matrix_destroy(system.A);
 	}
 
 	return 0;

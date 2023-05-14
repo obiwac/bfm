@@ -20,13 +20,16 @@ class Force_none(Force):
 		assert not lib.bfm_force_set_none(self.c_force)
 
 class __Force_linear(Force):
-	def __init__(self, dim: int, vec: tuple[float]):
+	def __init__(self, vec: tuple[float]):
+		dim = len(vec)
 		super().__init__(dim)
+
 		c_vector = Vec(vec)
 		assert not lib.bfm_force_set_linear(self.c_force, c_vector.c_vec)
 
 	def __init_subclass__(cls):
-		cls.EARTH_GRAVITY = cls(3, (0, -9.81, 0))
+		cls.EARTH_GRAVITY = cls((0, -9.81, 0))
+		cls.EARTH_GRAVITY_2D = cls((0, -9.81))
 
 class Force_linear(__Force_linear):
 	... # to call __init_subclass__

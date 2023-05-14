@@ -18,11 +18,7 @@ int bfm_vec_create(bfm_vec_t* vec, bfm_state_t* state, size_t n) {
 }
 
 int bfm_vec_copy(bfm_vec_t* vec, bfm_vec_t* src) {
-	if (bfm_vec_create(vec, src->state, src->n) < 0)
-		return -1;
-
 	memcpy(vec->data, src->data, src->n * sizeof *vec->data);
-
 	return 0;
 }
 

@@ -68,11 +68,11 @@ class Instance:
 		gl.glGenBuffers(1, self.ibo)
 		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 
-		indices_t = gl.GLuint * len(mesh.indices)
+		indices_t = gl.GLuint * len(mesh.line_indices)
 
 		gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
 			ctypes.sizeof(indices_t),
-			(indices_t) (*mesh.indices),
+			(indices_t) (*mesh.line_indices),
 			gl.GL_STATIC_DRAW)
 
 	@functools.cached_property
@@ -97,12 +97,7 @@ class Instance:
 
 	def draw(self):
 		mesh = self.obj.mesh
+
 		gl.glBindVertexArray(self.vao)
-
-		if mesh.kind == Mesh.SIMPLEX:
-			mode = gl.GL_TRIANGLES
-
-		elif mesh.kind == Mesh.QUAD:
-			mode = gl.GL_QUADS
-
-		gl.glDrawElements(mode, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
+		# gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
+		gl.glDrawElements(gl.GL_LINES, len(mesh.line_indices), gl.GL_UNSIGNED_INT, None)
