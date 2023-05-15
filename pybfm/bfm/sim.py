@@ -41,6 +41,7 @@ class Sim:
 
 	def draw(self, mvp_matrix: Matrix):
 		self.shader.use()
+		self.shader.mvp_matrix(mvp_matrix)
 
 		for instance in self.instances:
 			instance.draw()
