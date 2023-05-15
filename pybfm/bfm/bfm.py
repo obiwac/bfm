@@ -20,17 +20,20 @@ class Window(pyglet.window.Window):
 
 		# orbit camera
 
-		self.recoil = 1
-		self.target_recoil = 1
-
-		self.rotation = [0, 0]
-		self.target_rotation = [0, 0]
-
-		self.origin = [0, 0, 0]
-		self.target_origin = [0, 0, 0]
+		self.orbit_defaults(True)
 
 		self.mv_matrix = Matrix()
 		self.p_matrix = Matrix()
+
+	def orbit_defaults(self, set_real = False):
+		self.target_recoil = 1
+		self.target_rotation = [0, 0]
+		self.target_origin = [0, 0, 0]
+
+		if set_real:
+			self.recoil = self.target_recoil
+			self.rotation = self.target_rotation
+			self.origin = self.target_origin
 
 	def __anim(self, target, val, dt, speed):
 		fac = dt * speed
@@ -87,11 +90,15 @@ class Window(pyglet.window.Window):
 	def on_mouse_drag(self, x, y, delta_x, delta_y, buttons, modifiers):
 		self.on_mouse_motion(x, y, delta_x, delta_y)
 
+		# orbiting
+
 		if buttons & pyglet.window.mouse.LEFT:
 			self.target_rotation[0] += delta_x / 200
 			self.target_rotation[1] += delta_y / 200
 
 			self.target_rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.target_rotation[1]))
+
+		# panning
 
 		if buttons & pyglet.window.mouse.RIGHT:
 			self.target_origin[0] += delta_x / 200
@@ -104,6 +111,9 @@ class Window(pyglet.window.Window):
 	def on_key_press(self, key, modifiers):
 		if key == pyglet.window.key.ESCAPE:
 			pyglet.app.exit()
+
+		if key == pyglet.window.key.SPACE:
+			self.orbit_defaults()
 
 	def on_key_release(self, key, modifiers):
 		...
