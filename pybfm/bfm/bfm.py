@@ -32,8 +32,8 @@ class Window(pyglet.window.Window):
 
 		if set_real:
 			self.recoil = self.target_recoil
-			self.rotation = self.target_rotation
-			self.origin = self.target_origin
+			*self.rotation, = self.target_rotation
+			*self.origin, = self.target_origin
 
 	def __anim(self, target, val, dt, speed):
 		fac = dt * speed
