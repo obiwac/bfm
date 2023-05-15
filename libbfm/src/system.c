@@ -229,8 +229,10 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 
 		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET) {
 			for (size_t j = 0; j < mesh->n_nodes; j++) {
-				for (size_t k = 0; condition->nodes[j] && k < mesh->dim; k++)
-					apply_constraint(system, j * mesh->dim + k, 0);
+				if (condition->nodes[j]) {
+					apply_constraint(system, j * mesh->dim, condition->value_x);
+					apply_constraint(system, j * mesh->dim + 1, condition->value_y);
+				}
 			}
 		}
 		else if (condition->kind == BFM_CONDITION_KIND_VON_NEUMANN) {
@@ -242,10 +244,10 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 					size_t n2 = edge.nodes[1];
 					double jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
 					// the phi cancel beceause of simplication jac * val is constant
-					// system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
-					// system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
-					// system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
-					// system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
+					system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
+					system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
+					system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
+					system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
 				}
 			}
 		}
