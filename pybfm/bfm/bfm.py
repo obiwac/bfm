@@ -1,3 +1,5 @@
+import math
+
 import pyglet
 
 pyglet.options["shadow_window"] = False
@@ -6,6 +8,7 @@ pyglet.options["debug_gl"] = False
 import pyglet.gl as gl
 
 from .instance import Instance
+from .matrix import Matrix
 from .sim import Sim
 
 global_bfm = None
@@ -15,10 +18,29 @@ class Window(pyglet.window.Window):
 		super().__init__(**args)
 		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
 
+		# orbit camera
+
+		self.mv_matrix = Matrix()
+		self.p_matrix = Matrix()
+		self.x = 0
+
 	def update(self, dt):
-		...
+		self.x += dt
 
 	def on_draw(self):
+		# create MVP matrix
+
+		self.p_matrix.load_identity()
+		self.p_matrix.perspective(90, self.width / self.height, 0.1, 500)
+
+		self.mv_matrix.load_identity()
+		self.mv_matrix.translate(0, 0, -1)
+		self.mv_matrix.rotate_2d(self.x + 6.28 / 4, math.sin(self.x / 3 * 2) / 2)
+
+		mvp_matrix = self.p_matrix @ self.mv_matrix
+
+		# actually draw
+
 		gl.glEnable(gl.GL_DEPTH_TEST)
 		# gl.glEnable(gl.GL_CULL_FACE)
 
@@ -26,7 +48,7 @@ class Window(pyglet.window.Window):
 		self.clear()
 
 		if global_bfm.current_sim is not None:
-			global_bfm.current_sim.draw()
+			global_bfm.current_sim.draw(mvp_matrix)
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")

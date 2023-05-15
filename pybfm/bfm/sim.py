@@ -1,6 +1,7 @@
 from .force import Force
 from .instance import Instance
 from .libbfm import lib, ffi
+from .matrix import Matrix
 from .shader import Shader
 from .state import default_state
 
@@ -38,7 +39,7 @@ class Sim:
 		for instance in self.instances:
 			instance.update_effects()
 
-	def draw(self):
+	def draw(self, mvp_matrix: Matrix):
 		self.shader.use()
 
 		for instance in self.instances:
