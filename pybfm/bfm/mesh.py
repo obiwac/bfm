@@ -32,7 +32,7 @@ class Mesh:
 		coords = []
 
 		for i in range(self.c_mesh.n_nodes * self.dim):
-			coords.append(self.c_mesh.coords[i] - 0.5)
+			coords.append(self.c_mesh.coords[i])
 
 		return coords
 
