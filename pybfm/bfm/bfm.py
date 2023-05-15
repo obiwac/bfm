@@ -99,6 +99,7 @@ class Window(pyglet.window.Window):
 
 	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
 		self.target_recoil -= scroll_y / 10
+		self.target_recoil = max(self.target_recoil, 0.5)
 
 	def on_key_press(self, key, modifiers):
 		if key == pyglet.window.key.ESCAPE:
