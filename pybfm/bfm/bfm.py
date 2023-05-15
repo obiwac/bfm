@@ -77,6 +77,8 @@ class Window(pyglet.window.Window):
 		self.target_rotation[0] += delta_x / 200
 		self.target_rotation[1] += delta_y / 200
 
+		self.target_rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.target_rotation[1]))
+
 	def on_key_press(self, key, modifiers):
 		if key == pyglet.window.key.ESCAPE:
 			pyglet.app.exit()
