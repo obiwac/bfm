@@ -21,12 +21,22 @@ class Window(pyglet.window.Window):
 		# orbit camera
 
 		self.rotation = [0, 0]
+		self.target_rotation = [0, 0]
 
 		self.mv_matrix = Matrix()
 		self.p_matrix = Matrix()
 
+	def __anim(self, target, val, dt, speed):
+		fac = dt * speed
+
+		if fac > 1:
+			return target
+
+		return val + fac * (target - val)
+
 	def update(self, dt):
-		...
+		self.rotation[0] = self.__anim(self.target_rotation[0], self.rotation[0], dt, 20)
+		self.rotation[1] = self.__anim(self.target_rotation[1], self.rotation[1], dt, 20)
 
 	def on_draw(self):
 		# create MVP matrix
@@ -64,8 +74,8 @@ class Window(pyglet.window.Window):
 	def on_mouse_drag(self, x, y, delta_x, delta_y, buttons, modifiers):
 		self.on_mouse_motion(x, y, delta_x, delta_y)
 
-		self.rotation[0] += delta_x / 100
-		self.rotation[1] += delta_y / 100
+		self.target_rotation[0] += delta_x / 200
+		self.target_rotation[1] += delta_y / 200
 
 	def on_key_press(self, key, modifiers):
 		if key == pyglet.window.key.ESCAPE:
