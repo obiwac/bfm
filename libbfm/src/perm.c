@@ -207,6 +207,7 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 	// success
 
+	perm->has_perm = true;
 	rv = 0;
 
 err_inv_perm_alloc:
