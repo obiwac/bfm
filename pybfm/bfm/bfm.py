@@ -26,6 +26,9 @@ class Window(pyglet.window.Window):
 		self.rotation = [0, 0]
 		self.target_rotation = [0, 0]
 
+		self.origin = [0, 0, 0]
+		self.target_origin = [0, 0, 0]
+
 		self.mv_matrix = Matrix()
 		self.p_matrix = Matrix()
 
@@ -43,6 +46,10 @@ class Window(pyglet.window.Window):
 		self.rotation[0] = self.__anim(self.target_rotation[0], self.rotation[0], dt, 20)
 		self.rotation[1] = self.__anim(self.target_rotation[1], self.rotation[1], dt, 20)
 
+		self.origin[0] = self.__anim(self.target_origin[0], self.origin[0], dt, 20)
+		self.origin[1] = self.__anim(self.target_origin[1], self.origin[1], dt, 20)
+		self.origin[2] = self.__anim(self.target_origin[2], self.origin[2], dt, 20)
+
 	def on_draw(self):
 		# create MVP matrix
 
@@ -52,6 +59,7 @@ class Window(pyglet.window.Window):
 		self.mv_matrix.load_identity()
 		self.mv_matrix.translate(0, 0, -self.recoil)
 		self.mv_matrix.rotate_2d(*self.rotation)
+		self.mv_matrix.translate(*self.origin)
 
 		mvp_matrix = self.p_matrix @ self.mv_matrix
 
@@ -79,10 +87,15 @@ class Window(pyglet.window.Window):
 	def on_mouse_drag(self, x, y, delta_x, delta_y, buttons, modifiers):
 		self.on_mouse_motion(x, y, delta_x, delta_y)
 
-		self.target_rotation[0] += delta_x / 200
-		self.target_rotation[1] += delta_y / 200
+		if buttons & pyglet.window.mouse.LEFT:
+			self.target_rotation[0] += delta_x / 200
+			self.target_rotation[1] += delta_y / 200
 
-		self.target_rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.target_rotation[1]))
+			self.target_rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.target_rotation[1]))
+
+		if buttons & pyglet.window.mouse.RIGHT:
+			self.target_origin[0] += delta_x / 200
+			self.target_origin[1] += delta_y / 200
 
 	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
 		self.target_recoil -= scroll_y / 10
