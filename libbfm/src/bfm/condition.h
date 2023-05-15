@@ -14,6 +14,8 @@ typedef struct {
 	bfm_condition_kind_t kind;
 
 	// for each node of the mesh, "true" indicates it's part of this boundary condition
+	// double value_x;
+	// double value_y;
 
 	bool* nodes;
 } bfm_condition_t;
