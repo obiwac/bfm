@@ -20,6 +20,9 @@ class Window(pyglet.window.Window):
 
 		# orbit camera
 
+		self.recoil = 1
+		self.target_recoil = 1
+
 		self.rotation = [0, 0]
 		self.target_rotation = [0, 0]
 
@@ -35,6 +38,8 @@ class Window(pyglet.window.Window):
 		return val + fac * (target - val)
 
 	def update(self, dt):
+		self.recoil = self.__anim(self.target_recoil, self.recoil, dt, 10)
+
 		self.rotation[0] = self.__anim(self.target_rotation[0], self.rotation[0], dt, 20)
 		self.rotation[1] = self.__anim(self.target_rotation[1], self.rotation[1], dt, 20)
 
@@ -45,7 +50,7 @@ class Window(pyglet.window.Window):
 		self.p_matrix.perspective(90, self.width / self.height, 0.1, 500)
 
 		self.mv_matrix.load_identity()
-		self.mv_matrix.translate(0, 0, -1)
+		self.mv_matrix.translate(0, 0, -self.recoil)
 		self.mv_matrix.rotate_2d(*self.rotation)
 
 		mvp_matrix = self.p_matrix @ self.mv_matrix
@@ -78,6 +83,9 @@ class Window(pyglet.window.Window):
 		self.target_rotation[1] += delta_y / 200
 
 		self.target_rotation[1] = max(-math.tau / 4, min(math.tau / 4, self.target_rotation[1]))
+
+	def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+		self.target_recoil -= scroll_y / 10
 
 	def on_key_press(self, key, modifiers):
 		if key == pyglet.window.key.ESCAPE:
