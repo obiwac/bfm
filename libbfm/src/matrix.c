@@ -11,6 +11,20 @@ static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	return 0;
 }
 
+static int matrix_full_copy_to_band(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	for (size_t i = 0; i < matrix->m; i++) {
+		for (size_t j = 0; j < matrix->m; j++) {
+			if (i + j > matrix->band.k)
+				continue;
+
+			double const val = bfm_matrix_get(src, i, j);
+			bfm_matrix_set(matrix, i, j, val);
+		}
+	}
+
+	return 0;
+}
+
 static int matrix_full_destroy(bfm_matrix_t* matrix) {
 	bfm_state_t* const state = matrix->state;
 
@@ -287,6 +301,17 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 // generic matrix routines
 
 int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	if (matrix->m != src->m)
+		return -1;
+
+	// specific matrix kind conversions
+
+	if (src->kind == BFM_MATRIX_KIND_FULL && matrix->kind == BFM_MATRIX_KIND_BAND)
+		return matrix_full_copy_to_band(matrix, src);
+
+	// same-kind copying functions
+	// enforce this with a sanity check
+
 	if (matrix->kind != src->kind)
 		return -1;
 
@@ -409,7 +434,7 @@ int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 }
 
 int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m, size_t k) {
-	matrix_create(matrix, state, BFM_MATRIX_KIND_FULL, major, m);
+	matrix_create(matrix, state, BFM_MATRIX_KIND_BAND, major, m);
 	matrix->band.k = k;
 
 	size_t const size = m * (k * 2 + 1) * sizeof *matrix->band.data;
@@ -418,7 +443,7 @@ int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
 	if (matrix->band.data == NULL)
 		return -1;
 
-	memset(matrix->full.data, 0, size);
+	memset(matrix->band.data, 0, size);
 
 	return 0;
 }
