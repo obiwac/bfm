@@ -62,6 +62,37 @@ int bfm_perm_perm_matrix(bfm_perm_t* perm, bfm_matrix_t* matrix, bool inv) {
 	return 0;
 }
 
+int bfm_perm_perm_vec(bfm_perm_t* perm, bfm_vec_t* vec, bool inv) {
+	bfm_state_t* const state = perm->state;
+
+	if (!perm->has_perm)
+		return -1;
+
+	size_t* const cur_perm = inv ? perm->inv_perm : perm->perm;
+
+	if (vec->n != perm->m)
+		return -1;
+
+	// copy old vector to copy from
+
+	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) old = { 0 };
+
+	if (bfm_vec_create(&old, state, vec->n) < 0)
+		return -1;
+
+	if (bfm_vec_copy(&old, vec) < 0)
+		return -1;
+
+	// actually permute vec
+
+	for (size_t i = 0; i < vec->n; i++) {
+		size_t const perm_i = cur_perm[i];
+		vec->data[perm_i] = old.data[i];
+	}
+
+	return 0;
+}
+
 typedef struct {
 	size_t i;
 	size_t deg;
