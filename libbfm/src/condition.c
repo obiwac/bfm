@@ -7,13 +7,25 @@ int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mes
 	condition->mesh = mesh;
 	condition->kind = kind;
 
-	size_t const size = mesh->n_nodes * sizeof *condition->nodes;
-	condition->nodes = state->alloc(size);
+	
+	if (kind == BFM_CONDITION_KIND_DIRICHLET) {
+		size_t const size = mesh->n_nodes * sizeof *condition->nodes;
+		condition->nodes = state->alloc(size);
 
-	if (!condition->nodes)
-		return -1;
+		if (!condition->nodes)
+			return -1;
 
-	memset(condition->nodes, 0, size);
+		memset(condition->nodes, 0, size);
+	}
+	else if (kind == BFM_CONDITION_KIND_NEUMANN) {
+		size_t const size = mesh->n_edges * sizeof *condition->edges;
+		condition->edges = state->alloc(size);
+
+		if (!condition->edges)
+			return -1;
+
+		memset(condition->edges, 0, size);
+	}
 
 	return 0;
 }

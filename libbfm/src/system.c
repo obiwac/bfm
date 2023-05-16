@@ -230,24 +230,24 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET) {
 			for (size_t j = 0; j < mesh->n_nodes; j++) {
 				if (condition->nodes[j]) {
-					apply_constraint(system, j * mesh->dim, condition->value_x);
-					apply_constraint(system, j * mesh->dim + 1, condition->value_y);
+					// We need to apply only on choosen dimension, maybe values[i] != Nan ?
+					apply_constraint(system, j * mesh->dim, condition->values[0]);
+					apply_constraint(system, j * mesh->dim + 1, condition->values[1]);
 				}
 			}
 		}
-		else if (condition->kind == BFM_CONDITION_KIND_VON_NEUMANN) {
+		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				// shoubld be called edges
-				if (condition->nodes[j]) {
-					bfm_edge_t edge = mesh->edges[i];
-					size_t n1 = edge.nodes[0];
-					size_t n2 = edge.nodes[1];
-					double jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
+				if (condition->edges[j]) {
+					bfm_edge_t const edge = mesh->edges[i];
+					size_t const n1 = edge.nodes[0];
+					size_t const n2 = edge.nodes[1];
+					double const jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
 					// the phi cancel beceause of simplication jac * val is constant
-					system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
-					system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
-					system->b.data[n1 * 2 + 0] += jacobian * condition->value_x;
-					system->b.data[n1 * 2 + 1] += jacobian * condition->value_y;
+					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
+					system->b.data[n1 * 2 + 1] += jacobian * condition->values[1];
+					system->b.data[n2 * 2 + 0] += jacobian * condition->values[0];
+					system->b.data[n2 * 2 + 1] += jacobian * condition->values[1];
 				}
 			}
 		}

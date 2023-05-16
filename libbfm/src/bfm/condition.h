@@ -4,7 +4,7 @@
 
 typedef enum {
 	BFM_CONDITION_KIND_DIRICHLET,
-	BFM_CONDITION_KIND_VON_NEUMANN,
+	BFM_CONDITION_KIND_NEUMANN,
 } bfm_condition_kind_t;
 
 typedef struct {
@@ -13,11 +13,13 @@ typedef struct {
 
 	bfm_condition_kind_t kind;
 
-	// for each node of the mesh, "true" indicates it's part of this boundary condition
-	double value_x;
-	double value_y;
+	double* values;
 
-	bool* nodes;
+	union {
+		// for each node of the mesh, "true" indicates it's part of this boundary condition
+		bool* nodes;
+		bool* edges;
+	};
 } bfm_condition_t;
 
 int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mesh_t* mesh, bfm_condition_kind_t kind);
