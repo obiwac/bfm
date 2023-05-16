@@ -6,20 +6,51 @@ int bfm_system_create(bfm_system_t* system, bfm_state_t* state, size_t n) {
 
 	system->n = n;
 
-	if (bfm_matrix_full_create(&system->A, state, BFM_MATRIX_MAJOR_ROW, n) < 0)
-		return -1;
+	if (bfm_perm_create(&system->perm, state, n) < 0)
+		goto err_perm;
 
-	if (bfm_vec_create(&system->b, state, n) < 0) {
-		bfm_matrix_destroy(&system->A);
-		return -1;
-	}
+	if (bfm_matrix_full_create(&system->A, state, BFM_MATRIX_MAJOR_ROW, n) < 0)
+		goto err_matrix;
+
+	if (bfm_vec_create(&system->b, state, n) < 0)
+		goto err_vec;
+
+	return 0;
+
+err_vec:
+
+	bfm_matrix_destroy(&system->A);
+
+err_matrix:
+
+	bfm_perm_destroy(&system->perm);
+
+err_perm:
+
+	return -1;
+}
+
+int bfm_system_destroy(bfm_system_t* system) {
+	bfm_perm_destroy(&system->perm);
+	bfm_matrix_destroy(&system->A);
+	bfm_vec_destroy(&system->b);
 
 	return 0;
 }
 
-int bfm_system_destroy(bfm_system_t* system) {
-	bfm_matrix_destroy(&system->A);
-	bfm_vec_destroy(&system->b);
+int bfm_system_renumber(bfm_system_t* system) {
+	// create RCM permutation vector
+
+	if (bfm_perm_rcm(&system->perm, &system->A) < 0)
+		return -1;
+
+	// apply permutation to system matrix and vector
+
+	if (bfm_perm_perm_matrix(&system->perm, &system->A, false) < 0)
+		return -1;
+
+	if (bfm_perm_perm_vec(&system->perm, &system->b, false) < 0)
+		return -1;
 
 	return 0;
 }
