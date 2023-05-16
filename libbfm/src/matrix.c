@@ -206,16 +206,16 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 			if (matrix_band_set(matrix, i, pivot_i, factor) < 0)
 				return -1;
 
-			// cblas_daxpy(max_i - pivot_i - 1, - factor, matrix->band.data + pivot_i * k + pivot_i + 1, 1, matrix->band.data + i * k + pivot_i + 1, 1);
-			for (size_t j = pivot_i + 1; j < max_i; j++) {
-				double const val = matrix_band_get(matrix, pivot_i, j);
+			cblas_daxpy(max_i - pivot_i - 1, - factor, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, matrix->band.data + i * (2 * k + 1) + pivot_i + 1, 1);
+			// for (size_t j = pivot_i + 1; j < max_i; j++) {
+				// double const val = matrix_band_get(matrix, pivot_i, j);
 
-				if (BFM_IS_NAN(val))
-					return -1;
+				// if (BFM_IS_NAN(val))
+					// return -1;
 
-				if (matrix_band_add(matrix, i, j, - factor * val) < 0)
-					return -1;
-			}
+				// if (matrix_band_add(matrix, i, j, - factor * val) < 0)
+					// return -1;
+			// }
 		}
 	}
 
@@ -246,29 +246,28 @@ static int matrix_band_cholesky(bfm_matrix_t* matrix) {
 static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
-	CBLAS_LAYOUT layout = matrix->major == BFM_MATRIX_MAJOR_ROW ? CblasRowMajor : CblasColMajor;
 
 	for (size_t pivot_i = 0; pivot_i < m; pivot_i++) {
 		ssize_t diff = pivot_i - k;
 		size_t const min_i = BFM_MAX(diff, 0);
-		for (size_t j = min_i; j < pivot_i; j++) {
-			double const val = matrix_band_get(matrix, pivot_i, j);
-			vec->data[pivot_i] -= val * vec->data[j];
-		}
+		vec->data[pivot_i] -= cblas_ddot(pivot_i - min_i, matrix->band.data + pivot_i * (2 * k + 1) + min_i, 1, vec->data + min_i, 1);
+		// for (size_t j = min_i; j < pivot_i; j++) {
+			// double const val = matrix_band_get(matrix, pivot_i, j);
+			// vec->data[pivot_i] -= val * vec->data[j];
+		// }
 	}
-	// cblas_dtbsv(layout, CblasLower, CblasNoTrans, CblasUnit, m, k, matrix->band.data, 2 * k + 1, vec->data, 1);
-	// cblas_dtbsv(layout, CblasUpper, CblasNoTrans, CblasNonUnit, m, k, matrix->band.data, 2 * k + 1, vec->data, 1);
 
 	for (ssize_t pivot_i = m - 1; pivot_i >= 0; pivot_i--) {
 		size_t const max_i = BFM_MIN(pivot_i + k + 1, m);
-		for (size_t j = pivot_i + 1; j < max_i; j++) {
-			double const val = matrix_band_get(matrix, pivot_i, j);
+		vec->data[pivot_i] -= cblas_ddot(max_i - pivot_i - 1, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, vec->data + pivot_i + 1, 1);
+		// for (size_t j = pivot_i + 1; j < max_i; j++) {
+			// double const val = matrix_band_get(matrix, pivot_i, j);
 
-			if (BFM_IS_NAN(val))
-				return -1;
+			// if (BFM_IS_NAN(val))
+				// return -1;
 
-			vec->data[pivot_i] -= vec->data[j] * val;
-		}
+			// vec->data[pivot_i] -= vec->data[j] * val;
+		// }
 
 		double const pivot = matrix_band_get(matrix, pivot_i, pivot_i);
 
