@@ -4,6 +4,13 @@
 
 // full matrix
 
+static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	size_t const size = src->m * src->m * sizeof *matrix->full.data;
+	memcpy(matrix->full.data, src->full.data, size);
+
+	return 0;
+}
+
 static int matrix_full_destroy(bfm_matrix_t* matrix) {
 	bfm_state_t* const state = matrix->state;
 
@@ -108,6 +115,13 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 }
 
 // band matrix routines
+
+static int matrix_band_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	size_t const size = src->m * (src->band.k * 2 + 1) * sizeof *src->band.data;
+	memcpy(matrix->band.data, src->band.data, size);
+
+	return 0;
+}
 
 static int matrix_band_destroy(bfm_matrix_t *matrix) {
 	bfm_state_t* const state = matrix->state;
@@ -252,6 +266,19 @@ static int matrix_band_lu_solve(bfm_matrix_t *matrix, bfm_vec_t *vec) {
 }
 
 // generic matrix routines
+
+int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	if (matrix->kind != src->kind)
+		return -1;
+
+	if (matrix->kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_copy(matrix, src);
+
+	if (matrix->kind == BFM_MATRIX_KIND_BAND)
+		return matrix_band_copy(matrix, src);
+
+	return -1;
+}
 
 int bfm_matrix_destroy(bfm_matrix_t* matrix) {
 	if (matrix->kind == BFM_MATRIX_KIND_FULL)

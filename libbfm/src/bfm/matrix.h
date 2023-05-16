@@ -22,7 +22,7 @@ typedef struct {
 } bfm_matrix_full_t;
 
 typedef struct {
-	size_t k; // Size of the band
+	size_t k; // bandwidth
 	double* data;
 } bfm_matrix_band_t;
 
@@ -63,6 +63,8 @@ int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
  * @return int, 0 if success, -1 if failure
  */
 int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m, size_t k);
+
+int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src);
 
 /**
  * @brief Destroy a matrix
