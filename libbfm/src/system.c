@@ -52,7 +52,7 @@ static void get_elem(elem_t* elem, bfm_mesh_t* mesh, size_t i) {
 static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
-   bfm_material_t* const material = obj->material;
+	bfm_material_t* const material = obj->material;
 	bfm_rule_t* const rule = obj->rule;
 	bfm_shape_t* const shape = &rule->shape;
 	size_t dim = rule->dim;
@@ -62,7 +62,7 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 
 	// constants
 
-   double const a = material->E / (1 - material->nu * material->nu);
+	double const a = material->E / (1 - material->nu * material->nu);
 	double const b = material->E * material->nu / (1 - material->nu * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
 
@@ -176,7 +176,7 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
-   bfm_material_t* const material = obj->material;
+	bfm_material_t* const material = obj->material;
 	bfm_rule_t* const rule = obj->rule;
 	bfm_shape_t* const shape = &rule->shape;
 	size_t dim = rule->dim;
@@ -186,7 +186,7 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 
 	// constants
 
-   	double const a = material->E / (1 - material->nu * material->nu);
+	double const a = material->E / (1 - material->nu * material->nu);
 	double const b = material->E * material->nu / (1 - material->nu * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
 
@@ -283,6 +283,7 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 
 			for (size_t k = 0; k < kind; k++) {
 				int const index_j = dim * map[k];
+
 				double const f_11 = a * dphi_dx[j] * dphi_dx[k] * r + c * dphi_dy[j] * dphi_dy[k] * r + phi[j] * (b * dphi_dx[k] + a * phi[k] / r) + dphi_dx[j] * b * phi[k];
 				double const f_12 = b * dphi_dx[j] * dphi_dy[k] * r + c * dphi_dy[j] * dphi_dx[k] * r + phi[j] * b * dphi_dy[k];
 				double const f_21 = b * dphi_dy[j] * dphi_dx[k] * r + c * dphi_dx[j] * dphi_dy[k] * r + dphi_dy[j] * b * phi[k];
@@ -314,6 +315,16 @@ static void apply_constraint(bfm_system_t* system, size_t node, double value) {
 
 	bfm_matrix_set(&system->A, node, node, 1);
 	system->b.data[node] = value;
+}
+
+static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
+	for (size_t j = 0; j < mesh->n_nodes; j++) {
+		if (!condition->nodes[j])
+			continue;
+
+		apply_constraint(system, j * mesh->dim + 0, 0);
+		apply_constraint(system, j * mesh->dim + 1, 0);
+	}
 }
 
 int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
@@ -353,28 +364,27 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET) {
-			for (size_t j = 0; j < mesh->n_nodes; j++) {
-				if (condition->nodes[j]) {
-					// We need to apply only on choosen dimension, maybe values[i] != Nan ?
-					apply_constraint(system, j * mesh->dim, 0);
-					apply_constraint(system, j * mesh->dim + 1, 0);
-				}
-			}
-		}
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET)
+			apply_dirichlet(system, mesh, condition);
+
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				bfm_edge_t const edge = mesh->edges[i];
-				size_t const n1 = edge.nodes[0];
-				size_t const n2 = edge.nodes[1];
-				if (condition->nodes[n1] && condition->nodes[n2]) {
-					double const jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
-					// the phi cancel beceause of simplication jac * val is constant
-					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
-					system->b.data[n1 * 2 + 1] += jacobian * condition->values[1];
-					system->b.data[n2 * 2 + 0] += jacobian * condition->values[0];
-					system->b.data[n2 * 2 + 1] += jacobian * condition->values[1];
-				}
+				bfm_edge_t* const edge = &mesh->edges[i];
+
+				size_t const n1 = edge->nodes[0];
+				size_t const n2 = edge->nodes[1];
+
+				if (!condition->nodes[n1] || !condition->nodes[n2])
+					continue;
+
+				double const jacobian = sqrt(
+					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
+
+				system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
+				system->b.data[n1 * 2 + 1] += jacobian * condition->values[1];
+				system->b.data[n2 * 2 + 0] += jacobian * condition->values[0];
+				system->b.data[n2 * 2 + 1] += jacobian * condition->values[1];
 			}
 		}
 	}
@@ -419,30 +429,37 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET) {
-			for (size_t j = 0; j < mesh->n_nodes; j++) {
-				if (condition->nodes[j]) {
-					// We need to apply only on choosen dimension, maybe values[i] != Nan ?
-					apply_constraint(system, j * mesh->dim, 0);
-					apply_constraint(system, j * mesh->dim + 1, 0);
-				}
-			}
-		}
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET)
+			apply_dirichlet(system, mesh, condition);
+
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				bfm_edge_t const edge = mesh->edges[i];
-				size_t  const n1 = edge.nodes[0];
-				size_t const n2 = edge.nodes[1];
-				if (condition->nodes[n1] && condition->nodes[n2]) {
-					double const r1 = mesh->coords[n1 * 2 + 0] * (1 - 1 /sqrt(3)) / 2 + mesh->coords[n1 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
-					double const r2 = mesh->coords[n2 * 2 + 0] * (1 - 1 /sqrt(3)) / 2 + mesh->coords[n2 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
-					double const jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
-					// the phi cancel beceause of simplication jac * val is constant
-					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0] * (r1 + r2);
-					system->b.data[n1 * 2 + 1] += jacobian * condition->values[1] * (r1 + r2);
-					system->b.data[n2 * 2 + 0] += jacobian * condition->values[0] * (r1 + r2);
-					system->b.data[n2 * 2 + 1] += jacobian * condition->values[1] * (r1 + r2);
-				}
+				bfm_edge_t* const edge = &mesh->edges[i];
+
+				size_t const n1 = edge->nodes[0];
+				size_t const n2 = edge->nodes[1];
+
+				if (!condition->nodes[n1] || !condition->nodes[n2])
+					continue;
+
+				double const r1 =
+					mesh->coords[n1 * 2 + 0] * (1 - 1 / sqrt(3)) / 2 +
+					mesh->coords[n1 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
+
+				double const r2 =
+					mesh->coords[n2 * 2 + 0] * (1 - 1 / sqrt(3)) / 2 +
+					mesh->coords[n2 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
+
+				double const fac = r1 + r2;
+
+				double const jacobian = sqrt(
+					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
+
+				system->b.data[n1 * 2 + 0] += fac * jacobian * condition->values[0];
+				system->b.data[n1 * 2 + 1] += fac * jacobian * condition->values[1];
+				system->b.data[n2 * 2 + 0] += fac * jacobian * condition->values[0];
+				system->b.data[n2 * 2 + 1] += fac * jacobian * condition->values[1];
 			}
 		}
 	}
