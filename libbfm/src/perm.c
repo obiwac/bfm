@@ -23,6 +23,45 @@ int bfm_perm_destroy(bfm_perm_t* perm) {
 	return 0;
 }
 
+int bfm_perm_perm_matrix(bfm_perm_t* perm, bfm_matrix_t* matrix, bool inv) {
+	bfm_state_t* const state = perm->state;
+
+	if (!perm->has_perm)
+		return -1;
+
+	size_t* const cur_perm = inv ? perm->inv_perm : perm->perm;
+
+	if (matrix->m != perm->m)
+		return -1;
+
+	if (matrix->kind != BFM_MATRIX_KIND_FULL)
+		return -1;
+
+	// copy old matrix to copy from
+
+	bfm_matrix_t __attribute__((cleanup(bfm_matrix_destroy))) old = { 0 };
+
+	if (bfm_matrix_full_create(&old, state, matrix->major, matrix->m) < 0)
+		return -1;
+
+	if (bfm_matrix_copy(&old, matrix) < 0)
+		return -1;
+
+	// actually permute matrix
+
+	for (size_t i = 0; i < matrix->m; i++) {
+		for (size_t j = 0; j < matrix->m; j++) {
+			size_t const perm_i = cur_perm[i];
+			size_t const perm_j = cur_perm[j];
+
+			double const val = bfm_matrix_get(&old, i, j);
+			bfm_matrix_set(matrix, perm_i, perm_j, val);
+		}
+	}
+
+	return 0;
+}
+
 typedef struct {
 	size_t i;
 	size_t deg;
