@@ -14,12 +14,9 @@ typedef struct {
 	bfm_condition_kind_t kind;
 
 	double* values;
-
-	union {
-		// for each node of the mesh, "true" indicates it's part of this boundary condition
-		bool* nodes;
-		bool* edges;
-	};
+	
+	// for each node of the mesh, "true" indicates it's part of this boundary condition
+	bool* nodes;
 } bfm_condition_t;
 
 int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mesh_t* mesh, bfm_condition_kind_t kind);

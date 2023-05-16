@@ -271,8 +271,8 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 				bfm_force_t* const force = forces[k];
 				bfm_force_eval(force, &pos, &applied_force);
 
-				forces_vec->data[index_i + 0] += det_J * weight * applied_force.data[0] * material->rho * phi[j];
-				forces_vec->data[index_i + 1] += det_J * weight * applied_force.data[1] * material->rho * phi[j];
+				forces_vec->data[index_i + 0] += det_J * weight * applied_force.data[0] * material->rho * phi[j] * r;
+				forces_vec->data[index_i + 1] += det_J * weight * applied_force.data[1] * material->rho * phi[j] * r;
 			}
 		}
 
@@ -364,10 +364,10 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 		}
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				if (condition->edges[j]) {
-					bfm_edge_t const edge = mesh->edges[i];
-					size_t const n1 = edge.nodes[0];
-					size_t const n2 = edge.nodes[1];
+				bfm_edge_t const edge = mesh->edges[i];
+				size_t const n1 = edge.nodes[0];
+				size_t const n2 = edge.nodes[1];
+				if (condition->nodes[n1] && condition->nodes[n2]) {
 					double const jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
 					// the phi cancel beceause of simplication jac * val is constant
 					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
@@ -430,16 +430,18 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 		}
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				if (condition->nodes[j]) {
-					bfm_edge_t const edge = mesh->edges[i];
-					size_t const n1 = edge.nodes[0];
-					size_t const n2 = edge.nodes[1];
+				bfm_edge_t const edge = mesh->edges[i];
+				size_t  const n1 = edge.nodes[0];
+				size_t const n2 = edge.nodes[1];
+				if (condition->nodes[n1] && condition->nodes[n2]) {
+					double const r1 = mesh->coords[n1 * 2 + 0] * (1 - 1 /sqrt(3)) / 2 + mesh->coords[n1 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
+					double const r2 = mesh->coords[n2 * 2 + 0] * (1 - 1 /sqrt(3)) / 2 + mesh->coords[n2 * 2 + 1] * (1 + 1 / sqrt(3)) / 2;
 					double const jacobian = sqrt(pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) + pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1] , 2)) / 2;
 					// the phi cancel beceause of simplication jac * val is constant
-					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
-					system->b.data[n1 * 2 + 1] += jacobian * condition->values[1];
-					system->b.data[n2 * 2 + 0] += jacobian * condition->values[0];
-					system->b.data[n2 * 2 + 1] += jacobian * condition->values[1];
+					system->b.data[n1 * 2 + 0] += jacobian * condition->values[0] * (r1 + r2);
+					system->b.data[n1 * 2 + 1] += jacobian * condition->values[1] * (r1 + r2);
+					system->b.data[n2 * 2 + 0] += jacobian * condition->values[0] * (r1 + r2);
+					system->b.data[n2 * 2 + 1] += jacobian * condition->values[1] * (r1 + r2);
 				}
 			}
 		}
