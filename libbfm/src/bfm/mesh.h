@@ -22,6 +22,12 @@ typedef struct {
 } bfm_edge_t;
 
 typedef struct {
+	char name[50];
+	size_t n_elements;
+	size_t* elements;
+} bfm_domain_t;
+
+typedef struct {
 	bfm_state_t* state;
 
 	size_t dim;
@@ -34,6 +40,9 @@ typedef struct {
 	double* coords;
 	size_t* elems;
 	bfm_edge_t* edges;
+
+	size_t n_domains;
+	bfm_domain_t** domains;
 	// bool* boundary_nodes;
 } bfm_mesh_t;
 

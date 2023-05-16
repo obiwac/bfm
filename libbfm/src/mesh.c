@@ -25,6 +25,13 @@ int bfm_mesh_destroy(bfm_mesh_t* mesh) {
 	state->free(mesh->elems);
 	state->free(mesh->edges);
 
+	for (size_t i = 0; i < mesh->n_domains; i++) {
+		bfm_domain_t* const domain = mesh->domains[i];
+		state->free(domain->elements);
+		state->free(domain);
+	}
+	state->free(mesh->domains);
+
 	return 0;
 }
 
@@ -120,6 +127,12 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	for (size_t i = 0; i < mesh->n_nodes; i++)
 		fscanf(fp, "\t%zu :\t%lf\t%lf\n", &_, &mesh->coords[i * 2], &mesh->coords[i * 2 + 1]);
 
+	// read edges
+	fscanf(fp, "Number of edges %zu\n", &mesh->n_edges);
+	mesh->edges = state->alloc(mesh->n_edges * sizeof *mesh->edges);
+	for (size_t i = 0; i < mesh->n_edges; i++)
+		fscanf(fp, "\t%zu :\t%zu\t%zu\n", &mesh->edges->elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
+	
 	// read elements
 
 	char kind_str[16];
@@ -142,10 +155,28 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
-	if (compute_edges(mesh) < 0) {
-		free(mesh->elems); // TODO idiosyncratic
-		goto err_kind;
+
+	fscanf(fp, "Number of domains %zu\n", &mesh->n_domains);
+	mesh->domains = state->alloc(mesh->n_domains * sizeof(bfm_domain_t*));
+	for (size_t i = 0; i < mesh->n_domains; i++) {
+		size_t domain_id;
+		fscanf(fp, "Domain :\t%zu\n", &domain_id);
+		mesh->domains[domain_id] = state->alloc(sizeof(bfm_domain_t));
+		bfm_domain_t* const domain = mesh->domains[domain_id];
+		domain->n_elements = 0;
+
+		fscanf(fp, "Name : %s\n", domain->name);
+		fscanf(fp, "Number of elements :\t%zu\n", &domain->n_elements);
+		domain->elements = state->alloc(domain->n_elements * sizeof *domain->elements);
+
+		for (size_t j = 0; j < domain->n_elements; j++) {
+			fscanf(fp, "%zu", &domain->elements[j]);
+			if (j + 1 != domain->n_elements && (j + 1) % 10 == 0)
+				fscanf(fp, "\n");
+		fscanf(fp, "\n");
+		}
 	}
+
 
 	// success
 
