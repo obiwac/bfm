@@ -90,7 +90,7 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 }
 
 #define POP_QUEUE(res) { \
-	res = QUEUE_INDEX(queue_start);\
+	res = QUEUE_INDEX(queue_start); \
 	in_queue[res] = false; \
 	queue_start++; \
 }
