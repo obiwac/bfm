@@ -181,14 +181,14 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 	memset(visited, 0, n * sizeof *visited);
 
-	// allocate permutation vector
+	// allocate inverse permutation vector
 	// we do this as late as possible to ease error handling
 	// this doesn't need to be zeroed out
 
-	perm->perm = state->alloc(n * sizeof *perm->perm);
+	perm->inv_perm = state->alloc(n * sizeof *perm->inv_perm);
 
-	if (perm->perm == NULL)
-		goto err_perm_alloc;
+	if (perm->inv_perm == NULL)
+		goto err_inv_perm_alloc;
 
 	// continue while there are still unvisited nodes
 
@@ -257,31 +257,31 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 			for (size_t i = 0; i < to_sort_count; i++)
 				PUSH_QUEUE(to_sort[i].i);
 
-			// add to permutation vector, reversed
+			// add to inverse permutation vector, reversed
 
-			perm->perm[n - p++ - 1] = cur;
+			perm->inv_perm[n - p++ - 1] = cur;
 		}
 	}
 
-	// create inverted permutation vector
+	// create permutation vector
 
-	perm->inv_perm = state->alloc(n * sizeof *perm->inv_perm);
+	perm->perm = state->alloc(n * sizeof *perm->perm);
 
-	if (perm->inv_perm == NULL) {
-		state->free(perm->perm);
-		goto err_inv_perm_alloc;
+	if (perm->perm == NULL) {
+		state->free(perm->inv_perm);
+		goto err_perm_alloc;
 	}
 
 	for (size_t i = 0; i < n; i++)
-		perm->inv_perm[perm->perm[i]] = i;
+		perm->perm[perm->inv_perm[i]] = i;
 
 	// success
 
 	perm->has_perm = true;
 	rv = 0;
 
-err_inv_perm_alloc:
 err_perm_alloc:
+err_inv_perm_alloc:
 
 	state->free(visited);
 
