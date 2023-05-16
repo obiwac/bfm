@@ -53,6 +53,21 @@ static int matrix_full_add(bfm_matrix_t* matrix, size_t i, size_t j, double val)
 	return 0;
 }
 
+static size_t matrix_full_bandwidth(bfm_matrix_t* matrix) {
+	size_t k = 0;
+
+	for (ssize_t i = 0; i < (ssize_t) matrix->m; i++) {
+		for (ssize_t j = 0; j < (ssize_t) matrix->m; j++) {
+			if (!bfm_matrix_get(matrix, i, j))
+				continue;
+
+			k = BFM_MAX((ssize_t) k, BFM_ABS(i - j));
+		}
+	}
+
+	return k;
+}
+
 static int matrix_full_lu(bfm_matrix_t* matrix) {
 	size_t const size = matrix->m;
 
@@ -123,14 +138,14 @@ static int matrix_band_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	return 0;
 }
 
-static int matrix_band_destroy(bfm_matrix_t *matrix) {
+static int matrix_band_destroy(bfm_matrix_t* matrix) {
 	bfm_state_t* const state = matrix->state;
 	state->free(matrix->band.data);
 
 	return 0;
 }
 
-static double matrix_band_get(bfm_matrix_t *matrix, size_t i, size_t j) {
+static double matrix_band_get(bfm_matrix_t* matrix, size_t i, size_t j) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
@@ -147,7 +162,7 @@ static double matrix_band_get(bfm_matrix_t *matrix, size_t i, size_t j) {
 	return matrix->band.data[idx];
 }
 
-static int matrix_band_set(bfm_matrix_t *matrix, size_t i, size_t j, double value) {
+static int matrix_band_set(bfm_matrix_t* matrix, size_t i, size_t j, double value) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
@@ -165,7 +180,7 @@ static int matrix_band_set(bfm_matrix_t *matrix, size_t i, size_t j, double valu
 	return 0;
 }
 
-static int matrix_band_add(bfm_matrix_t *matrix, size_t i, size_t j, double value) {
+static int matrix_band_add(bfm_matrix_t* matrix, size_t i, size_t j, double value) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
@@ -181,6 +196,10 @@ static int matrix_band_add(bfm_matrix_t *matrix, size_t i, size_t j, double valu
 
 	matrix->band.data[idx] += value;
 	return 0;
+}
+
+static size_t matrix_band_bandwidth(bfm_matrix_t* matrix) {
+	return matrix->band.k;
 }
 
 static int matrix_band_lu(bfm_matrix_t* matrix) {
@@ -229,7 +248,7 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 	return 0;
 }
 
-static int matrix_band_lu_solve(bfm_matrix_t *matrix, bfm_vec_t *vec) {
+static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
@@ -316,6 +335,16 @@ int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val) {
 
 	else if (matrix->kind == BFM_MATRIX_KIND_BAND)
 		return matrix_band_add(matrix, i, j, val);
+
+	return -1;
+}
+
+size_t bfm_matrix_bandwidth(bfm_matrix_t* matrix) {
+	if (matrix->kind == BFM_MATRIX_KIND_FULL)
+		return matrix_full_bandwidth(matrix);
+
+	else if (matrix->kind == BFM_MATRIX_KIND_BAND)
+		return matrix_band_bandwidth(matrix);
 
 	return -1;
 }

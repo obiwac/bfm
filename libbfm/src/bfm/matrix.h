@@ -97,6 +97,8 @@ int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
 int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
+size_t bfm_matrix_bandwidth(bfm_matrix_t* matrix);
+
 /**
  * @brief Apply LU decomposition to a matrix; store it in place
  * 
