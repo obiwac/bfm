@@ -3,11 +3,6 @@
 
 #include <bfm/mesh.h>
 
-static double const xsi_triangles[3] = {0., 1., 0.};
-static double const eta_triangles[3] = {0., 0., 1.};
-static double const xsi_quads[4] = {1., -1., -1., 1.};
-static double const eta_quads[4] = {1., 1., -1., -1.};
-
 int bfm_mesh_create(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
 	memset(mesh, 0, sizeof *mesh);
 	mesh->state = state;
@@ -143,7 +138,7 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
 	if (compute_edges(mesh) < 0) {
-		free(mesh->elems); // TODO idiosyncratic
+		state->free(mesh->elems); // TODO idiosyncratic
 		goto err_kind;
 	}
 
@@ -163,8 +158,11 @@ err_fopen:
 int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
 	int rv = -1;
 
+	memset(mesh, 0, sizeof *mesh);
+
 	mesh->state = state;
-	mesh->dim = 2; // LEPL1110 only looks at 2D meshes
+	mesh->dim = 2; // Wavefront files are always 3D, but we're gonna implicitly convert them to 2D
+	mesh->kind = BFM_ELEM_KIND_SIMPLEX;
 
 	// TODO error messages & more error checking (alloc's/fscanf's)
 
@@ -173,40 +171,48 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 	if (fp == NULL)
 		goto err_fopen; // TODO error message
 
-	// read nodes
+	// read lines
 
-	fscanf(fp, "Number of nodes %zu\n", &mesh->n_nodes);
-	mesh->coords = state->alloc(mesh->n_nodes * 2 * sizeof *mesh->coords);
+	char obj_name[256];
 
-	size_t _;
+	for (char header[16]; fscanf(fp, "%15s", header) != EOF;) {
+		if (!strcmp(header, "o"))
+			fscanf(fp, "%255s\n", obj_name);
 
-	for (size_t i = 0; i < mesh->n_nodes; i++)
-		fscanf(fp, "\t%zu :\t%lf\t%lf\n", &_, &mesh->coords[i * 2], &mesh->coords[i * 2 + 1]);
+		else if (!strcmp(header, "v")) {
+			mesh->coords = state->realloc(mesh->coords, ++mesh->n_nodes * mesh->dim * sizeof *mesh->coords);
 
-	// read elements
+			double* const x = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 0];
+			double* const y = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 1];
 
-	char kind_str[16];
-	fscanf(fp, "Number of %15s %zu\n", kind_str, &mesh->n_elems);
+			double tmp_coord;
+			fscanf(fp, "%lf %lf %lf\n", x, &tmp_coord, y);
+		}
 
-	if (strcmp(kind_str, "triangles") == 0)
-		mesh->kind = BFM_ELEM_KIND_SIMPLEX;
+		else if (!strcmp(header, "f")) {
+			mesh->elems = state->realloc(mesh->elems, ++mesh->n_elems * mesh->kind * sizeof *mesh->elems);
 
-	else if (strcmp(kind_str, "quads") == 0)
-		mesh->kind = BFM_ELEM_KIND_QUAD;
+			size_t* const a = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 0];
+			size_t* const b = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 1];
+			size_t* const c = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 2];
 
-	else
-		goto err_kind; // TODO error message
+			fscanf(fp, "%zu %zu %zu\n", a, b, c);
+		}
 
-	mesh->elems = state->alloc(mesh->n_elems * mesh->kind * sizeof *mesh->elems);
+		// skip line if we don't recognize it
 
-	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_SIMPLEX && i < mesh->n_elems; i++)
-		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 3], &mesh->elems[i * 3 + 1], &mesh->elems[i * 3 + 2]);
+		else {
+			char temp[1024];
+			fgets(temp, sizeof temp, fp);
+		}
+	}
 
-	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
-		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
+	// get edges
 
 	if (compute_edges(mesh) < 0) {
-		free(mesh->elems); // TODO idiosyncratic
+		state->free(mesh->coords); // TODO idiosyncratic
+		state->free(mesh->elems); // TODO idiosyncratic
+
 		goto err_kind;
 	}
 
