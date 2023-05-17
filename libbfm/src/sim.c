@@ -183,7 +183,9 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
             fscanf(fp, ":  %le\n", vec->data + 1);
 
 			bfm_force_set_linear(force, vec);
+
 			bfm_vec_destroy(vec);
+			state->free(vec);
 
 			bfm_sim_add_force(sim, force);
 		}
@@ -205,7 +207,6 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 
 			bfm_condition_t* condition = state->alloc(sizeof(bfm_condition_t));
 			bfm_condition_create(condition, state, mesh, kind);
-			condition->values = state->alloc(2 * sizeof *condition->values);
 			condition->values[0] = condition->values[1] = val;
 
 			for (size_t i = 0; i < mesh->n_domains; i++) {
@@ -225,6 +226,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	}
 	fclose(fp);
 
+	rv = 0;
+
 	bfm_material_t* material = state->alloc(sizeof(bfm_material_t));
 	bfm_material_create(material, state, "basic", E, rho, nu);
 
@@ -242,5 +245,5 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	instance->n_conditions = n_conds;
 
 	bfm_sim_add_instance(sim, instance);
-	return 0;
+	return rv;
 }
