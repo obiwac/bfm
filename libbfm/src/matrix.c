@@ -2,6 +2,10 @@
 
 #include <bfm/matrix.h>
 
+#if defined(WITH_BLAS)
+#include <cblas.h>
+#endif
+
 // full matrix
 
 static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
@@ -71,31 +75,42 @@ static size_t matrix_full_bandwidth(bfm_matrix_t* matrix) {
 static int matrix_full_lu(bfm_matrix_t* matrix) {
 	size_t const size = matrix->m;
 
-	for (size_t k = 0; k < size - 1; k++) {
+	for (size_t pivot_i = 0; pivot_i < size - 1; pivot_i++) {
 		// TODO handle error case and non square matrix
 
-		double const pivot = matrix_full_get(matrix, k, k);
+		double const pivot = matrix_full_get(matrix, pivot_i, pivot_i);
 
+		if (pivot != pivot)
+			return -1;
+		
 		if (fabs(pivot) < BFM_PIVOT_EPS)
 			return -1;
 
-		for (size_t i = k + 1; i < size; i++) {
-			double row_val = matrix_full_get(matrix, i, k);
+		for (size_t i = pivot_i + 1; i < size; i++) {
+			double row_val = matrix_full_get(matrix, i, pivot_i);
+
+			if (BFM_IS_NAN(row_val))
+				return -1;
+
 			double factor = row_val / pivot;
 
 			// set pivot to one
 
-			if (matrix_full_set(matrix, i, k, factor) < 0)
+			if (matrix_full_set(matrix, i, pivot_i, factor) < 0)
 				return -1;
 
-			for (size_t j = k + 1; j < size; j++) {
-				double const val_row_pivot = matrix_full_get(matrix, k, j);
+#if defined(WITH_BLAS)
+			cblas_daxpy(size - pivot_i - 1, - factor, matrix->full.data + pivot_i * size + pivot_i + 1, 1, matrix->full.data + i * size + pivot_i + 1, 1);
+#else
+			for (size_t j = pivot_i + 1; j < size; j++) {
+				double const val_row_pivot = matrix_full_get(matrix, pivot_i, j);
 
 				// A[i][j] -= A[i][k] * A[k][j]
 
 				if (matrix_full_add(matrix, i, j, - factor * val_row_pivot) < 0)
 					return -1;
 			}
+#endif
 		}
 	}
 
@@ -108,23 +123,47 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 
 	// forward substitution Lx = y
 
+#if defined(WITH_BLAS)
+	CBLAS_LAYOUT const layout = matrix->major == BFM_MATRIX_MAJOR_ROW ?
+		CblasRowMajor : CblasColMajor;
+
+	cblas_dtrsv(layout, CblasLower, CblasNoTrans, CblasUnit, m, matrix->full.data, m, y, 1);
+#else
 	for (size_t i = 0; i < matrix->m; i++) {
 		for (size_t j = 0; j < i; j++) {
 			double const val = matrix_full_get(matrix, i, j);
+
+			if (BFM_IS_NAN(val))
+				return -1;
+
 			y[i] -= val * y[j];
 		}
 	}
+#endif
 
 	// backward substitution Ux = L^-1 @ y
 
+#if defined(WITH_BLAS)
+	cblas_dtrsv(layout, CblasUpper, CblasNoTrans, CblasNonUnit, m, matrix->full.data, m, y, 1);
+#else
 	for (ssize_t i = m - 1; i >= 0; i--) {
 		for (size_t j = i + 1; j < matrix->m; j++) {
 			double const val = matrix_full_get(matrix, i, j);
+
+			if (BFM_IS_NAN(val))
+				return -1;
+
 			y[i] -= val * y[j];
 		}
 
-		y[i] /= matrix_full_get(matrix, i, i);
+		double const pivot = matrix_full_get(matrix, i, i);
+
+		if (BFM_IS_NAN(pivot))
+			return -1;
+
+		y[i] /= pivot;
 	}
+#endif
 
 	return 0;
 }
@@ -231,6 +270,9 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 			if (matrix_band_set(matrix, i, pivot_i, val_below_pivot) < 0)
 				return -1;
 
+#if defined(WITH_BLAS)
+			cblas_daxpy(len - pivot_i - 1, -val_below_pivot, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, matrix->band.data + i * (2 * k + 1) + pivot_i + 1, 1);
+#else
 			for (size_t j = pivot_i + 1; j < len; j++) {
 				double const val = matrix_band_get(matrix, pivot_i, j);
 
@@ -240,22 +282,69 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 				if (matrix_band_add(matrix, i, j, -val_below_pivot * val) < 0)
 					return -1;
 			}
+#endif
 		}
 	}
 
 	return 0;
 }
 
-static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
+__attribute__((unused))
+static int matrix_band_cholesky(bfm_matrix_t* matrix) {
+	size_t const m = matrix->m;
+
+	for (size_t i = 0; i < m; i++) {
+		size_t const len = BFM_MAX(0, matrix->band.k - i);
+
+		for (size_t j = len; j < i; j++) {
+			double s = 0;
+
+			for (size_t k = len; k < j; k++) {
+				double const a = matrix_band_get(matrix, i, k);
+				double const b = matrix_band_get(matrix, j, k);
+
+				if (BFM_IS_NAN(a) || BFM_IS_NAN(b))
+					return -1;
+
+				s += a * b;
+			}
+
+			double const val = matrix_band_get(matrix, i, j);
+
+			if (BFM_IS_NAN(val))
+				return -1;
+
+			if (i == j && matrix_band_set(matrix, i, j, sqrt(val - s)) < 0)
+				return -1;
+
+			else {
+				double const pivot = matrix_band_get(matrix, j, j);
+
+				if (BFM_IS_NAN(val))
+					return -1;
+
+				if (matrix_band_set(matrix, i, j, 1 / pivot * (val - s)) < 0)
+					return -1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
 	// forward substitution
 
 	for (ssize_t pivot_i = 0; pivot_i < (ssize_t) m; pivot_i++) {
-		ssize_t const max_i = BFM_MAX(pivot_i - (ssize_t) k, 0);
+		ssize_t const len = BFM_MAX(pivot_i - (ssize_t) k, 0);
 
-		for (ssize_t i = max_i; i < pivot_i; i++) {
+#if defined(WITH_BLAS)
+		vec->data[pivot_i] -= cblas_ddot(pivot_i - len, matrix->band.data + pivot_i * (2 * k + 1) + len, 1, vec->data + len, 1);
+#else
+		for (ssize_t i = len; i < pivot_i; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
 
 			if (BFM_IS_NAN(val))
@@ -263,6 +352,7 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 
 			vec->data[pivot_i] -= val * vec->data[i];
 		}
+#endif
 	}
 
 	// backward substitution
@@ -270,6 +360,9 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 	for (ssize_t pivot_i = m - 1; pivot_i >= 0; pivot_i--) {
 		ssize_t const len = BFM_MIN(pivot_i + k + 1, m);
 
+#if defined(WITH_BLAS)
+		vec->data[pivot_i] -= cblas_ddot(len - pivot_i - 1, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, vec->data + pivot_i + 1, 1);
+#else
 		for (ssize_t i = pivot_i + 1; i < len; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
 
@@ -278,6 +371,7 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 
 			vec->data[pivot_i] -= vec->data[i] * val;
 		}
+#endif
 
 		double const pivot = matrix_band_get(matrix, pivot_i, pivot_i);
 
