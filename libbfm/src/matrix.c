@@ -11,17 +11,6 @@ static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	return 0;
 }
 
-static int matrix_full_copy_to_band(bfm_matrix_t* matrix, bfm_matrix_t* src) {
-	for (size_t i = 0; i < matrix->m; i++) {
-		for (size_t j = 0; j < matrix->m; j++) {
-			double const val = bfm_matrix_get(src, i, j);
-			bfm_matrix_set(matrix, i, j, val);
-		}
-	}
-
-	return 0;
-}
-
 static int matrix_full_destroy(bfm_matrix_t* matrix) {
 	bfm_state_t* const state = matrix->state;
 
@@ -143,6 +132,9 @@ static int matrix_full_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 // band matrix routines
 
 static int matrix_band_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
+	if (matrix->band.k != src->band.k)
+		return -1;
+
 	size_t const size = src->m * (src->band.k * 2 + 1) * sizeof *src->band.data;
 	memcpy(matrix->band.data, src->band.data, size);
 
@@ -301,24 +293,25 @@ int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	if (matrix->m != src->m)
 		return -1;
 
-	// specific matrix kind conversions
+	// bespoke copying functions
+	// these are here to make copying faster than the generic method
 
-	if (src->kind == BFM_MATRIX_KIND_FULL && matrix->kind == BFM_MATRIX_KIND_BAND)
-		return matrix_full_copy_to_band(matrix, src);
-
-	// same-kind copying functions
-	// enforce this with a sanity check
-
-	if (matrix->kind != src->kind)
-		return -1;
-
-	if (matrix->kind == BFM_MATRIX_KIND_FULL)
+	if (matrix->kind == BFM_MATRIX_KIND_FULL && src->kind == BFM_MATRIX_KIND_FULL)
 		return matrix_full_copy(matrix, src);
 
-	if (matrix->kind == BFM_MATRIX_KIND_BAND)
+	if (matrix->kind == BFM_MATRIX_KIND_BAND && src->kind == BFM_MATRIX_KIND_BAND)
 		return matrix_band_copy(matrix, src);
 
-	return -1;
+	// generic method for copying matrices
+
+	for (size_t i = 0; i < matrix->m; i++) {
+		for (size_t j = 0; j < matrix->m; j++) {
+			double const val = bfm_matrix_get(src, i, j);
+			bfm_matrix_set(matrix, i, j, val);
+		}
+	}
+
+	return 0;
 }
 
 int bfm_matrix_destroy(bfm_matrix_t* matrix) {

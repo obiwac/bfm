@@ -69,16 +69,6 @@ int bfm_system_renumber(bfm_system_t* system) {
 		return -1;
 	}
 
-	for (size_t j = 0; j < A.m; j++) {
-		double const val = bfm_matrix_get(&system->A, A.m / 2, j);
-
-		if (!val) continue;
-
-		printf("%zu/%g ", j, val);
-	}
-
-	printf("\n");
-
 	bfm_matrix_destroy(&system->A);
 	memcpy(&system->A, &A, sizeof A);
 
