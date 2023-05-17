@@ -250,33 +250,41 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *vec) {
 	size_t const m = matrix->m;
 	size_t const k = matrix->band.k;
 
-	for (size_t pivot_i = 0; pivot_i < m; pivot_i++) {
-		ssize_t const min_i = BFM_MIN(pivot_i - k, 0);
+	// forward substitution
 
-		for (size_t i = min_i; i < pivot_i; i++) {
-			double const val = matrix_band_get(matrix, pivot_i, i);
-			vec->data[pivot_i] -= val * vec->data[i];
-		}
-	}
+	for (ssize_t pivot_i = 0; pivot_i < (ssize_t) m; pivot_i++) {
+		ssize_t const max_i = BFM_MAX(pivot_i - (ssize_t) k, 0);
 
-	for (ssize_t pivot_i = m - 1; pivot_i >= 0; pivot_i--) {
-		ssize_t const max_i = BFM_MIN(pivot_i + k + 1, m);
-
-		for (ssize_t i = pivot_i + 1; i < max_i; i++) {
+		for (ssize_t i = max_i; i < pivot_i; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
 
 			if (BFM_IS_NAN(val))
 				return -1;
 
-			vec->data[k] -= vec->data[i] * val;
+			vec->data[pivot_i] -= val * vec->data[i];
+		}
+	}
+
+	// backward substitution
+
+	for (ssize_t pivot_i = m - 1; pivot_i >= 0; pivot_i--) {
+		ssize_t const len = BFM_MIN(pivot_i + k + 1, m);
+
+		for (ssize_t i = pivot_i + 1; i < len; i++) {
+			double const val = matrix_band_get(matrix, pivot_i, i);
+
+			if (BFM_IS_NAN(val))
+				return -1;
+
+			vec->data[pivot_i] -= vec->data[i] * val;
 		}
 
 		double const pivot = matrix_band_get(matrix, pivot_i, pivot_i);
 
-		if (BFM_IS_NAN(pivot))
+		if (BFM_IS_NAN(pivot) || !pivot)
 			return -1;
 
-		vec->data[k] /= pivot;
+		vec->data[pivot_i] /= pivot;
 	}
 
 	return 0;
