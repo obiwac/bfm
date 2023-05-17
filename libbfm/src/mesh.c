@@ -3,11 +3,6 @@
 
 #include <bfm/mesh.h>
 
-static double const xsi_triangles[3] = {0., 1., 0.};
-static double const eta_triangles[3] = {0., 0., 1.};
-static double const xsi_quads[4] = {1., -1., -1., 1.};
-static double const eta_quads[4] = {1., 1., -1., -1.};
-
 int bfm_mesh_create(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
 	memset(mesh, 0, sizeof *mesh);
 	mesh->state = state;
@@ -143,7 +138,81 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
 
 	if (compute_edges(mesh) < 0) {
-		free(mesh->elems); // TODO idiosyncratic
+		state->free(mesh->elems); // TODO idiosyncratic
+		goto err_kind;
+	}
+
+	// success
+
+	rv = 0;
+
+err_kind:
+
+	fclose(fp);
+
+err_fopen:
+
+	return rv;
+}
+
+int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
+	int rv = -1;
+
+	memset(mesh, 0, sizeof *mesh);
+
+	mesh->state = state;
+	mesh->dim = 2; // Wavefront files are always 3D, but we're gonna implicitly convert them to 2D
+	mesh->kind = BFM_ELEM_KIND_SIMPLEX;
+
+	// TODO error messages & more error checking (alloc's/fscanf's)
+
+	FILE* const fp = fopen(name, "r");
+
+	if (fp == NULL)
+		goto err_fopen; // TODO error message
+
+	// read lines
+
+	char obj_name[256];
+
+	for (char header[16]; fscanf(fp, "%15s", header) != EOF;) {
+		if (!strcmp(header, "o"))
+			fscanf(fp, "%255s\n", obj_name);
+
+		else if (!strcmp(header, "v")) {
+			mesh->coords = state->realloc(mesh->coords, ++mesh->n_nodes * mesh->dim * sizeof *mesh->coords);
+
+			double* const x = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 0];
+			double* const y = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 1];
+
+			double tmp_coord;
+			fscanf(fp, "%lf %lf %lf\n", x, &tmp_coord, y);
+		}
+
+		else if (!strcmp(header, "f")) {
+			mesh->elems = state->realloc(mesh->elems, ++mesh->n_elems * mesh->kind * sizeof *mesh->elems);
+
+			size_t* const a = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 0];
+			size_t* const b = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 1];
+			size_t* const c = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 2];
+
+			fscanf(fp, "%zu %zu %zu\n", a, b, c);
+		}
+
+		// skip line if we don't recognize it
+
+		else {
+			char temp[1024];
+			fgets(temp, sizeof temp, fp);
+		}
+	}
+
+	// get edges
+
+	if (compute_edges(mesh) < 0) {
+		state->free(mesh->coords); // TODO idiosyncratic
+		state->free(mesh->elems); // TODO idiosyncratic
+
 		goto err_kind;
 	}
 
