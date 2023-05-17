@@ -19,6 +19,7 @@ class Sim:
 
 		if kind == Sim.DEFORMATION:
 			self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
+			self.line_shader = Shader("shaders/sim/line_deformation.vert", "shaders/sim/deformation.frag")
 
 	def __del__(self):
 		assert not lib.bfm_sim_destroy(self.c_sim)
@@ -45,3 +46,11 @@ class Sim:
 
 		for instance in self.instances:
 			instance.draw()
+
+		# draw lines
+
+		self.line_shader.use()
+		self.line_shader.mvp_matrix(mvp_matrix)
+
+		for instance in self.instances:
+			instance.draw(True)

@@ -68,11 +68,24 @@ class Instance:
 		gl.glGenBuffers(1, self.ibo)
 		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 
-		indices_t = gl.GLuint * len(mesh.line_indices)
+		indices_t = gl.GLuint * len(mesh.indices)
 
 		gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
 			ctypes.sizeof(indices_t),
-			(indices_t) (*mesh.line_indices),
+			(indices_t) (*mesh.indices),
+			gl.GL_STATIC_DRAW)
+
+		# create lines IBO
+
+		self.lines_ibo = gl.GLuint(0)
+		gl.glGenBuffers(1, self.lines_ibo)
+		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.lines_ibo)
+
+		line_indices_t = gl.GLuint * len(mesh.line_indices)
+
+		gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
+			ctypes.sizeof(line_indices_t),
+			(line_indices_t) (*mesh.line_indices),
 			gl.GL_STATIC_DRAW)
 
 	@functools.cached_property
@@ -95,9 +108,14 @@ class Instance:
 			(effects_t) (*self.effects),
 			gl.GL_STATIC_DRAW)
 
-	def draw(self):
+	def draw(self, lines = False):
 		mesh = self.obj.mesh
-
 		gl.glBindVertexArray(self.vao)
-		# gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
-		gl.glDrawElements(gl.GL_LINES, len(mesh.line_indices), gl.GL_UNSIGNED_INT, None)
+
+		if lines:
+			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.lines_ibo)
+			gl.glDrawElements(gl.GL_LINES, len(mesh.line_indices), gl.GL_UNSIGNED_INT, None)
+
+		else:
+			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
+			gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)

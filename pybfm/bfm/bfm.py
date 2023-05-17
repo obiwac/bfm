@@ -68,7 +68,7 @@ class Window(pyglet.window.Window):
 
 		# actually draw
 
-		gl.glEnable(gl.GL_DEPTH_TEST)
+		gl.glDisable(gl.GL_DEPTH_TEST)
 		# gl.glEnable(gl.GL_CULL_FACE)
 
 		gl.glClearColor(0.4, 0.0, 0.2, 0.0)

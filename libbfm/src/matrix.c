@@ -195,7 +195,7 @@ static double matrix_band_get(bfm_matrix_t* matrix, size_t i, size_t j) {
 		return BFM_NAN;
 
 	if (BFM_ABS((ssize_t) i - (ssize_t) j) > (ssize_t) k)
-		return 0.;
+		return 0;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
 		j + i * 2 * k :
