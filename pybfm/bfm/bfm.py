@@ -120,8 +120,13 @@ class Window(pyglet.window.Window):
 
 class Bfm:
 	def __init__(self):
-		self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
-		self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
+		try:
+			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16, sample_buffers = 1, samples = 4)
+			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
+
+		except pyglet.window.NoSuchConfigException:
+			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
+			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
 
 		self.current_sim: Sim = None
 
