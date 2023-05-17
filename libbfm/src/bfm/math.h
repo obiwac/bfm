@@ -9,6 +9,8 @@
 #define BFM_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define BFM_MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#define BFM_ABS(a) ((a) < 0 ? -(a) : (a))
+
 typedef struct {
 	bfm_state_t* state;
 
