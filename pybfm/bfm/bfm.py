@@ -60,7 +60,7 @@ class Window(pyglet.window.Window):
 		self.p_matrix.perspective(90, self.width / self.height, 0.1, 500)
 
 		self.mv_matrix.load_identity()
-		self.mv_matrix.translate(0, 0, -self.recoil)
+		self.mv_matrix.translate(0, 0, -pow(self.recoil, 2))
 		self.mv_matrix.rotate_2d(*self.rotation)
 		self.mv_matrix.translate(*self.origin)
 
