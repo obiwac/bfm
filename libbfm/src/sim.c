@@ -146,7 +146,7 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	double nu;
 	double rho;
 	
-	bfm_condition_t* conds[10];
+	bfm_condition_t** conds = NULL;
 	size_t n_conds = 0;
 
 	// From lepl1110 fem.c
@@ -216,6 +216,7 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 					break;
 				}
 			}
+			conds = state->realloc(conds, (n_conds + 1) * sizeof *conds);
 			conds[n_conds++] = condition;
 			
 		}
@@ -237,9 +238,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	bfm_instance_create(instance, state, obj);
 	bfm_sim_add_instance(sim, instance);
 
-	for (size_t i = 0; i < n_conds; i++) {
-		bfm_instance_add_condition(instance, conds[i]);
-	}
+	instance->conditions = conds;
+	instance->n_conditions = n_conds;
 
 	bfm_sim_add_instance(sim, instance);
 	return 0;
