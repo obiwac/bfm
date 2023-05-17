@@ -271,7 +271,7 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 				return -1;
 
 #if defined(WITH_BLAS)
-			cblas_daxpy(len - pivot_i - 1, -val_below_pivot, matrix->band.data + pivot_i * k + pivot_i + 1, 1, matrix->band.data + i * k + pivot_i + 1, 1);
+			cblas_daxpy(len - pivot_i - 1, -val_below_pivot, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, matrix->band.data + i * (2 * k + 1) + pivot_i + 1, 1);
 #else
 			for (size_t j = pivot_i + 1; j < len; j++) {
 				double const val = matrix_band_get(matrix, pivot_i, j);
@@ -282,8 +282,8 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 				if (matrix_band_add(matrix, i, j, -val_below_pivot * val) < 0)
 					return -1;
 			}
-		}
 #endif
+		}
 	}
 
 	return 0;
@@ -339,9 +339,12 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 	// forward substitution
 
 	for (ssize_t pivot_i = 0; pivot_i < (ssize_t) m; pivot_i++) {
-		ssize_t const max_i = BFM_MAX(pivot_i - (ssize_t) k, 0);
+		ssize_t const len = BFM_MAX(pivot_i - (ssize_t) k, 0);
 
-		for (ssize_t i = max_i; i < pivot_i; i++) {
+#if defined(WITH_BLAS)
+		vec->data[pivot_i] -= cblas_ddot(pivot_i - len, matrix->band.data + pivot_i * (2 * k + 1) + len, 1, vec->data + len, 1);
+#else
+		for (ssize_t i = len; i < pivot_i; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
 
 			if (BFM_IS_NAN(val))
@@ -349,6 +352,7 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 
 			vec->data[pivot_i] -= val * vec->data[i];
 		}
+#endif
 	}
 
 	// backward substitution
@@ -356,6 +360,9 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 	for (ssize_t pivot_i = m - 1; pivot_i >= 0; pivot_i--) {
 		ssize_t const len = BFM_MIN(pivot_i + k + 1, m);
 
+#if defined(WITH_BLAS)
+		vec->data[pivot_i] -= cblas_ddot(max_i - pivot_i - 1, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, vec->data + pivot_i + 1, 1);
+#else
 		for (ssize_t i = pivot_i + 1; i < len; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
 
@@ -364,6 +371,7 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 
 			vec->data[pivot_i] -= vec->data[i] * val;
 		}
+#endif
 
 		double const pivot = matrix_band_get(matrix, pivot_i, pivot_i);
 
