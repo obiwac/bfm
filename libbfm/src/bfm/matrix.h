@@ -22,7 +22,7 @@ typedef struct {
 } bfm_matrix_full_t;
 
 typedef struct {
-	size_t k; // Size of the band
+	size_t k; // bandwidth
 	double* data;
 } bfm_matrix_band_t;
 
@@ -64,6 +64,8 @@ int bfm_matrix_full_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_
  */
 int bfm_matrix_band_create(bfm_matrix_t* matrix, bfm_state_t* state, bfm_matrix_major_t major, size_t m, size_t k);
 
+int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src);
+
 /**
  * @brief Destroy a matrix
  *
@@ -94,6 +96,8 @@ double bfm_matrix_get(bfm_matrix_t* matrix, size_t i, size_t j);
 int bfm_matrix_set(bfm_matrix_t* matrix, size_t i, size_t j, double val);
 
 int bfm_matrix_add(bfm_matrix_t* matrix, size_t i, size_t j, double val);
+
+size_t bfm_matrix_bandwidth(bfm_matrix_t* matrix);
 
 /**
  * @brief Apply LU decomposition to a matrix; store it in place
