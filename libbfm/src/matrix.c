@@ -14,7 +14,7 @@ static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 static int matrix_full_copy_to_band(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	for (size_t i = 0; i < matrix->m; i++) {
 		for (size_t j = 0; j < matrix->m; j++) {
-			if (i + j > matrix->band.k)
+			if (BFM_ABS(i - j) > matrix->band.k)
 				continue;
 
 			double const val = bfm_matrix_get(src, i, j);
