@@ -186,7 +186,7 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 			double* const y = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 1];
 
 			double tmp_coord;
-			fscanf(fp, "%lf %lf %lf\n", x, &tmp_coord, y);
+			fscanf(fp, "%lf %lf %lf\n", x, y, &tmp_coord);
 		}
 
 		else if (!strcmp(header, "f")) {
@@ -197,6 +197,7 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 			size_t* const c = &mesh->elems[(mesh->n_elems - 1) * mesh->kind + 2];
 
 			fscanf(fp, "%zu %zu %zu\n", a, b, c);
+			(*a)--, (*b)--, (*c)--;
 		}
 
 		// skip line if we don't recognize it
