@@ -133,8 +133,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 
 	FILE* const fp = fopen(name, "r");
 
-	// if (fp == NULL)
-		// goto err_fopen; // TODO error message
+	if (fp == NULL)
+		goto err_fopen; // TODO error message
 
 	char line[50];
 	char arg[50];
@@ -175,10 +175,14 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
             fscanf(fp,":  %le\n",&rho);
 
         else if (strncasecmp(line, "Gravity             ", 19) == 0) {
-			bfm_force_t* force = state->alloc(sizeof(bfm_force_t));
+			bfm_force_t* force = state->alloc(sizeof *force);
+			if (!force)
+				goto err_while;
 			bfm_force_create(force, state, 2);
 
 			bfm_vec_t* vec = state->alloc(sizeof(bfm_vec_t));
+			if (!vec)
+				goto err_while;
 			bfm_vec_create(vec, state, 2);
             fscanf(fp, ":  %le\n", vec->data + 1);
 
@@ -205,7 +209,9 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
             else if (strncasecmp(arg, "Neumann-Y", 19) == 0)
                 kind = BFM_CONDITION_KIND_NEUMANN;
 
-			bfm_condition_t* condition = state->alloc(sizeof(bfm_condition_t));
+			bfm_condition_t* condition = state->alloc(sizeof *condition);
+			if (!condition)
+				goto err_while;
 			bfm_condition_create(condition, state, mesh, kind);
 			condition->values[0] = condition->values[1] = val;
 
@@ -218,6 +224,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 				}
 			}
 			conds = state->realloc(conds, (n_conds + 1) * sizeof *conds);
+			if(!conds)
+				goto err_while;
 			conds[n_conds++] = condition;
 			
 		}
@@ -226,18 +234,33 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	}
 	fclose(fp);
 
-	rv = 0;
-
-	bfm_material_t* material = state->alloc(sizeof(bfm_material_t));
+	bfm_material_t* material = state->alloc(sizeof *material);
+	if (!material)
+		goto err_mat;
 	bfm_material_create(material, state, "basic", E, rho, nu);
 
-	bfm_rule_t* rule = state->alloc(sizeof(bfm_rule_t));
+	bfm_rule_t* rule = state->alloc(sizeof *rule);
+	if (!rule) {
+		state->free(material);
+		goto err_mat;
+	}
 	bfm_rule_create(rule, state, 2, mesh->kind, mesh->kind);
 
-	bfm_obj_t* obj = state->alloc(sizeof(bfm_obj_t));
+	bfm_obj_t* obj = state->alloc(sizeof *obj);
+	if (!obj) {
+		state->free(material);
+		state->free(rule);
+		goto err_mat;
+	}
 	bfm_obj_create(obj, state, mesh, material, rule);
 
-	bfm_instance_t* const instance = state->alloc(sizeof(bfm_instance_t));
+	bfm_instance_t* const instance = state->alloc(sizeof *instance);
+	if (!instance) {
+		state->free(material);
+		state->free(rule);
+		state->free(obj);
+		goto err_mat;
+	}
 	bfm_instance_create(instance, state, obj);
 	bfm_sim_add_instance(sim, instance);
 
@@ -245,5 +268,17 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	instance->n_conditions = n_conds;
 
 	bfm_sim_add_instance(sim, instance);
+	rv = 0;
+	return rv;
+err_while:
+	fclose(fp);
+err_mat:
+	for (size_t i = 0; i < n_conds; i++)
+		bfm_condition_destroy(conds[i]);
+	state->free(conds);
+	for (size_t i = 0; sim->n_forces; i++)
+		bfm_force_destroy(sim->forces[i]);
+	bfm_sim_destroy(sim);
+err_fopen:
 	return rv;
 }
