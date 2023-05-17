@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include <bfm/instance.h>
 
@@ -63,4 +64,17 @@ int bfm_instance_add_condition(bfm_instance_t* instance, bfm_condition_t* condit
 	instance->conditions[instance->n_conditions - 1] = condition;
 
 	return 0;
+}
+
+int bfm_instance_write_lepl1110(bfm_instance_t* instance, size_t shift, char const* filename) {
+	FILE* fp = fopen(filename, "w");
+
+	fscanf(fp, "Number of nodes %d\n", instance->obj->mesh->n_nodes);
+	for (size_t i = 0; i < instance->obj->mesh->n_nodes; i++) {
+		fprintf(fp, "%14.7e", instance->effects[i * 2 + shift]);
+		if (i + 1 != instance->n_effects && (i + 1) % 3 == 0)
+			fprintf(fp, "\n");
+	}
+	fprintf(fp, "\n");
+	fclose(fp);
 }
