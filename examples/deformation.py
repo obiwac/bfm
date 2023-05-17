@@ -4,7 +4,6 @@ faulthandler.enable()
 import math
 
 from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Material, Obj, Rule_gauss_legendre, Sim
-
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
 
@@ -20,6 +19,7 @@ bfm = Bfm()
 
 mesh = Mesh_lepl1110("meshes/8.lepl1110")
 
+sim = Sim.bfm_sim_read_lepl1110(mesh, "problem/problem.txt")
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
 
