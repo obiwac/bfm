@@ -14,9 +14,6 @@ static int matrix_full_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 static int matrix_full_copy_to_band(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	for (size_t i = 0; i < matrix->m; i++) {
 		for (size_t j = 0; j < matrix->m; j++) {
-			if (BFM_ABS(i - j) > matrix->band.k)
-				continue;
-
 			double const val = bfm_matrix_get(src, i, j);
 			bfm_matrix_set(matrix, i, j, val);
 		}
@@ -166,12 +163,12 @@ static double matrix_band_get(bfm_matrix_t* matrix, size_t i, size_t j) {
 	if (i >= m || j >= m)
 		return BFM_NAN;
 
-	if (j + k < i || j > i + k)
+	if (BFM_ABS((ssize_t) i - (ssize_t) j) > (ssize_t) k)
 		return 0.;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		i * k + j :
-		i + j * k;
+		j + i * (2 * k + 1) :
+		i + j * (2 * k + 1);
 
 	return matrix->band.data[idx];
 }
@@ -183,12 +180,12 @@ static int matrix_band_set(bfm_matrix_t* matrix, size_t i, size_t j, double valu
 	if (i >= m || j >= m)
 		return -1;
 
-	if (j + k < i || j > i + k)
+	if (BFM_ABS((ssize_t) i - (ssize_t) j) > (ssize_t) k)
 		return fabs(value) < BFM_PIVOT_EPS ? 0 : -1;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		i * k + j :
-		i + j * k;
+		j + i * (2 * k + 1) :
+		i + j * (2 * k + 1);
 
 	matrix->band.data[idx] = value;
 	return 0;
