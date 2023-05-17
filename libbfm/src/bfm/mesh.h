@@ -7,6 +7,7 @@
 typedef enum {
 	BFM_ELEM_KIND_SIMPLEX = 3,
 	BFM_ELEM_KIND_QUAD = 4,
+	BFM_ELEM_KIND_QUADRATIC_TRIANGLE = 6,
 } bfm_elem_kind_t;
 
 typedef enum {
