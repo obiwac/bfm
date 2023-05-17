@@ -190,12 +190,12 @@ static int matrix_band_add(bfm_matrix_t* matrix, size_t i, size_t j, double valu
 	if (i >= m || j >= m)
 		return -1;
 
-	if (j + k < i || j > i + k)
+	if (BFM_ABS((ssize_t) i - (ssize_t) j) > (ssize_t) k)
 		return fabs(value) < BFM_PIVOT_EPS ? 0 : -1;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		i * k + j :
-		i + j * k;
+		j + i * (2 * k + 1) :
+		i + j * (2 * k + 1);
 
 	matrix->band.data[idx] += value;
 	return 0;
@@ -212,15 +212,15 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 	for (size_t pivot_i = 0; pivot_i < m - 1; pivot_i++) {
 		double const pivot = matrix_band_get(matrix, pivot_i, pivot_i);
 
-		if (pivot != pivot)
+		if (BFM_IS_NAN(pivot))
 			return -1;
 
 		if (fabs(pivot) < BFM_PIVOT_EPS)
 			return -1;
 
-		size_t const max_i = BFM_MAX(pivot + k + 1, m);
+		size_t const len = BFM_MIN(pivot_i + k + 1, m);
 
-		for (size_t i = pivot_i + 1; i < max_i; i++) {
+		for (size_t i = pivot_i + 1; i < len; i++) {
 			double val_below_pivot = matrix_band_get(matrix, i, pivot_i);
 
 			if (BFM_IS_NAN(val_below_pivot))
@@ -231,18 +231,13 @@ static int matrix_band_lu(bfm_matrix_t* matrix) {
 			if (matrix_band_set(matrix, i, pivot_i, val_below_pivot) < 0)
 				return -1;
 
-			for (size_t j = pivot + 1; j < max_i; j++) {
-				double const val = matrix_band_get(matrix, i, j);
+			for (size_t j = pivot_i + 1; j < len; j++) {
+				double const val = matrix_band_get(matrix, pivot_i, j);
 
 				if (BFM_IS_NAN(val))
 					return -1;
 
-				double const val_upside = matrix_band_get(matrix, pivot, j);
-
-				if (BFM_IS_NAN(val_upside))
-					return -1;
-
-				if (matrix_band_set(matrix, i, j, val - val_upside * val_below_pivot) < 0)
+				if (matrix_band_add(matrix, i, j, -val_below_pivot * val) < 0)
 					return -1;
 			}
 		}
