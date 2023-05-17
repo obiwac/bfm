@@ -361,7 +361,7 @@ static int matrix_band_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* vec) {
 		ssize_t const len = BFM_MIN(pivot_i + k + 1, m);
 
 #if defined(WITH_BLAS)
-		vec->data[pivot_i] -= cblas_ddot(max_i - pivot_i - 1, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, vec->data + pivot_i + 1, 1);
+		vec->data[pivot_i] -= cblas_ddot(len - pivot_i - 1, matrix->band.data + pivot_i * (2 * k + 1) + pivot_i + 1, 1, vec->data + pivot_i + 1, 1);
 #else
 		for (ssize_t i = pivot_i + 1; i < len; i++) {
 			double const val = matrix_band_get(matrix, pivot_i, i);
