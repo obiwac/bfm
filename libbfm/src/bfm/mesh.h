@@ -18,7 +18,7 @@ typedef struct {
 	// maybe rename src and dst ?
 	size_t nodes[2];
 	// the two faces that are adjacent to the edges, elem[1] is -1 if the edges is on the boundary
-	size_t elems[2];
+	ssize_t elems[2];
 } bfm_edge_t;
 
 typedef struct {

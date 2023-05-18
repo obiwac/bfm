@@ -42,14 +42,14 @@ class Instance:
 		gl.glGenBuffers(1, ctypes.byref(self.vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 
-		coords_t = gl.GLfloat * len(mesh.coords)
+		coords_t = gl.GLfloat * len(mesh.gl_coords)
 
 		gl.glBufferData(gl.GL_ARRAY_BUFFER,
 			ctypes.sizeof(coords_t),
-			(coords_t) (*mesh.coords),
+			(coords_t) (*mesh.gl_coords),
 			gl.GL_STATIC_DRAW)
 
-		gl.glVertexAttribPointer(0, mesh.dim, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(0)
 
 		# create effects VBO
@@ -59,7 +59,7 @@ class Instance:
 		gl.glGenBuffers(1, ctypes.byref(self.effects_vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.effects_vbo)
 
-		gl.glVertexAttribPointer(1, mesh.dim, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(1)
 
 		# create IBO
@@ -68,11 +68,24 @@ class Instance:
 		gl.glGenBuffers(1, self.ibo)
 		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 
-		indices_t = gl.GLuint * len(mesh.line_indices)
+		indices_t = gl.GLuint * len(mesh.indices)
 
 		gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
 			ctypes.sizeof(indices_t),
-			(indices_t) (*mesh.line_indices),
+			(indices_t) (*mesh.indices),
+			gl.GL_STATIC_DRAW)
+
+		# create lines IBO
+
+		self.lines_ibo = gl.GLuint(0)
+		gl.glGenBuffers(1, self.lines_ibo)
+		gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.lines_ibo)
+
+		line_indices_t = gl.GLuint * len(mesh.line_indices)
+
+		gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER,
+			ctypes.sizeof(line_indices_t),
+			(line_indices_t) (*mesh.line_indices),
 			gl.GL_STATIC_DRAW)
 
 	@functools.cached_property
@@ -82,7 +95,9 @@ class Instance:
 		for i in range(self.c_instance.n_effects):
 			effects.append(self.c_instance.effects[i])
 
-		return effects
+		# *2 for both faces
+
+		return 2 * effects
 
 	def update_effects(self):
 		gl.glBindVertexArray(self.vao)
@@ -95,9 +110,14 @@ class Instance:
 			(effects_t) (*self.effects),
 			gl.GL_STATIC_DRAW)
 
-	def draw(self):
+	def draw(self, lines = False):
 		mesh = self.obj.mesh
-
 		gl.glBindVertexArray(self.vao)
-		# gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)
-		gl.glDrawElements(gl.GL_LINES, len(mesh.line_indices), gl.GL_UNSIGNED_INT, None)
+
+		if lines:
+			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.lines_ibo)
+			gl.glDrawElements(gl.GL_LINES, len(mesh.line_indices), gl.GL_UNSIGNED_INT, None)
+
+		else:
+			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
+			gl.glDrawElements(gl.GL_TRIANGLES, len(mesh.indices), gl.GL_UNSIGNED_INT, None)

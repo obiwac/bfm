@@ -42,53 +42,51 @@ static int cmp_edge(const void* e1, const void* e2) {
 }
 
 static int compute_edges(bfm_mesh_t* mesh) {
-	size_t n_elems = mesh->n_elems;
-	size_t n_local_nodes = mesh->kind;
-	size_t n_edges = n_elems * n_local_nodes;
+	bfm_state_t* const state = mesh->state;
 
-	mesh->edges = mesh->state->alloc(n_elems * n_local_nodes * sizeof(bfm_edge_t));
-	if (!mesh->edges)
+	size_t const n_elems = mesh->n_elems;
+	size_t const n_local_nodes = mesh->kind;
+	size_t const n_edges = n_elems * n_local_nodes;
+
+	mesh->edges = state->alloc(n_elems * n_local_nodes * sizeof *mesh->edges);
+
+	if (mesh->edges == NULL)
 		return -1;
 
-	for (size_t elem = 0; elem < n_elems; elem++) {
+	for (size_t i = 0; i < n_elems; i++) {
 		for (size_t j = 0; j < n_local_nodes; j++) {
-			mesh->edges[elem * n_local_nodes + j].nodes[0] = mesh->elems[elem * n_local_nodes + j];
-			mesh->edges[elem * n_local_nodes + j].nodes[1] = mesh->elems[elem * n_local_nodes + (j + 1) % n_local_nodes];
-			mesh->edges[elem * n_local_nodes + j].elems[0] = elem;
-            mesh->edges[elem * n_local_nodes + j].elems[1] = -1;
+			mesh->edges[i * n_local_nodes + j].elems[0] = i;
+			mesh->edges[i * n_local_nodes + j].elems[1] = -1;
+
+			mesh->edges[i * n_local_nodes + j].nodes[0] = mesh->elems[i * n_local_nodes + j];
+			mesh->edges[i * n_local_nodes + j].nodes[1] = mesh->elems[i * n_local_nodes + (j + 1) % n_local_nodes];
 		}
 	}
 
 	qsort(mesh->edges, n_edges, sizeof *mesh->edges, cmp_edge);
 
-
 	size_t current = 0;
+
 	for (size_t i = 1; i < n_edges; i++) {
-		if ((mesh->edges[i - 1].nodes[0] == mesh->edges[i].nodes[1] && mesh->edges[i - 1].nodes[1] == mesh->edges[i].nodes[0])) {
+		if (mesh->edges[i - 1].nodes[0] == mesh->edges[i].nodes[1] && mesh->edges[i - 1].nodes[1] == mesh->edges[i].nodes[0]) {
 			mesh->edges[current] = mesh->edges[i - 1];
 			mesh->edges[current].elems[1] = mesh->edges[i].elems[0];
+
 			i++;
 		}
-		else {
+
+		else
 			mesh->edges[current] = mesh->edges[i - 1];
-		}
+
 		current++;
 	}
+
 	mesh->n_edges = current;
-	mesh->edges = mesh->state->realloc(mesh->edges, current * sizeof(bfm_edge_t));
-	if (!mesh->edges)
+	mesh->edges = mesh->state->realloc(mesh->edges, current * sizeof *mesh->edges);
+
+	if (mesh->edges == NULL)
 		return -1;
 
-	// mesh->boundary_nodes = mesh->state->alloc(mesh->n_nodes * sizeof *mesh->boundary_nodes);
-	// if (!mesh->boundary_nodes)
-		// return -1;
-	// memset(mesh->boundary_nodes, 0, mesh->n_nodes);
-	// for (size_t i = 0; i < current; i++) {
-	// 	if (mesh->edges[i].elems[1] == -1) {
-	// 		mesh->boundary_nodes[mesh->edges[i].nodes[0]] = true;
-	// 		mesh->boundary_nodes[mesh->edges[i].nodes[1]] = true;
-	// 	}
-	// }
 	return 0;
 }
 

@@ -26,7 +26,7 @@ mesh = Mesh_wavefront("meshes/test.obj")
 
 boundary_condition = Condition(mesh, Condition.DIRICHLET)
 # boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in coord)) < 0.1)
-boundary_condition.populate(lambda mesh, coord: any(x < -0.499 for x in coord))
+boundary_condition.populate(lambda mesh, coord: any(x < 0.001 for x in coord))
 
 # create object out of 7075-series aluminium:
 # density (rho): 2.81 g/cm^3
