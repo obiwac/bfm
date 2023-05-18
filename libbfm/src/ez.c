@@ -19,7 +19,7 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 	if (bfm_material_create(&ez->material, state, "lepl1110", 0, 0, 0) < 0)
 		return -1;
 
-	if (bfm_rule_create(&ez->rule, state, 2, mesh->kind, mesh->kind) < 0)
+	if (bfm_rule_create_gauss_legendre(&ez->rule, state, 2, mesh->kind) < 0)
 		return -1;
 
 	if (bfm_obj_create(&ez->obj, state, mesh, &ez->material, &ez->rule) < 0)
