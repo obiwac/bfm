@@ -4,9 +4,9 @@
 #include <bfm/instance.h>
 
 typedef enum {
-	BFM_SIM_KIND_DEFORMATION,
-	BFM_SIM_KIND_AXISYMETRIC,
-	BFM_SIM_KIND_PLANAR_STRAINS,
+	BFM_SIM_KIND_PLANAR_STRAINS, // deplacement
+	BFM_SIM_KIND_PLANAR_STRESS, // force
+	BFM_SIM_KIND_AXISYMMETRIC_STRAINS, // deplacement
 } bfm_sim_kind_t;
 
 typedef struct {

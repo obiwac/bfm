@@ -4,8 +4,6 @@
 
 int bfm_system_create(bfm_system_t* system, bfm_state_t* state, size_t n) {
 	system->state = state;
-	system->kind = BFM_SYSTEM_KIND_GENERIC;
-
 	system->n = n;
 
 	if (bfm_perm_create(&system->perm, state, n) < 0)
@@ -429,8 +427,6 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	if (bfm_system_create(system, state, n) < 0)
 		return -1;
 
-	system->kind = BFM_SYSTEM_KIND_ELASTICITY;
-
 	// go through all elements
 
 	elem_t elem;
@@ -532,8 +528,6 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 
 	if (bfm_system_create(system, state, n) < 0)
 		return -1;
-
-	system->kind = BFM_SYSTEM_KIND_ELASTICITY;
 
 	// go through all elements
 

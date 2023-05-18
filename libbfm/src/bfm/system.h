@@ -6,19 +6,12 @@
 #include <bfm/matrix.h>
 #include <bfm/perm.h>
 
-typedef enum {
-	BFM_SYSTEM_KIND_GENERIC = 0,
-	BFM_SYSTEM_KIND_ELASTICITY = 1,
-} bfm_system_kind_t;
-
 typedef struct {
 	bfm_state_t* state;
 
-	bfm_system_kind_t kind;
 	size_t n;
 
 	bfm_perm_t perm;
-
 	bfm_matrix_t A;
 	bfm_vec_t b;
 } bfm_system_t;
