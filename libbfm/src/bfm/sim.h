@@ -30,5 +30,3 @@ int bfm_sim_set_n_forces(bfm_sim_t* sim, size_t n_forces);
 int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force);
 
 int bfm_sim_run(bfm_sim_t* sim);
-
-int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, char* name);
