@@ -7,16 +7,18 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
-from .instance import Instance
 from .matrix import Matrix
+from .mesh import Mesh
 from .sim import Sim
-
-global_bfm = None
 
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
 		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
+
+		# scene objects
+
+		self.current_sim: Sim = None
 
 		# orbit camera
 
@@ -73,8 +75,8 @@ class Window(pyglet.window.Window):
 		gl.glClearColor(1, 1, 1, 0)
 		self.clear()
 
-		if global_bfm.current_sim is not None:
-			global_bfm.current_sim.draw(mvp_matrix)
+		if self.current_sim is not None:
+			self.current_sim.draw(mvp_matrix)
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -127,15 +129,10 @@ class Bfm:
 			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
 			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
 
-		self.current_sim: Sim = None
-
-		global global_bfm
-		global_bfm = self
-
-	def add(self, instance: Instance):
+	def add_scenery(self, mesh: Mesh):
 		self.instances.append(instance)
 
 	def show(self, sim: Sim):
 		sim.show()
-		global_bfm.current_sim = sim
+		self.window.current_sim = sim
 		pyglet.app.run()
