@@ -3,11 +3,6 @@
 
 #include <bfm/mesh.h>
 
-static double const xsi_triangles[3] = {0., 1., 0.};
-static double const eta_triangles[3] = {0., 0., 1.};
-static double const xsi_quads[4] = {1., -1., -1., 1.};
-static double const eta_quads[4] = {1., 1., -1., -1.};
-
 int bfm_mesh_create(bfm_mesh_t* mesh, bfm_state_t* state, size_t dim, bfm_elem_kind_t kind) {
 	memset(mesh, 0, sizeof *mesh);
 	mesh->state = state;

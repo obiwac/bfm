@@ -17,7 +17,8 @@ bfm = Bfm()
 # mesh.rect((0, 0), (1, 0.2))
 # mesh.mesh()
 
-mesh = Mesh_lepl1110("meshes/8.lepl1110")
+# mesh = Mesh_lepl1110("meshes/8.lepl1110")
+mesh = Mesh_wavefront("meshes/test.obj")
 
 sim = Sim.bfm_sim_read_lepl1110(mesh, "problem/problem.txt")
 # create Dirichlet boundary conditions for mesh

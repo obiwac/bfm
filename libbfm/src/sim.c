@@ -104,7 +104,11 @@ static int run_deformation(bfm_sim_t* sim) {
 		if (bfm_system_create_elasticity(&system, instance, sim->n_forces, sim->forces) < 0)
 			return -1;
 
+		if (bfm_system_renumber(&system) < 0)
+			return -1;
+
 		bfm_matrix_solve(&system.A, &system.b);
+		bfm_perm_perm_vec(&system.perm, &system.b, true);
 
 		// set instance effects to result of equation
 
