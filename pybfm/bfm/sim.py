@@ -53,8 +53,6 @@ class Sim:
 
 		# draw lines
 
-		gl.glDisable(gl.GL_DEPTH_TEST)
-
 		self.line_shader.use()
 		self.line_shader.mvp_matrix(mvp_matrix)
 
