@@ -67,7 +67,10 @@ int bfm_instance_add_condition(bfm_instance_t* instance, bfm_condition_t* condit
 }
 
 int bfm_instance_write_lepl1110(bfm_instance_t* instance, size_t shift, char const* filename) {
-	FILE* fp = fopen(filename, "w");
+	FILE* const fp = fopen(filename, "w");
+	
+	if (!fp)
+		return -1;
 
 	fprintf(fp, "Number of nodes %zu\n", instance->obj->mesh->n_nodes);
 	for (size_t i = 0; i < instance->obj->mesh->n_nodes; i++) {
