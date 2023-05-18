@@ -1,10 +1,9 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-#include <bfm/sim.h>
 #include <bfm/mesh.h>
+#include <bfm/sim.h>
 #include <bfm/system.h>
-
 int bfm_sim_create(bfm_sim_t* sim, bfm_state_t* state, bfm_sim_kind_t kind) {
 	memset(sim, 0, sizeof *sim);
 
