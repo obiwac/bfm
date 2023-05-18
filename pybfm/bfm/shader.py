@@ -59,6 +59,7 @@ class Shader:
 		# uniforms
 
 		self.mvp_location = self.find_uniform(b"mvp_matrix")
+		self.max_effect_location = self.find_uniform(b"max_effect")
 
 	def __del__(self):
 		gl.glDeleteProgram(self.program)
@@ -71,3 +72,6 @@ class Shader:
 
 	def mvp_matrix(self, mvp_matrix: Matrix):
 		gl.glUniformMatrix4fv(self.mvp_location, 1, gl.GL_FALSE, (gl.GLfloat * 16) (*sum(mvp_matrix.data, [])))
+
+	def max_effect(self, max_effect: float):
+		gl.glUniform1f(self.max_effect_location, max_effect)

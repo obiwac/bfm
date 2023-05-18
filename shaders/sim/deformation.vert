@@ -7,6 +7,7 @@ out vec3 transformed;
 out vec3 colour;
 
 uniform mat4 mvp_matrix;
+uniform float max_effect;
 
 vec3 inferno_colourmap(float t) {
 	// more colourmaps can be found here:
@@ -26,7 +27,7 @@ vec3 inferno_colourmap(float t) {
 void main(void) {
 	transformed = vec3(node.xy + effect * 1e5, node.z); // displacement
 
-	float t = length(effect) * 5e5;
+	float t = length(effect) / max_effect;
 	colour = inferno_colourmap(t);
 
 	gl_Position = mvp_matrix * vec4(transformed, 1.0);
