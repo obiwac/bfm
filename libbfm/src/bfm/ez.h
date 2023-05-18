@@ -25,3 +25,5 @@ typedef struct {
 
 int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t* mesh, char* name);
 int bfm_ez_lepl1110_destroy(bfm_ez_lepl1110_t* ez);
+
+int bfm_ez_lepl1110_write(bfm_ez_lepl1110_t* ez, size_t shift, char const* filename);

@@ -164,3 +164,21 @@ int bfm_ez_lepl1110_destroy(bfm_ez_lepl1110_t* ez) {
 
 	return 0;
 }
+
+int bfm_ez_lepl1110_write(bfm_ez_lepl1110_t* ez, size_t shift, char const* filename) {
+	FILE* const fp = fopen(filename, "w");
+	
+	if (!fp)
+		return -1;
+
+	fprintf(fp, "Number of nodes %zu\n", ez->obj.mesh->n_nodes);
+	for (size_t i = 0; i < ez->obj.mesh->n_nodes; i++) {
+		fprintf(fp, "%14.7e", ez->instance.effects[i * 2 + shift]);
+		if (i + 1 != ez->instance.n_effects && (i + 1) % 3 == 0)
+			fprintf(fp, "\n");
+	}
+	fprintf(fp, "\n");
+	fclose(fp);
+	
+	return 0;
+}
