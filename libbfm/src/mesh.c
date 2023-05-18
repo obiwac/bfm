@@ -156,7 +156,7 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 
 
 	fscanf(fp, "Number of domains %zu\n", &mesh->n_domains);
-	mesh->domains = state->alloc(mesh->n_domains * sizeof(bfm_domain_t*));
+	mesh->domains = state->alloc(mesh->n_domains * sizeof *mesh->domains);
 	for (size_t i = 0; i < mesh->n_domains; i++) {
 		size_t domain_id;
 		fscanf(fp, "Domain :  %zu\n", &domain_id);
