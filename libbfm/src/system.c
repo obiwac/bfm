@@ -224,13 +224,13 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 	bfm_material_t* const material = obj->material;
 	bfm_rule_t* const rule = obj->rule;
 	bfm_shape_t* const shape = &rule->shape;
-	size_t dim = rule->dim;
+	size_t const dim = rule->dim;
 
 	bfm_matrix_t* const stiffness_mat = &system->A;
 	bfm_vec_t* const forces_vec = &system->b;
 
-	
 	// constants
+
 	double const a = material->E * (1 - material->nu) / (1 + material->nu) * (1 - 2 * material->nu);
 	double const b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
@@ -374,7 +374,6 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 }
 
 static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition, double value) {
-	
 	for (size_t i = 0; i < mesh->n_nodes; i++) {
 		if (!condition->nodes[i])
 			continue;
@@ -385,21 +384,26 @@ static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mes
 		for (size_t j = 0; j < mesh->n_edges; j++) {
 			if (mesh->edges[j].nodes[0] == i && (mesh->edges[j].elems[1] == -1)) {
 				size_t const n2 = mesh->edges[j].nodes[1];
+
 				double const length = sqrt(
 					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+
 				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
 				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
 			}
 			else if (mesh->edges[j].nodes[1] == i && (mesh->edges[j].elems[1] == -1)) {
 				size_t const n2 = mesh->edges[j].nodes[0];
+
 				double const length = sqrt(
 					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+
 				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
 				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
 			}
 		}
+
 		apply_constraint(system, 2 * i + 0, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? tx : -ty));
 		apply_constraint(system, 2 * i + 1, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? ty : tx));
 	}
