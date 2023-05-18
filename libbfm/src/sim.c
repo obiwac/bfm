@@ -220,8 +220,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 			condition->values[0] = condition->values[1] = val;
 
 			for (size_t i = 0; i < mesh->n_domains; i++) {
-				if (strncasecmp(mesh->domains[i]->name, arg2, 25) == 0) {
-					bfm_domain_t* domain = mesh->domains[i];
+				if (strncasecmp(mesh->domains[i].name, arg2, 25) == 0) {
+					bfm_domain_t* domain = &mesh->domains[i];
 					for (size_t j = 0; j < domain->n_elements; j++)
 						condition->nodes[domain->elements[j]] = true;
 					break;

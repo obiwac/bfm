@@ -43,7 +43,7 @@ typedef struct {
 	bfm_edge_t* edges;
 
 	size_t n_domains;
-	bfm_domain_t** domains;
+	bfm_domain_t* domains;
 	// bool* boundary_nodes;
 } bfm_mesh_t;
 

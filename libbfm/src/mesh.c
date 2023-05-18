@@ -21,9 +21,8 @@ int bfm_mesh_destroy(bfm_mesh_t* mesh) {
 	state->free(mesh->edges);
 
 	for (size_t i = 0; i < mesh->n_domains; i++) {
-		bfm_domain_t* const domain = mesh->domains[i];
-		state->free(domain->elements);
-		state->free(domain);
+		bfm_domain_t const domain = mesh->domains[i];
+		state->free(domain.elements);
 	}
 	state->free(mesh->domains);
 
@@ -160,8 +159,7 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	for (size_t i = 0; i < mesh->n_domains; i++) {
 		size_t domain_id;
 		fscanf(fp, "Domain :  %zu\n", &domain_id);
-		mesh->domains[domain_id] = state->alloc(sizeof(bfm_domain_t));
-		bfm_domain_t* const domain = mesh->domains[domain_id];
+		bfm_domain_t* const domain = &mesh->domains[domain_id];
 		memset(domain, 0, sizeof *domain);
 
 		fscanf(fp, "Name : %[^\n]\n", domain->name);
