@@ -437,6 +437,30 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 				system->b.data[n2 * 2 + shift] += jacobian * condition->value;
 			}
 		}
+		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_NORMAL) {
+			for (size_t j = 0; j < mesh->n_edges; j++) {
+				bfm_edge_t* const edge = &mesh->edges[i];
+
+				size_t const n1 = edge->nodes[0];
+				size_t const n2 = edge->nodes[1];
+
+				if (!condition->nodes[n1] || !condition->nodes[n2])
+					continue;
+
+				double const jacobian = sqrt(
+					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
+
+				// found on https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
+				double const dx = mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0];
+				double const dy = mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1];
+
+				system->b.data[n1 * 2 + 0] += jacobian * condition->value * -dy;
+				system->b.data[n1 * 2 + 1] += jacobian * condition->value * dx;
+				system->b.data[n2 * 2 + 0] += jacobian * condition->value * dy;
+				system->b.data[n2 * 2 + 1] += jacobian * condition->value * -dx;
+			}
+		}
 	}
 
 	return 0;
