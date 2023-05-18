@@ -369,12 +369,13 @@ static void apply_constraint(bfm_system_t* system, size_t node, double value) {
 }
 
 static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
+	size_t const shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
+
 	for (size_t j = 0; j < mesh->n_nodes; j++) {
 		if (!condition->nodes[j])
 			continue;
 
-		apply_constraint(system, j * mesh->dim + 0, 0);
-		apply_constraint(system, j * mesh->dim + 1, 0);
+		apply_constraint(system, j * mesh->dim + shift, condition->value);
 	}
 }
 
@@ -415,10 +416,10 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET)
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y)
 			apply_dirichlet(system, mesh, condition);
 
-		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
+		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
 				bfm_edge_t* const edge = &mesh->edges[i];
 
@@ -432,10 +433,33 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
-				system->b.data[n1 * 2 + 0] += jacobian * condition->values[0];
-				system->b.data[n1 * 2 + 1] += jacobian * condition->values[1];
-				system->b.data[n2 * 2 + 0] += jacobian * condition->values[0];
-				system->b.data[n2 * 2 + 1] += jacobian * condition->values[1];
+				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+
+				system->b.data[n1 * 2 + shift] += jacobian * condition->value;
+				system->b.data[n2 * 2 + shift] += jacobian * condition->value;
+			}
+		}
+
+		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_NORMAL || condition->kind == BFM_CONDITION_KIND_NEUMANN_TANGENT) {
+			for (size_t j = 0; j < mesh->n_edges; j++) {
+				bfm_edge_t* const edge = &mesh->edges[i];
+
+				size_t const n1 = edge->nodes[0];
+				size_t const n2 = edge->nodes[1];
+
+				if (!condition->nodes[n1] || !condition->nodes[n2])
+					continue;
+
+				// found on https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
+
+				double const dx = mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0];
+				double const dy = mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1];
+
+				// length cancel : jac = length / 2 && vector = delta / length
+				system->b.data[n1 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
+				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * dx;
+				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * dy;
+				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : -dx);
 			}
 		}
 	}
@@ -480,10 +504,10 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET)
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y)
 			apply_dirichlet(system, mesh, condition);
 
-		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN) {
+		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
 				bfm_edge_t* const edge = &mesh->edges[i];
 
@@ -507,10 +531,10 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
-				system->b.data[n1 * 2 + 0] += fac * jacobian * condition->values[0];
-				system->b.data[n1 * 2 + 1] += fac * jacobian * condition->values[1];
-				system->b.data[n2 * 2 + 0] += fac * jacobian * condition->values[0];
-				system->b.data[n2 * 2 + 1] += fac * jacobian * condition->values[1];
+				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+
+				system->b.data[n1 * 2 + shift] += fac * jacobian * condition->value;
+				system->b.data[n2 * 2 + shift] += fac * jacobian * condition->value;
 			}
 		}
 	}

@@ -213,16 +213,16 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 			bfm_condition_kind_t kind;
 
 			if (strncasecmp(arg, "Dirichlet-X", 19) == 0)
-				kind = BFM_CONDITION_KIND_DIRICHLET;
+				kind = BFM_CONDITION_KIND_DIRICHLET_X;
 
 			else if (strncasecmp(arg, "Dirichlet-Y", 19) == 0)
-				kind = BFM_CONDITION_KIND_DIRICHLET;
+				kind = BFM_CONDITION_KIND_DIRICHLET_Y;
 
 			else if (strncasecmp(arg, "Neumann-X", 19) == 0)
-				kind = BFM_CONDITION_KIND_NEUMANN;
+				kind = BFM_CONDITION_KIND_NEUMANN_X;
 
 			else if (strncasecmp(arg, "Neumann-Y", 19) == 0)
-				kind = BFM_CONDITION_KIND_NEUMANN;
+				kind = BFM_CONDITION_KIND_NEUMANN_Y;
 
 			bfm_condition_t* const condition = state->alloc(sizeof *condition);
 
@@ -232,8 +232,7 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 			if (bfm_condition_create(condition, state, mesh, kind) < 0)
 				goto err_while;
 
-			condition->values[0] = val;
-			condition->values[1] = val;
+			condition->value = val;
 
 			for (size_t i = 0; i < mesh->n_domains; i++) {
 				if (strncasecmp(mesh->domains[i].name, arg2, 25))

@@ -23,9 +23,11 @@ mesh = Mesh_wavefront("meshes/test.obj")
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
 
-boundary_condition = Condition(mesh, Condition.DIRICHLET)
-# boundary_condition.populate(lambda mesh, coord: math.sqrt(sum(x ** 2 for x in coord)) < 0.1)
-boundary_condition.populate(lambda mesh, coord: any(x < 0.001 for x in coord))
+boundary_condition_x = Condition(mesh, Condition.DIRICHLET_X)
+boundary_condition_x.populate(lambda mesh, coord: any(x < -0.499 for x in coord))
+
+boundary_condition_y = Condition(mesh, Condition.DIRICHLET_Y)
+boundary_condition_y.populate(lambda mesh, coord: any(x < -0.499 for x in coord))
 
 # create object out of 7075-series aluminium:
 # density (rho): 2.81 g/cm^3
@@ -42,7 +44,8 @@ obj = Obj(mesh, material, rule)
 # add the instance to the state
 
 instance = Instance(obj)
-instance.add_condition(boundary_condition)
+instance.add_condition(boundary_condition_x)
+instance.add_condition(boundary_condition_y)
 
 # create basic gravity force field
 
