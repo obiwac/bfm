@@ -29,6 +29,10 @@ class Mesh:
 
 	@functools.cached_property
 	def coords(self):
+		return [self.c_mesh.coords[i] for i in range(self.c_mesh.n_nodes * self.dim)]
+
+	@functools.cached_property
+	def gl_coords(self):
 		coords = []
 
 		for i in range(self.c_mesh.n_nodes):

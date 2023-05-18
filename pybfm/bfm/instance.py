@@ -42,11 +42,11 @@ class Instance:
 		gl.glGenBuffers(1, ctypes.byref(self.vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 
-		coords_t = gl.GLfloat * len(mesh.coords)
+		coords_t = gl.GLfloat * len(mesh.gl_coords)
 
 		gl.glBufferData(gl.GL_ARRAY_BUFFER,
 			ctypes.sizeof(coords_t),
-			(coords_t) (*mesh.coords),
+			(coords_t) (*mesh.gl_coords),
 			gl.GL_STATIC_DRAW)
 
 		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
@@ -95,7 +95,9 @@ class Instance:
 		for i in range(self.c_instance.n_effects):
 			effects.append(self.c_instance.effects[i])
 
-		return effects
+		# *2 for both faces
+
+		return 2 * effects
 
 	def update_effects(self):
 		gl.glBindVertexArray(self.vao)
