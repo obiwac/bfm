@@ -187,13 +187,13 @@ err_fopen:
 	return rv;
 }
 
-int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* name) {
+int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* name, bool full) {
 	int rv = -1;
 
 	memset(mesh, 0, sizeof *mesh);
 
 	mesh->state = state;
-	mesh->dim = 2; // Wavefront files are always 3D, but we're gonna implicitly convert them to 2D
+	mesh->dim = full ? 3 : 2;
 	mesh->kind = BFM_ELEM_KIND_SIMPLEX;
 
 	// TODO error messages & more error checking (alloc's/fscanf's)
@@ -216,9 +216,10 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 
 			double* const x = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 0];
 			double* const y = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 1];
+			double* const z = &mesh->coords[(mesh->n_nodes - 1) * mesh->dim + 2];
 
 			double tmp_coord;
-			fscanf(fp, "%lf %lf %lf\n", x, y, &tmp_coord);
+			fscanf(fp, "%lf %lf %lf\n", x, y, full ? z : &tmp_coord);
 		}
 
 		else if (!strcmp(header, "f")) {
@@ -252,8 +253,12 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 	// success
 
 	rv = 0;
+
 err_kind:
+
 	fclose(fp);
+
 err_fopen:
+
 	return rv;
 }
