@@ -8,7 +8,10 @@ from .shader import Shader
 from .state import default_state
 
 class Sim:
-	DEFORMATION = 0
+	NONE                = 0
+	PLANAR_STRAIN       = 1
+	PLANAR_STRESS       = 2
+	AXISYMMETRIC_STRAIN = 3
 
 	def __init__(self, kind: int):
 		self.c_sim = ffi.new("bfm_sim_t*")
@@ -19,9 +22,8 @@ class Sim:
 		# create shader, depending on simulation kind
 		# TODO in fine, make these package resources
 
-		if kind == Sim.DEFORMATION:
-			self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
-			self.line_shader = Shader("shaders/sim/line_deformation.vert", "shaders/sim/deformation.frag")
+		self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
+		self.line_shader = Shader("shaders/sim/line_deformation.vert", "shaders/sim/deformation.frag")
 
 	def __del__(self):
 		assert not lib.bfm_sim_destroy(self.c_sim)
