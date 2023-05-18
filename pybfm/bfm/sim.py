@@ -1,3 +1,5 @@
+import pyglet.gl as gl
+
 from .force import Force
 from .instance import Instance
 from .libbfm import lib, ffi
@@ -41,6 +43,8 @@ class Sim:
 			instance.update_effects()
 
 	def draw(self, mvp_matrix: Matrix):
+		gl.glEnable(gl.GL_DEPTH_TEST)
+
 		self.shader.use()
 		self.shader.mvp_matrix(mvp_matrix)
 
@@ -48,6 +52,8 @@ class Sim:
 			instance.draw()
 
 		# draw lines
+
+		gl.glDisable(gl.GL_DEPTH_TEST)
 
 		self.line_shader.use()
 		self.line_shader.mvp_matrix(mvp_matrix)

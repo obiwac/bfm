@@ -41,8 +41,6 @@ class Mesh:
 			coords.append(self.c_mesh.coords[i * 2 + 1])
 			coords.append(0.1)
 
-		print("coords", coords)
-
 		return coords
 
 	@functools.cached_property
