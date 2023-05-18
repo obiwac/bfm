@@ -172,6 +172,12 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		fscanf(fp, "\n");
 	}
 
+	if (compute_edges(mesh) < 0) {
+		state->free(mesh->coords); // TODO idiosyncratic
+		state->free(mesh->elems); // TODO idiosyncratic
+
+		goto err_kind;
+	}
 
 	// success
 
