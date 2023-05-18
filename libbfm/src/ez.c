@@ -42,31 +42,31 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 	// from LEPL1110 fem.c
 
 	while (!feof(fp)) {
-		fscanf(fp, "%49[^\n]s \n", line);
+		fscanf(fp, "%19[^\n]s \n", line);
 
-		if (strncasecmp(line, "Type of problem	 ", 19) == 0) {
-			fscanf(fp, ":  %49[^\n]s \n", arg);
+		if (strncasecmp(line, "Type of problem     ", 19) == 0) {
+			fscanf(fp, ":  %[^\n]s \n", arg);
 
 			if (strncasecmp(arg, "Planar strains", 13) == 0)
 			   ez->sim.kind = BFM_SIM_KIND_DEFORMATION;
 
-			else if (strncasecmp(arg,"Planar stresses", 13) == 0)
+			else if (strncasecmp(arg, "Planar stresses", 13) == 0)
 			   ez->sim.kind = BFM_SIM_KIND_PLANAR_STRAINS;
 
 			else if (strncasecmp(arg, "Axi-symetric problem", 13) == 0)
 			   ez->sim.kind = BFM_SIM_KIND_AXISYMETRIC;
 		}
 
-		else if (strncasecmp(line, "Young modulus	   ", 19) == 0)
-			fscanf(fp,":  %le\n", &ez->material.E);
+		else if (strncasecmp(line, "Young modulus       ", 19) == 0)
+			fscanf(fp, ":  %le\n", &ez->material.E);
 
-		else if (strncasecmp(line,"Poisson ratio	   ", 19) == 0)
-			fscanf(fp,":  %le\n", &ez->material.nu);
+		else if (strncasecmp(line, "Poisson ratio       ", 19) == 0)
+			fscanf(fp, ":  %le\n", &ez->material.nu);
 
-		else if (strncasecmp(line, "Mass density		", 19) == 0)
-			fscanf(fp,":  %le\n", &ez->material.rho);
+		else if (strncasecmp(line, "Mass density        ", 19) == 0)
+			fscanf(fp, ":  %le\n", &ez->material.rho);
 
-		else if (strncasecmp(line, "Gravity			 ", 19) == 0) {
+		else if (strncasecmp(line, "Gravity             ", 19) == 0) {
 			if (bfm_force_create(&ez->gravity, state, 2) < 0)
 				return -1;
 
@@ -90,7 +90,7 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 
 		else if (strncasecmp(line, "Boundary condition  ", 19) == 0) {
 			double val;
-			fscanf(fp, ":  %19s = %le : %49[^\n]s\n", arg, &val, arg2);
+			fscanf(fp, ":  %19s = %le : %[^\n]s\n", arg, &val, arg2);
 
 			bfm_condition_kind_t kind;
 
