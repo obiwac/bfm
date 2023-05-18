@@ -103,9 +103,39 @@ class Mesh:
 	@functools.cached_property
 	def indices(self):
 		if self.kind == Mesh.QUAD:
-			return self.__indices_quad
+			indices = self.__indices_quad
 
-		return self.__indices_simplex
+		else:
+			indices = self.__indices_simplex
+
+		n = self.c_mesh.n_nodes
+
+		# connect edges of two faces
+
+		for i in range(self.c_mesh.n_edges):
+			edge = self.c_mesh.edges[i]
+
+			# only count boundary edges
+
+			if edge.elems[1] >= 0:
+				continue
+
+			a = edge.nodes[0]
+			b = edge.nodes[1]
+
+			# first triangle
+
+			indices.append(a)
+			indices.append(b)
+			indices.append(a + n)
+
+			# second triangle
+
+			indices.append(b)
+			indices.append(b + n)
+			indices.append(a + n)
+
+		return indices
 
 	@functools.cached_property
 	def __line_indices_simplex(self):
