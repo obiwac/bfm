@@ -56,7 +56,7 @@ class Sim:
 		self.shader.mvp_matrix(mvp_matrix)
 
 		for instance in self.instances:
-			instance.draw()
+			instance.draw(self.shader)
 
 		# draw lines
 
@@ -64,4 +64,4 @@ class Sim:
 		self.line_shader.mvp_matrix(mvp_matrix)
 
 		for instance in self.instances:
-			instance.draw(True)
+			instance.draw(self.shader, True)

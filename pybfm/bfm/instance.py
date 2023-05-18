@@ -2,10 +2,12 @@ from .condition import Condition
 from .libbfm import lib, ffi
 from .mesh import Mesh
 from .obj import Obj
+from .shader import Shader
 from .state import default_state
 
 import ctypes
 import functools
+import math
 
 import pyglet.gl as gl
 
@@ -99,6 +101,20 @@ class Instance:
 
 		return 2 * effects
 
+	@functools.cached_property
+	def max_effect(self):
+		mesh = self.obj.mesh
+		max_effect = 0
+
+		for i in range(mesh.c_mesh.n_nodes):
+			x = self.c_instance.effects[i * 2 + 0]
+			y = self.c_instance.effects[i * 2 + 1]
+
+			effect = math.sqrt(x ** 2 + y ** 2)
+			max_effect = max(max_effect, effect)
+
+		return max_effect
+
 	def update_effects(self):
 		gl.glBindVertexArray(self.vao)
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.effects_vbo)
@@ -110,7 +126,9 @@ class Instance:
 			(effects_t) (*self.effects),
 			gl.GL_STATIC_DRAW)
 
-	def draw(self, lines = False):
+	def draw(self, shader: Shader, lines = False):
+		shader.max_effect(self.max_effect)
+
 		mesh = self.obj.mesh
 		gl.glBindVertexArray(self.vao)
 
