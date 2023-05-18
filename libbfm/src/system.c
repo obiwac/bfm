@@ -450,6 +450,7 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 					continue;
 
 				// found on https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
+
 				double const dx = mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0];
 				double const dy = mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1];
 
