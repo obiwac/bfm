@@ -404,7 +404,7 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	double c;
 	// Planar strains
 	if (1) {
-		a = material->E * (1 - material->nu) / (1 + material->nu) * (1 - 2 * material->nu);
+		a = material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu);
 		b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
 		c = material->E / (2 * (1 + material->nu));
 	}
