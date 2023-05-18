@@ -4,7 +4,6 @@ faulthandler.enable()
 import math
 
 from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Mesh_wavefront, Material, Obj, Rule_gauss_legendre, Sim
-
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
 
