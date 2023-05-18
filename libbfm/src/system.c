@@ -4,8 +4,6 @@
 
 int bfm_system_create(bfm_system_t* system, bfm_state_t* state, size_t n) {
 	system->state = state;
-	system->kind = BFM_SYSTEM_KIND_GENERIC;
-
 	system->n = n;
 
 	if (bfm_perm_create(&system->perm, state, n) < 0)
@@ -100,7 +98,7 @@ static void get_elem(elem_t* elem, bfm_mesh_t* mesh, size_t i) {
 	}
 }
 
-static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces, double const a, double const b, double const c) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
 	bfm_material_t* const material = obj->material;
@@ -110,12 +108,6 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 
 	bfm_matrix_t* const stiffness_mat = &system->A;
 	bfm_vec_t* const forces_vec = &system->b;
-
-	// constants
-
-	double const a = material->E / (1 - material->nu * material->nu);
-	double const b = material->E * material->nu / (1 - material->nu * material->nu);
-	double const c = material->E / (2 * (1 + material->nu));
 
 	// vectors to be used later
 
@@ -230,15 +222,15 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 	bfm_material_t* const material = obj->material;
 	bfm_rule_t* const rule = obj->rule;
 	bfm_shape_t* const shape = &rule->shape;
-	size_t dim = rule->dim;
+	size_t const dim = rule->dim;
 
 	bfm_matrix_t* const stiffness_mat = &system->A;
 	bfm_vec_t* const forces_vec = &system->b;
 
 	// constants
 
-	double const a = material->E / (1 - material->nu * material->nu);
-	double const b = material->E * material->nu / (1 - material->nu * material->nu);
+	double const a = material->E * (1 - material->nu) / (1 + material->nu) * (1 - 2 * material->nu);
+	double const b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
 
 	// vectors to be used later
@@ -379,9 +371,46 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 	}
 }
 
-int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition, double value) {
+	for (size_t i = 0; i < mesh->n_nodes; i++) {
+		if (!condition->nodes[i])
+			continue;
+		
+		double tx = 0;
+		double ty = 0;
+
+		for (size_t j = 0; j < mesh->n_edges; j++) {
+			if (mesh->edges[j].nodes[0] == i && (mesh->edges[j].elems[1] == -1)) {
+				size_t const n2 = mesh->edges[j].nodes[1];
+
+				double const length = sqrt(
+					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+
+				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
+				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
+			}
+			else if (mesh->edges[j].nodes[1] == i && (mesh->edges[j].elems[1] == -1)) {
+				size_t const n2 = mesh->edges[j].nodes[0];
+
+				double const length = sqrt(
+					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+
+				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
+				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
+			}
+		}
+
+		apply_constraint(system, 2 * i + 0, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? tx : -ty));
+		apply_constraint(system, 2 * i + 1, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? ty : tx));
+	}
+}
+
+static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces, bool stress) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
+	bfm_material_t* const material = obj->material;
 	bfm_mesh_t* const mesh = obj->mesh;
 	size_t const n = mesh->n_nodes * mesh->dim;
 
@@ -398,16 +427,24 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	if (bfm_system_create(system, state, n) < 0)
 		return -1;
 
-	system->kind = BFM_SYSTEM_KIND_ELASTICITY;
-
 	// go through all elements
 
 	elem_t elem;
 
+	double const a = !stress ?
+		material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu) :
+		material->E / (1 - material->nu * material->nu);
+
+	double const b = !stress ?
+		material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu) :
+		material->E * material->nu / (1 - material->nu * material->nu);
+
+	double const c = material->E / (2 * (1 + material->nu));
+
 	for (size_t i = 0; i < mesh->n_elems; i++) {
 		get_elem(&elem, mesh, i);
 
-		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces) < 0)
+		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces, a, b, c) < 0)
 			return -1;
 	}
 
@@ -457,9 +494,9 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 
 				// length cancel : jac = length / 2 && vector = delta / length
 				system->b.data[n1 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
-				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * dx;
-				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * dy;
-				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : -dx);
+				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
+				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
+				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
 			}
 		}
 	}
@@ -467,7 +504,15 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	return 0;
 }
 
-int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+int bfm_system_create_planar_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+	return create_planar(system, instance, n_forces, forces, false);
+}
+
+int bfm_system_create_planar_stress(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+	return create_planar(system, instance, n_forces, forces, true);
+}
+
+int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
 	bfm_mesh_t* const mesh = obj->mesh;
@@ -485,8 +530,6 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 
 	if (bfm_system_create(system, state, n) < 0)
 		return -1;
-
-	system->kind = BFM_SYSTEM_KIND_ELASTICITY;
 
 	// go through all elements
 

@@ -4,6 +4,7 @@ faulthandler.enable()
 import math
 
 from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Mesh_wavefront, Material, Obj, Rule_gauss_legendre, Sim
+
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
 
@@ -44,6 +45,7 @@ obj = Obj(mesh, material, rule)
 # add the instance to the state
 
 instance = Instance(obj)
+
 instance.add_condition(boundary_condition_x)
 instance.add_condition(boundary_condition_y)
 
@@ -54,7 +56,7 @@ gravity = Force_linear.EARTH_GRAVITY_2D
 # create simulation
 # run the simulation
 
-sim = Sim(Sim.DEFORMATION)
+sim = Sim(Sim.PLANAR_STRESS)
 
 sim.add_instance(instance)
 sim.add_force(gravity)

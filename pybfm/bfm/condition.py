@@ -5,12 +5,14 @@ from .state import default_state
 from collections.abc import Callable
 
 class Condition:
-	DIRICHLET_X = 0
-	DIRICHLET_Y = 1
-	NEUMANN_X = 2
-	NEUMANN_Y = 3
-	NEUMANN_NORMAL = 4
-	NEUMANN_TANGENT = 5
+	DIRICHLET_X       = 0
+	DIRICHLET_Y       = 1
+	NEUMANN_X         = 2
+	NEUMANN_Y         = 3
+	NEUMANN_NORMAL    = 4
+	NEUMANN_TANGENT   = 5
+	DIRICHLET_NORMAL  = 6
+	DIRICHLET_TANGENT = 7
 
 	def __init__(self, mesh: Mesh, kind: int):
 		self.c_condition = ffi.new("bfm_condition_t*")
