@@ -100,7 +100,7 @@ static void get_elem(elem_t* elem, bfm_mesh_t* mesh, size_t i) {
 	}
 }
 
-static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces, double const a, double const b, double const c) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
 	bfm_material_t* const material = obj->material;
@@ -110,12 +110,6 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 
 	bfm_matrix_t* const stiffness_mat = &system->A;
 	bfm_vec_t* const forces_vec = &system->b;
-
-	// constants
-
-	double const a = material->E / (1 - material->nu * material->nu);
-	double const b = material->E * material->nu / (1 - material->nu * material->nu);
-	double const c = material->E / (2 * (1 + material->nu));
 
 	// vectors to be used later
 
@@ -235,10 +229,10 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 	bfm_matrix_t* const stiffness_mat = &system->A;
 	bfm_vec_t* const forces_vec = &system->b;
 
+	
 	// constants
-
-	double const a = material->E / (1 - material->nu * material->nu);
-	double const b = material->E * material->nu / (1 - material->nu * material->nu);
+	double const a = material->E * (1 - material->nu) / (1 + material->nu) * (1 - 2 * material->nu);
+	double const b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
 	double const c = material->E / (2 * (1 + material->nu));
 
 	// vectors to be used later
@@ -382,6 +376,7 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
+	bfm_material_t* const material = obj->material;
 	bfm_mesh_t* const mesh = obj->mesh;
 	size_t const n = mesh->n_nodes * mesh->dim;
 
@@ -404,10 +399,26 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 
 	elem_t elem;
 
+	double a;
+	double b;
+	double c;
+	// Planar strains
+	if (1) {
+		a = material->E * (1 - material->nu) / (1 + material->nu) * (1 - 2 * material->nu);
+		b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
+		c = material->E / (2 * (1 + material->nu));
+	}
+	// Planar stress
+	else if (1) {
+		a = material->E / (1 - material->nu * material->nu);
+		b = material->E * material->nu / (1 - material->nu * material->nu);
+		c = material->E / (2 * (1 + material->nu));
+	}
+
 	for (size_t i = 0; i < mesh->n_elems; i++) {
 		get_elem(&elem, mesh, i);
 
-		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces) < 0)
+		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces, a, b, c) < 0)
 			return -1;
 	}
 
