@@ -37,13 +37,6 @@ class Sim:
 
 	def run(self):
 		assert not lib.bfm_sim_run(self.c_sim)
-	
-	@classmethod
-	def read_lepl1110(cls, mesh, name):
-		sim = cls(Sim.DEFORMATION)
-		c_str = ffi.new("char[]", bytes(name, "utf-8"))
-		assert not lib.bfm_sim_read_lepl1110(sim.c_sim, mesh.c_mesh, default_state, c_str)
-		return sim
 
 	# visualisation functions
 
