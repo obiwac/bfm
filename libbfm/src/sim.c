@@ -238,7 +238,7 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	}
 	fclose(fp);
 
-	bfm_material_t* material = state->alloc(sizeof *material);
+	bfm_material_t* const material = state->alloc(sizeof *material);
 	if (!material)
 		goto err_mat;
 	bfm_material_create(material, state, "basic", E, rho, nu);
@@ -272,8 +272,8 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 	instance->n_conditions = n_conds;
 
 	bfm_sim_add_instance(sim, instance);
-	rv = 0;
-	return rv;
+	
+	return 0;
 err_while:
 	fclose(fp);
 err_mat:
