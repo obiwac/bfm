@@ -251,11 +251,11 @@ class Mesh_lepl1110(Mesh):
 		self.kind = self.c_mesh.kind
 
 class Mesh_wavefront(Mesh):
-	def __init__(self, name: str):
+	def __init__(self, name: str, full: bool = False):
 		self.c_mesh = ffi.new("bfm_mesh_t*")
 
 		c_str = ffi.new("char[]", bytes(name, "utf-8"))
-		assert not lib.bfm_mesh_read_wavefront(self.c_mesh, default_state, c_str)
+		assert not lib.bfm_mesh_read_wavefront(self.c_mesh, default_state, c_str, full)
 
 		self.dim = self.c_mesh.dim
 		self.kind = self.c_mesh.kind
