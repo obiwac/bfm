@@ -17,8 +17,8 @@ class Rule(CRule):
 
 class Rule_gauss_legendre(CRule):
 	def __init__(self, dim: int, kind: int):
-		self.c_rule = ffi.new("bfm_rule_t*")
-		assert not lib.bfm_rule_create_gauss_legendre(self.c_rule, default_state, dim, kind)
+		c_rule = ffi.new("bfm_rule_t*")
+		assert not lib.bfm_rule_create_gauss_legendre(c_rule, default_state, dim, kind)
 
 		super().__init__(c_rule)
 
