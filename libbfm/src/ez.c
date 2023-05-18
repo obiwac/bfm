@@ -125,7 +125,10 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 				bfm_domain_t* const domain = &mesh->domains[i];
 
 				for (size_t j = 0; j < domain->n_elements; j++)
-					condition->nodes[domain->elements[j]] = true;
+					for (size_t k = 0; k < 2; k++) {
+						size_t node = mesh->edges[domain->elements[j]].nodes[k];
+						condition->nodes[node] = true;
+					}
 
 				break;
 			}

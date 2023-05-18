@@ -3,5 +3,5 @@ Young modulus      :  2.1100000e+11
 Poisson ratio      :  3.0000000e-01  
 Mass density       :  7.8500000e+03  
 Gravity            :  9.8100000e+00  
-Boundary condition :  Dirichlet-X        =  0.0000000e+00 : Symetry
+Boundary condition :  Dirichlet-X        =  0.0000000e+00 : Symmetry
 Boundary condition :  Dirichlet-Y        =  0.0000000e+00 : Bottom
