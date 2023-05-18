@@ -125,6 +125,10 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	// read edges
 	fscanf(fp, "Number of edges %zu\n", &mesh->n_edges);
 	mesh->edges = state->alloc(mesh->n_edges * sizeof *mesh->edges);
+	
+	if (mesh->edges == NULL)
+		return -1;
+
 	for (size_t i = 0; i < mesh->n_edges; i++)
 		fscanf(fp, "\t%zu :\t%zu\t%zu\n", &mesh->edges->elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
 	
