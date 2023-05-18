@@ -49,15 +49,18 @@ class Mesh:
 	def __indices_simplex(self):
 		indices = []
 
-		for i in range(self.c_mesh.n_elems):
-			indices.append(self.c_mesh.elems[i * 3 + 0])
-			indices.append(self.c_mesh.elems[i * 3 + 1])
-			indices.append(self.c_mesh.elems[i * 3 + 2])
+		n = self.c_mesh.n_nodes
+		elems = self.c_mesh.elems
 
 		for i in range(self.c_mesh.n_elems):
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 0])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 1])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 2])
+			indices.append(elems[i * 3 + 0])
+			indices.append(elems[i * 3 + 1])
+			indices.append(elems[i * 3 + 2])
+
+		for i in range(self.c_mesh.n_elems):
+			indices.append(n + elems[i * 3 + 0])
+			indices.append(n + elems[i * 3 + 1])
+			indices.append(n + elems[i * 3 + 2])
 
 		return indices
 
@@ -65,34 +68,37 @@ class Mesh:
 	def __indices_quad(self):
 		indices = []
 
+		n = self.c_mesh.n_nodes
+		elems = self.c_mesh.elems
+
 		# OpenGL doesn't know what quads are
 		# so they have to be turned into two triangles
 
 		for i in range(self.c_mesh.n_elems):
 			# first triangle
 
-			indices.append(self.c_mesh.elems[i * 4 + 0])
-			indices.append(self.c_mesh.elems[i * 4 + 1])
-			indices.append(self.c_mesh.elems[i * 4 + 3])
+			indices.append(elems[i * 4 + 0])
+			indices.append(elems[i * 4 + 1])
+			indices.append(elems[i * 4 + 3])
 
 			# second triangle
 
-			indices.append(self.c_mesh.elems[i * 4 + 1])
-			indices.append(self.c_mesh.elems[i * 4 + 2])
-			indices.append(self.c_mesh.elems[i * 4 + 3])
+			indices.append(elems[i * 4 + 1])
+			indices.append(elems[i * 4 + 2])
+			indices.append(elems[i * 4 + 3])
 
 		for i in range(self.c_mesh.n_elems):
 			# first triangle
 
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 0])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 1])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 3])
+			indices.append(n + elems[i * 4 + 0])
+			indices.append(n + elems[i * 4 + 1])
+			indices.append(n + elems[i * 4 + 3])
 
 			# second triangle
 
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 1])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 2])
-			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 3])
+			indices.append(n + elems[i * 4 + 1])
+			indices.append(n + elems[i * 4 + 2])
+			indices.append(n + elems[i * 4 + 3])
 
 		return indices
 
