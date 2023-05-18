@@ -127,7 +127,7 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		return -1;
 
 	for (size_t i = 0; i < mesh->n_edges; i++) {
-		fscanf(fp, "\t%zu :\t%zu\t%zu\n", &mesh->edges->elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
+		fscanf(fp, "\t%zd :\t%zu\t%zu\n", &mesh->edges[i].elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
 		mesh->edges->elems[1] = -1;
 	}
 	
