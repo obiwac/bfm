@@ -79,6 +79,7 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 				return -1;
 
 			fscanf(fp, ":  %le\n", &vec->data[1]);
+			vec->data[1] *= -1;
 
 			bfm_force_set_linear(&ez->gravity, vec);
 
