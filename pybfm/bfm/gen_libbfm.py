@@ -21,6 +21,7 @@ if __name__ == "__main__":
 		"bfm/obj.h",
 		"bfm/instance.h",
 		"bfm/sim.h",
+		"bfm/ez.h",
 		"bfm/perm.h",
 		"bfm/system.h",
 	]
