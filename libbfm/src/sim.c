@@ -154,7 +154,7 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
 
 	// From lepl1110 fem.c
 	while (!feof(fp)) {
-        fscanf(fp, "%19[^\n]s \n", &line);
+        fscanf(fp, "%19[^\n]s \n", line);
         if (strncasecmp(line, "Type of problem     ", 19) == 0) {
             fscanf(fp, ":  %[^\n]s \n", &arg);
 
