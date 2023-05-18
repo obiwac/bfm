@@ -126,8 +126,10 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	if (mesh->edges == NULL)
 		return -1;
 
-	for (size_t i = 0; i < mesh->n_edges; i++)
+	for (size_t i = 0; i < mesh->n_edges; i++) {
 		fscanf(fp, "\t%zu :\t%zu\t%zu\n", &mesh->edges->elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
+		mesh->edges->elems[1] = -1;
+	}
 	
 	// read elements
 
@@ -171,14 +173,6 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 		}
 		fscanf(fp, "\n");
 	}
-
-	if (compute_edges(mesh) < 0) {
-		state->free(mesh->coords); // TODO idiosyncratic
-		state->free(mesh->elems); // TODO idiosyncratic
-
-		goto err_kind;
-	}
-
 	// success
 
 	rv = 0;
