@@ -77,4 +77,6 @@ int bfm_instance_write_lepl1110(bfm_instance_t* instance, size_t shift, char con
 	}
 	fprintf(fp, "\n");
 	fclose(fp);
+	
+	return 0;
 }
