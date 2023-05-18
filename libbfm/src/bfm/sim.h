@@ -4,9 +4,10 @@
 #include <bfm/instance.h>
 
 typedef enum {
-	BFM_SIM_KIND_PLANAR_STRAINS, // deplacement
-	BFM_SIM_KIND_PLANAR_STRESS, // force
-	BFM_SIM_KIND_AXISYMMETRIC_STRAINS, // deplacement
+	BFM_SIM_KIND_NONE                = 0,
+	BFM_SIM_KIND_PLANAR_STRAIN       = 1, // deplacement
+	BFM_SIM_KIND_PLANAR_STRESS       = 2, // force
+	BFM_SIM_KIND_AXISYMMETRIC_STRAIN = 3, // deplacement
 } bfm_sim_kind_t;
 
 typedef struct {
@@ -30,5 +31,3 @@ int bfm_sim_set_n_forces(bfm_sim_t* sim, size_t n_forces);
 int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force);
 
 int bfm_sim_run(bfm_sim_t* sim);
-
-int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, char* name);
