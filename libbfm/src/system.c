@@ -454,7 +454,7 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 				double const dx = mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0];
 				double const dy = mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1];
 
-				// jac = length / 2
+				// length cancel : jac = length / 2 && vector = delta / length
 				system->b.data[n1 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
 				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * dx;
 				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * dy;
