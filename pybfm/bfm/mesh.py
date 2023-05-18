@@ -31,8 +31,17 @@ class Mesh:
 	def coords(self):
 		coords = []
 
-		for i in range(self.c_mesh.n_nodes * self.dim):
-			coords.append(self.c_mesh.coords[i])
+		for i in range(self.c_mesh.n_nodes):
+			coords.append(self.c_mesh.coords[i * 2 + 0])
+			coords.append(self.c_mesh.coords[i * 2 + 1])
+			coords.append(-0.1)
+
+		for i in range(self.c_mesh.n_nodes):
+			coords.append(self.c_mesh.coords[i * 2 + 0])
+			coords.append(self.c_mesh.coords[i * 2 + 1])
+			coords.append(0.1)
+
+		print("coords", coords)
 
 		return coords
 
@@ -40,8 +49,15 @@ class Mesh:
 	def __indices_simplex(self):
 		indices = []
 
-		for i in range(3 * self.c_mesh.n_elems):
-			indices.append(self.c_mesh.elems[i])
+		for i in range(self.c_mesh.n_elems):
+			indices.append(self.c_mesh.elems[i * 3 + 0])
+			indices.append(self.c_mesh.elems[i * 3 + 1])
+			indices.append(self.c_mesh.elems[i * 3 + 2])
+
+		for i in range(self.c_mesh.n_elems):
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 0])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 1])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 3 + 2])
 
 		return indices
 
@@ -65,6 +81,19 @@ class Mesh:
 			indices.append(self.c_mesh.elems[i * 4 + 2])
 			indices.append(self.c_mesh.elems[i * 4 + 3])
 
+		for i in range(self.c_mesh.n_elems):
+			# first triangle
+
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 0])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 1])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 3])
+
+			# second triangle
+
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 1])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 2])
+			indices.append(self.c_mesh.elems[(self.c_mesh.n_elems + i) * 4 + 3])
+
 		return indices
 
 	@functools.cached_property
@@ -78,21 +107,40 @@ class Mesh:
 	def __line_indices_simplex(self):
 		indices = []
 
+		n = self.c_mesh.n_nodes
+		elems = self.c_mesh.elems
+
 		for i in range(self.c_mesh.n_elems):
 			# first line
 
-			indices.append(self.c_mesh.elems[i * 3 + 0])
-			indices.append(self.c_mesh.elems[i * 3 + 1])
+			indices.append(elems[i * 3 + 0])
+			indices.append(elems[i * 3 + 1])
 
 			# second line
 
-			indices.append(self.c_mesh.elems[i * 3 + 1])
-			indices.append(self.c_mesh.elems[i * 3 + 2])
+			indices.append(elems[i * 3 + 1])
+			indices.append(elems[i * 3 + 2])
 
 			# third line
 
-			indices.append(self.c_mesh.elems[i * 3 + 2])
-			indices.append(self.c_mesh.elems[i * 3 + 0])
+			indices.append(elems[i * 3 + 2])
+			indices.append(elems[i * 3 + 0])
+
+		for i in range(self.c_mesh.n_elems):
+			# first line
+
+			indices.append(n + elems[i * 3 + 0])
+			indices.append(n + elems[i * 3 + 1])
+
+			# second line
+
+			indices.append(n + elems[i * 3 + 1])
+			indices.append(n + elems[i * 3 + 2])
+
+			# third line
+
+			indices.append(n + elems[i * 3 + 2])
+			indices.append(n + elems[i * 3 + 0])
 
 		return indices
 
@@ -100,26 +148,50 @@ class Mesh:
 	def __line_indices_quad(self):
 		indices = []
 
+		n = self.c_mesh.n_nodes
+		elems = self.c_mesh.elems
+
 		for i in range(self.c_mesh.n_elems):
 			# first line
 
-			indices.append(self.c_mesh.elems[i * 4 + 0])
-			indices.append(self.c_mesh.elems[i * 4 + 1])
+			indices.append(elems[i * 4 + 0])
+			indices.append(elems[i * 4 + 1])
 
 			# second line
 
-			indices.append(self.c_mesh.elems[i * 4 + 1])
-			indices.append(self.c_mesh.elems[i * 4 + 2])
+			indices.append(elems[i * 4 + 1])
+			indices.append(elems[i * 4 + 2])
 
 			# third line
 
-			indices.append(self.c_mesh.elems[i * 4 + 2])
-			indices.append(self.c_mesh.elems[i * 4 + 3])
+			indices.append(elems[i * 4 + 2])
+			indices.append(elems[i * 4 + 3])
 
 			# fourth line
 
-			indices.append(self.c_mesh.elems[i * 4 + 3])
-			indices.append(self.c_mesh.elems[i * 4 + 0])
+			indices.append(elems[i * 4 + 3])
+			indices.append(elems[i * 4 + 0])
+
+		for i in range(self.c_mesh.n_elems):
+			# first line
+
+			indices.append(n + elems[i * 4 + 0])
+			indices.append(n + elems[i * 4 + 1])
+
+			# second line
+
+			indices.append(n + elems[i * 4 + 1])
+			indices.append(n + elems[i * 4 + 2])
+
+			# third line
+
+			indices.append(n + elems[i * 4 + 2])
+			indices.append(n + elems[i * 4 + 3])
+
+			# fourth line
+
+			indices.append(n + elems[i * 4 + 3])
+			indices.append(n + elems[i * 4 + 0])
 
 		return indices
 

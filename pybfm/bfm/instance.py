@@ -49,7 +49,7 @@ class Instance:
 			(coords_t) (*mesh.coords),
 			gl.GL_STATIC_DRAW)
 
-		gl.glVertexAttribPointer(0, mesh.dim, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(0)
 
 		# create effects VBO
@@ -59,7 +59,7 @@ class Instance:
 		gl.glGenBuffers(1, ctypes.byref(self.effects_vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.effects_vbo)
 
-		gl.glVertexAttribPointer(1, mesh.dim, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(1, 2, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(1)
 
 		# create IBO
