@@ -2,6 +2,8 @@ import ctypes
 
 import pyglet.gl as gl
 
+from .matrix import Matrix
+
 class Shader_error(Exception):
 	def __init__(self, msg):
 		self.msg = msg
@@ -54,8 +56,22 @@ class Shader:
 		gl.glDeleteShader(self.vert_shader)
 		gl.glDeleteShader(self.frag_shader)
 
+		# uniforms
+
+		self.mvp_location = self.find_uniform(b"mvp_matrix")
+		self.max_effect_location = self.find_uniform(b"max_effect")
+
 	def __del__(self):
 		gl.glDeleteProgram(self.program)
 
+	def find_uniform(self, name):
+		return gl.glGetUniformLocation(self.program, ctypes.create_string_buffer(name))
+
 	def use(self):
 		gl.glUseProgram(self.program)
+
+	def mvp_matrix(self, mvp_matrix: Matrix):
+		gl.glUniformMatrix4fv(self.mvp_location, 1, gl.GL_FALSE, (gl.GLfloat * 16) (*sum(mvp_matrix.data, [])))
+
+	def max_effect(self, max_effect: float):
+		gl.glUniform1f(self.max_effect_location, max_effect)

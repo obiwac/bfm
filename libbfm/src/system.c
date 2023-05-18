@@ -369,7 +369,8 @@ static void apply_constraint(bfm_system_t* system, size_t node, double value) {
 }
 
 static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
-	size_t shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
+	size_t const shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
+
 	for (size_t j = 0; j < mesh->n_nodes; j++) {
 		if (!condition->nodes[j])
 			continue;
@@ -432,7 +433,8 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
-				size_t shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+
 				system->b.data[n1 * 2 + shift] += jacobian * condition->value;
 				system->b.data[n2 * 2 + shift] += jacobian * condition->value;
 			}
@@ -448,6 +450,7 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 					continue;
 
 				// found on https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
+
 				double const dx = mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0];
 				double const dy = mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1];
 
@@ -527,7 +530,8 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
-				size_t shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+
 				system->b.data[n1 * 2 + shift] += fac * jacobian * condition->value;
 				system->b.data[n2 * 2 + shift] += fac * jacobian * condition->value;
 			}

@@ -19,7 +19,7 @@ typedef struct {
 	// maybe rename src and dst ?
 	size_t nodes[2];
 	// the two faces that are adjacent to the edges, elem[1] is -1 if the edges is on the boundary
-	size_t elems[2];
+	ssize_t elems[2];
 } bfm_edge_t;
 
 typedef struct {
@@ -43,7 +43,7 @@ typedef struct {
 	bfm_edge_t* edges;
 
 	size_t n_domains;
-	bfm_domain_t** domains;
+	bfm_domain_t* domains;
 	// bool* boundary_nodes;
 } bfm_mesh_t;
 
