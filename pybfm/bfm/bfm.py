@@ -70,7 +70,7 @@ class Window(pyglet.window.Window):
 
 		gl.glDisable(gl.GL_CULL_FACE)
 
-		gl.glClearColor(0.4, 0.0, 0.2, 0.0)
+		gl.glClearColor(1, 1, 1, 0)
 		self.clear()
 
 		if global_bfm.current_sim is not None:
