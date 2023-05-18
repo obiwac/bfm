@@ -195,11 +195,11 @@ static double matrix_band_get(bfm_matrix_t* matrix, size_t i, size_t j) {
 		return BFM_NAN;
 
 	if (BFM_ABS((ssize_t) i - (ssize_t) j) > (ssize_t) k)
-		return 0.;
+		return 0;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		j + i * (2 * k + 1) :
-		i + j * (2 * k + 1);
+		j + i * 2 * k :
+		i + j * 2 * k;
 
 	return matrix->band.data[idx];
 }
@@ -215,8 +215,8 @@ static int matrix_band_set(bfm_matrix_t* matrix, size_t i, size_t j, double valu
 		return fabs(value) < BFM_PIVOT_EPS ? 0 : -1;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		j + i * (2 * k + 1) :
-		i + j * (2 * k + 1);
+		j + i * 2 * k :
+		i + j * 2 * k;
 
 	matrix->band.data[idx] = value;
 	return 0;
@@ -233,8 +233,8 @@ static int matrix_band_add(bfm_matrix_t* matrix, size_t i, size_t j, double valu
 		return fabs(value) < BFM_PIVOT_EPS ? 0 : -1;
 
 	size_t const idx = matrix->major == BFM_MATRIX_MAJOR_ROW ?
-		j + i * (2 * k + 1) :
-		i + j * (2 * k + 1);
+		j + i * 2 * k :
+		i + j * 2 * k;
 
 	matrix->band.data[idx] += value;
 	return 0;
@@ -404,7 +404,12 @@ int bfm_matrix_copy(bfm_matrix_t* matrix, bfm_matrix_t* src) {
 	for (size_t i = 0; i < matrix->m; i++) {
 		for (size_t j = 0; j < matrix->m; j++) {
 			double const val = bfm_matrix_get(src, i, j);
-			bfm_matrix_set(matrix, i, j, val);
+
+			if (BFM_IS_NAN(val))
+				return -1;
+
+			if (bfm_matrix_set(matrix, i, j, val) < 0)
+				return -1;
 		}
 	}
 
