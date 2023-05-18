@@ -50,4 +50,3 @@ class Sim:
 
 		for instance in self.instances:
 			instance.draw()
-
