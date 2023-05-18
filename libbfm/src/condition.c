@@ -14,10 +14,6 @@ int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mes
 		return -1;
 
 	memset(condition->nodes, 0, size);
-
-	condition->values = state->alloc(2 * sizeof *condition->values);
-	memset(condition->values, 0, 2 * sizeof *condition->values);
-
 	return 0;
 }
 
@@ -25,7 +21,6 @@ int bfm_condition_destroy(bfm_condition_t* condition) {
 	bfm_state_t* const state = condition->state;
 
 	state->free(condition->nodes);
-	state->free(condition->values);
 
 	return 0;
 }

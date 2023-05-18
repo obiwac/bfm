@@ -3,8 +3,10 @@
 #include <bfm/mesh.h>
 
 typedef enum {
-	BFM_CONDITION_KIND_DIRICHLET,
-	BFM_CONDITION_KIND_NEUMANN,
+	BFM_CONDITION_KIND_DIRICHLET_X,
+	BFM_CONDITION_KIND_DIRICHLET_Y,
+	BFM_CONDITION_KIND_NEUMANN_X,
+	BFM_CONDITION_KIND_NEUMANN_Y,
 } bfm_condition_kind_t;
 
 typedef struct {
@@ -13,7 +15,7 @@ typedef struct {
 
 	bfm_condition_kind_t kind;
 
-	double* values;
+	double value;
 	
 	// for each node of the mesh, "true" indicates it's part of this boundary condition
 

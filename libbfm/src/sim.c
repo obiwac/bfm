@@ -202,22 +202,22 @@ int bfm_sim_read_lepl1110(bfm_sim_t* sim, bfm_mesh_t* mesh, bfm_state_t* state, 
             fscanf(fp, ":  %19s = %le : %[^\n]s\n", &arg, &val, &arg2);
 			bfm_condition_kind_t kind;
             if (strncasecmp(arg, "Dirichlet-X", 19) == 0)
-                kind = BFM_CONDITION_KIND_DIRICHLET;
+                kind = BFM_CONDITION_KIND_DIRICHLET_X;
 
             else if (strncasecmp(arg, "Dirichlet-Y", 19) == 0)
-                kind = BFM_CONDITION_KIND_DIRICHLET;
+                kind = BFM_CONDITION_KIND_DIRICHLET_Y;
 
             else if (strncasecmp(arg, "Neumann-X", 19) == 0)
-                kind = BFM_CONDITION_KIND_NEUMANN;
+                kind = BFM_CONDITION_KIND_NEUMANN_X;
 
             else if (strncasecmp(arg, "Neumann-Y", 19) == 0)
-                kind = BFM_CONDITION_KIND_NEUMANN;
+                kind = BFM_CONDITION_KIND_NEUMANN_Y;
 
 			bfm_condition_t* condition = state->alloc(sizeof *condition);
 			if (!condition)
 				goto err_while;
 			bfm_condition_create(condition, state, mesh, kind);
-			condition->values[0] = condition->values[1] = val;
+			condition->value = val;
 
 			for (size_t i = 0; i < mesh->n_domains; i++) {
 				if (strncasecmp(mesh->domains[i]->name, arg2, 25) == 0) {
