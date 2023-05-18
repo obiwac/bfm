@@ -65,21 +65,3 @@ int bfm_instance_add_condition(bfm_instance_t* instance, bfm_condition_t* condit
 
 	return 0;
 }
-
-int bfm_instance_write_lepl1110(bfm_instance_t* instance, size_t shift, char const* filename) {
-	FILE* const fp = fopen(filename, "w");
-	
-	if (!fp)
-		return -1;
-
-	fprintf(fp, "Number of nodes %zu\n", instance->obj->mesh->n_nodes);
-	for (size_t i = 0; i < instance->obj->mesh->n_nodes; i++) {
-		fprintf(fp, "%14.7e", instance->effects[i * 2 + shift]);
-		if (i + 1 != instance->n_effects && (i + 1) % 3 == 0)
-			fprintf(fp, "\n");
-	}
-	fprintf(fp, "\n");
-	fclose(fp);
-	
-	return 0;
-}
