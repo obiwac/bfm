@@ -369,7 +369,8 @@ static void apply_constraint(bfm_system_t* system, size_t node, double value) {
 }
 
 static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
-	size_t shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
+	size_t const shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
+
 	for (size_t j = 0; j < mesh->n_nodes; j++) {
 		if (!condition->nodes[j])
 			continue;
