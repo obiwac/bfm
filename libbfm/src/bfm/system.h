@@ -23,4 +23,6 @@ int bfm_system_renumber(bfm_system_t* system);
 
 // system creation functions per kind
 
-int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces);
+int bfm_system_create_planar_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces);
+int bfm_system_create_planar_stress(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces);
+int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces);

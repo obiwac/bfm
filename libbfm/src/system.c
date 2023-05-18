@@ -407,7 +407,7 @@ static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mes
 	}
 }
 
-int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces, bool stress) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
 	bfm_material_t* const material = obj->material;
@@ -431,21 +431,15 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 
 	elem_t elem;
 
-	double a;
-	double b;
-	double c;
-	// Planar strains
-	if (1) {
-		a = material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu);
-		b = material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu);
-		c = material->E / (2 * (1 + material->nu));
-	}
-	// Planar stress
-	else if (1) {
-		a = material->E / (1 - material->nu * material->nu);
-		b = material->E * material->nu / (1 - material->nu * material->nu);
-		c = material->E / (2 * (1 + material->nu));
-	}
+	double const a = !stress ?
+		material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu) :
+		material->E / (1 - material->nu * material->nu);
+
+	double const b = !stress ?
+		material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu) :
+		material->E * material->nu / (1 - material->nu * material->nu);
+
+	double const c = material->E / (2 * (1 + material->nu));
 
 	for (size_t i = 0; i < mesh->n_elems; i++) {
 		get_elem(&elem, mesh, i);
@@ -510,7 +504,15 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 	return 0;
 }
 
-int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+int bfm_system_create_planar_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+	return create_planar(system, instance, n_forces, forces, false);
+}
+
+int bfm_system_create_planar_stress(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
+	return create_planar(system, instance, n_forces, forces, true);
+}
+
+int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
 	bfm_mesh_t* const mesh = obj->mesh;

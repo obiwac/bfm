@@ -90,7 +90,9 @@ int bfm_sim_add_force(bfm_sim_t* sim, bfm_force_t* force) {
 
 // simulation run functions per kind
 
-static int run_deformation(bfm_sim_t* sim) {
+typedef int (*system_create_elasticity_fn_t) (bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces);
+
+static int run_elasticity(bfm_sim_t* sim, system_create_elasticity_fn_t system_create_fn) {
 	for (size_t i = 0; i < sim->n_instances; i++) {
 		bfm_instance_t* const instance = sim->instances[i];
 		bfm_obj_t* const obj = instance->obj;
@@ -101,7 +103,7 @@ static int run_deformation(bfm_sim_t* sim) {
 
 		bfm_system_t __attribute__((cleanup(bfm_system_destroy))) system;
 
-		if (bfm_system_create_elasticity(&system, instance, sim->n_forces, sim->forces) < 0)
+		if (system_create_fn(&system, instance, sim->n_forces, sim->forces) < 0)
 			return -1;
 
 		if (bfm_system_renumber(&system) < 0)
@@ -122,8 +124,17 @@ static int run_deformation(bfm_sim_t* sim) {
 }
 
 int bfm_sim_run(bfm_sim_t* sim) {
-	if (sim->kind == BFM_SIM_KIND_DEFORMATION)
-		return run_deformation(sim);
+	if (sim->kind == BFM_SIM_KIND_NONE)
+		return 0;
+
+	if (sim->kind == BFM_SIM_KIND_PLANAR_STRAIN)
+		return run_elasticity(sim, bfm_system_create_planar_strain);
+
+	if (sim->kind == BFM_SIM_KIND_PLANAR_STRESS)
+		return run_elasticity(sim, bfm_system_create_planar_stress);
+
+	if (sim->kind == BFM_SIM_KIND_AXISYMMETRIC_STRAIN)
+		return run_elasticity(sim, bfm_system_create_axisymmetric_strain);
 
 	return -1;
 }
