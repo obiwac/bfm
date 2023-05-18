@@ -48,13 +48,13 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 			fscanf(fp, ":  %[^\n]s \n", arg);
 
 			if (strncasecmp(arg, "Planar strains", 13) == 0)
-			   ez->sim.kind = BFM_SIM_KIND_DEFORMATION;
+			   ez->sim.kind = BFM_SIM_KIND_PLANAR_STRAIN;
 
 			else if (strncasecmp(arg, "Planar stresses", 13) == 0)
-			   ez->sim.kind = BFM_SIM_KIND_PLANAR_STRAINS;
+			   ez->sim.kind = BFM_SIM_KIND_PLANAR_STRESS;
 
 			else if (strncasecmp(arg, "Axi-symetric problem", 13) == 0)
-			   ez->sim.kind = BFM_SIM_KIND_AXISYMETRIC;
+			   ez->sim.kind = BFM_SIM_KIND_AXISYMMETRIC_STRAIN;
 		}
 
 		else if (strncasecmp(line, "Young modulus       ", 19) == 0)
