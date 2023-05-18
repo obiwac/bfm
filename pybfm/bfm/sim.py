@@ -1,6 +1,9 @@
+import pyglet.gl as gl
+
 from .force import Force
 from .instance import Instance
 from .libbfm import lib, ffi
+from .matrix import Matrix
 from .shader import Shader
 from .state import default_state
 
@@ -18,6 +21,7 @@ class Sim:
 
 		if kind == Sim.DEFORMATION:
 			self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
+			self.line_shader = Shader("shaders/sim/line_deformation.vert", "shaders/sim/deformation.frag")
 
 	def __del__(self):
 		assert not lib.bfm_sim_destroy(self.c_sim)
@@ -33,7 +37,7 @@ class Sim:
 		assert not lib.bfm_sim_run(self.c_sim)
 	
 	@classmethod
-	def bfm_sim_read_lepl1110(cls, mesh, name):
+	def read_lepl1110(cls, mesh, name):
 		sim = cls(Sim.DEFORMATION)
 		c_str = ffi.new("char[]", bytes(name, "utf-8"))
 		assert not lib.bfm_sim_read_lepl1110(sim.c_sim, mesh.c_mesh, default_state, c_str)
@@ -45,9 +49,19 @@ class Sim:
 		for instance in self.instances:
 			instance.update_effects()
 
-	def draw(self):
+	def draw(self, mvp_matrix: Matrix):
+		gl.glEnable(gl.GL_DEPTH_TEST)
+
 		self.shader.use()
+		self.shader.mvp_matrix(mvp_matrix)
 
 		for instance in self.instances:
-			instance.draw()
+			instance.draw(self.shader)
 
+		# draw lines
+
+		self.line_shader.use()
+		self.line_shader.mvp_matrix(mvp_matrix)
+
+		for instance in self.instances:
+			instance.draw(self.shader, True)
