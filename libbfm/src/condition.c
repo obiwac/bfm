@@ -4,6 +4,7 @@
 
 int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mesh_t* mesh, bfm_condition_kind_t kind) {
 	condition->state = state;
+
 	condition->mesh = mesh;
 	condition->kind = kind;
 
@@ -14,6 +15,7 @@ int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mes
 		return -1;
 
 	memset(condition->nodes, 0, size);
+
 	return 0;
 }
 

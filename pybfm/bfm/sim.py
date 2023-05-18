@@ -7,14 +7,12 @@ from .matrix import Matrix
 from .shader import Shader
 from .state import default_state
 
-class Sim:
+class CSim:
 	DEFORMATION = 0
 
-	def __init__(self, kind: int):
-		self.c_sim = ffi.new("bfm_sim_t*")
-		assert not lib.bfm_sim_create(self.c_sim, default_state, kind)
-
-		self.instances: list[Instance] = []
+	def __init__(self, c_sim, instances: list[Instance], kind: int):
+		self.c_sim = c_sim
+		self.instances = instances
 
 		# create shader, depending on simulation kind
 		# TODO in fine, make these package resources
@@ -22,9 +20,6 @@ class Sim:
 		if kind == Sim.DEFORMATION:
 			self.shader = Shader("shaders/sim/deformation.vert", "shaders/sim/deformation.frag")
 			self.line_shader = Shader("shaders/sim/line_deformation.vert", "shaders/sim/deformation.frag")
-
-	def __del__(self):
-		assert not lib.bfm_sim_destroy(self.c_sim)
 
 	def add_instance(self, instance: Instance):
 		assert not lib.bfm_sim_add_instance(self.c_sim, instance.c_instance)
@@ -35,13 +30,6 @@ class Sim:
 
 	def run(self):
 		assert not lib.bfm_sim_run(self.c_sim)
-	
-	@classmethod
-	def read_lepl1110(cls, mesh, name):
-		sim = cls(Sim.DEFORMATION)
-		c_str = ffi.new("char[]", bytes(name, "utf-8"))
-		assert not lib.bfm_sim_read_lepl1110(sim.c_sim, mesh.c_mesh, default_state, c_str)
-		return sim
 
 	# visualisation functions
 
@@ -65,3 +53,14 @@ class Sim:
 
 		for instance in self.instances:
 			instance.draw(self.shader, True)
+
+class Sim(CSim):
+	def __init__(self, kind: int):
+		c_sim = ffi.new("bfm_sim_t*")
+		assert not lib.bfm_sim_create(c_sim, default_state, kind)
+
+		instances: list[Instance] = []
+		super().__init__(c_sim, instances, kind)
+
+	def __del__(self):
+		assert not lib.bfm_sim_destroy(self.c_sim)

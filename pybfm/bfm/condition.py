@@ -9,7 +9,7 @@ class Condition:
 	DIRICHLET_Y = 1
 	NEUMANN_X = 2
 	NEUMANN_Y = 3
-	NEUMAN_NORMAL = 4
+	NEUMANN_NORMAL = 4
 	NEUMANN_TANGENT = 5
 
 	def __init__(self, mesh: Mesh, kind: int):
