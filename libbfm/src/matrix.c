@@ -100,14 +100,14 @@ static int matrix_full_lu(bfm_matrix_t* matrix) {
 				return -1;
 
 #if defined(WITH_BLAS)
-			cblas_daxpy(size - pivot_i - 1, - factor, matrix->full.data + pivot_i * size + pivot_i + 1, 1, matrix->full.data + i * size + pivot_i + 1, 1);
+			cblas_daxpy(size - pivot_i - 1, -factor, matrix->full.data + pivot_i * size + pivot_i + 1, 1, matrix->full.data + i * size + pivot_i + 1, 1);
 #else
 			for (size_t j = pivot_i + 1; j < size; j++) {
 				double const val_row_pivot = matrix_full_get(matrix, pivot_i, j);
 
 				// A[i][j] -= A[i][k] * A[k][j]
 
-				if (matrix_full_add(matrix, i, j, - factor * val_row_pivot) < 0)
+				if (matrix_full_add(matrix, i, j, -factor * val_row_pivot) < 0)
 					return -1;
 			}
 #endif
