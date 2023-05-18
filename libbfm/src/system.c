@@ -373,6 +373,38 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 	}
 }
 
+static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition, double value) {
+	
+	for (size_t i = 0; i < mesh->n_nodes; i++) {
+		if (!condition->nodes[i])
+			continue;
+		
+		double tx = 0;
+		double ty = 0;
+
+		for (size_t j = 0; j < mesh->n_edges; j++) {
+			if (mesh->edges[j].nodes[0] == i && (mesh->edges[j].elems[1] == -1)) {
+				size_t const n2 = mesh->edges[j].nodes[1];
+				double const length = sqrt(
+					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
+				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
+			}
+			else if (mesh->edges[j].nodes[1] == i && (mesh->edges[j].elems[1] == -1)) {
+				size_t const n2 = mesh->edges[j].nodes[0];
+				double const length = sqrt(
+					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
+				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
+			}
+		}
+		apply_constraint(system, 2 * i + 0, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? tx : -ty));
+		apply_constraint(system, 2 * i + 1, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? ty : tx));
+	}
+}
+
 int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance, size_t n_forces, bfm_force_t** forces) {
 	bfm_state_t* const state = instance->state;
 	bfm_obj_t* const obj = instance->obj;
@@ -468,9 +500,9 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 
 				// length cancel : jac = length / 2 && vector = delta / length
 				system->b.data[n1 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
-				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * dx;
-				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * dy;
-				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : -dx);
+				system->b.data[n1 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
+				system->b.data[n2 * 2 + 0] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dx : -dy);
+				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
 			}
 		}
 	}
