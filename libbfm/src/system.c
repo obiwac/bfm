@@ -530,7 +530,8 @@ int bfm_system_create_axisymmetric(bfm_system_t* system, bfm_instance_t* instanc
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
-				size_t shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
+
 				system->b.data[n1 * 2 + shift] += fac * jacobian * condition->value;
 				system->b.data[n2 * 2 + shift] += fac * jacobian * condition->value;
 			}
