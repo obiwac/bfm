@@ -439,6 +439,7 @@ int bfm_system_create_elasticity(bfm_system_t* system, bfm_instance_t* instance,
 				system->b.data[n2 * 2 + shift] += jacobian * condition->value;
 			}
 		}
+
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_NORMAL || condition->kind == BFM_CONDITION_KIND_NEUMANN_TANGENT) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
 				bfm_edge_t* const edge = &mesh->edges[i];
