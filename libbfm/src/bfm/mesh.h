@@ -7,6 +7,7 @@
 typedef enum {
 	BFM_ELEM_KIND_SIMPLEX = 3,
 	BFM_ELEM_KIND_QUAD = 4,
+	BFM_ELEM_KIND_QUADRATIC_TRIANGLE = 6,
 } bfm_elem_kind_t;
 
 typedef enum {
@@ -22,6 +23,12 @@ typedef struct {
 } bfm_edge_t;
 
 typedef struct {
+	char name[50];
+	size_t n_elements;
+	size_t* elements;
+} bfm_domain_t;
+
+typedef struct {
 	bfm_state_t* state;
 
 	size_t dim;
@@ -34,6 +41,9 @@ typedef struct {
 	double* coords;
 	size_t* elems;
 	bfm_edge_t* edges;
+
+	size_t n_domains;
+	bfm_domain_t* domains;
 	// bool* boundary_nodes;
 } bfm_mesh_t;
 

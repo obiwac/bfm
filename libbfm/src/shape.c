@@ -24,6 +24,15 @@ static int default_phi(bfm_shape_t* shape, double* point, double* phi) {
 		return 0;
 	}
 
+	if (shape->kind == BFM_ELEM_KIND_QUADRATIC_TRIANGLE) {
+		phi[0] = 1 - 3 * (xsi + eta) + 2 * (xsi + eta) * (xsi + eta);
+		phi[1] = xsi * (2 * xsi - 1);
+		phi[2] = eta * (2 * eta - 1);
+		phi[3] = 4 * xsi * (1 - xsi - eta);
+		phi[4] = 4 * xsi * eta;
+		phi[5] = 4 * eta * (1 - xsi - eta);
+	}
+
 	return -1;
 }
 
@@ -49,6 +58,25 @@ static int default_dphi(bfm_shape_t* shape, size_t wrt, double* point, double* d
 		dphi[3] = (wrt == 0 ?  1 - eta : -1 - xsi) / 4;
 
 		return 0;
+	}
+
+	if (shape->kind == BFM_ELEM_KIND_QUADRATIC_TRIANGLE) {
+		if (wrt == 0) {
+			dphi[0] = -3 + 4 * (xsi + eta);
+			dphi[1] = 4 * xsi - 1;
+			dphi[2] = 0;
+			dphi[3] = 4 - 8 * xsi - 4 * eta;
+			dphi[4] = 4 * eta;
+			dphi[5] = - 4 * eta;
+		}
+		else {
+			dphi[0] =  -3 + 4 * (xsi + eta);
+			dphi[1] = 0;
+			dphi[2] = 4 * eta - 1;
+			dphi[3] = - 4 * xsi;
+			dphi[4] = 4 * xsi;
+			dphi[5] = 4 - 4 * xsi - 8 * eta;
+		}
 	}
 
 	return -1;
