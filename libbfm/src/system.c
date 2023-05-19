@@ -458,7 +458,7 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				bfm_edge_t* const edge = &mesh->edges[i];
+				bfm_edge_t* const edge = &mesh->edges[j];
 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
@@ -471,7 +471,6 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
 
 				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
-
 				system->b.data[n1 * 2 + shift] += jacobian * condition->value;
 				system->b.data[n2 * 2 + shift] += jacobian * condition->value;
 			}
@@ -479,7 +478,7 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_NORMAL || condition->kind == BFM_CONDITION_KIND_NEUMANN_TANGENT) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				bfm_edge_t* const edge = &mesh->edges[i];
+				bfm_edge_t* const edge = &mesh->edges[j];
 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
@@ -552,7 +551,7 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
-				bfm_edge_t* const edge = &mesh->edges[i];
+				bfm_edge_t* const edge = &mesh->edges[j];
 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
