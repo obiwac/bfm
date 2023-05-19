@@ -106,6 +106,18 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 
 			else if (strncasecmp(arg, "Neumann-Y", 19) == 0)
 				kind = BFM_CONDITION_KIND_NEUMANN_Y;
+			
+			else if (strncasecmp(arg, "Neumann-Tangent", 19) == 0)
+				kind = BFM_CONDITION_KIND_NEUMANN_TANGENT;
+			
+			else if (strncasecmp(arg, "Neumann-Normal", 19) == 0)
+				kind = BFM_CONDITION_KIND_NEUMANN_NORMAL;
+			
+			else if (strncasecmp(arg, "Dirichlet-Normal", 19) == 0)
+				kind = BFM_CONDITION_KIND_DIRICHLET_NORMAL;
+			
+			else if (strncasecmp(arg, "Dirichlet-Tangent", 19) == 0)
+				kind = BFM_CONDITION_KIND_DIRICHLET_TANGENT;
 
 			else
 				return -1;
