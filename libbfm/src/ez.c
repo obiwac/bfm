@@ -117,7 +117,7 @@ int bfm_ez_lepl1110_create(bfm_ez_lepl1110_t* ez, bfm_state_t* state, bfm_mesh_t
 				kind = BFM_CONDITION_KIND_DIRICHLET_NORMAL;
 			
 			else if (strncasecmp(arg, "Dirichlet-Tangent", 19) == 0)
-				kind = BFM_CONDITION_KIND_DIRICHLET_TANGENT
+				kind = BFM_CONDITION_KIND_DIRICHLET_TANGENT;
 
 			else
 				return -1;
