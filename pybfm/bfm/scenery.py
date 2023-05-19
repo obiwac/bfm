@@ -58,6 +58,52 @@ class Scenery:
 
 		return self.__indices_simplex
 
+	@functools.cached_property
+	def normals(self):
+		normals = [0] * self.__c_mesh.n_nodes * self.mesh.dim
+
+		elems = self.__c_mesh.elems
+		coords = self.__c_mesh.coords
+
+		for i in range(self.__c_mesh.n_elems):
+			# only need three vertices to calculate element normal
+
+			a = elems[i * self.mesh.kind + 0]
+			b = elems[i * self.mesh.kind + 1]
+			c = elems[i * self.mesh.kind + 2]
+
+			# only need two vectors to calculate element normal
+
+			ab = (
+				coords[a * self.mesh.dim + 0] - coords[b * self.mesh.dim + 0],
+				coords[a * self.mesh.dim + 1] - coords[b * self.mesh.dim + 1],
+				coords[a * self.mesh.dim + 2] - coords[b * self.mesh.dim + 2],
+			)
+
+			ac = (
+				coords[a * self.mesh.dim + 0] - coords[c * self.mesh.dim + 0],
+				coords[a * self.mesh.dim + 1] - coords[c * self.mesh.dim + 1],
+				coords[a * self.mesh.dim + 2] - coords[c * self.mesh.dim + 2],
+			)
+
+			# take the cross product between ab and ac
+
+			n = (
+				 ab[1] * ac[2] - ab[2] * ac[1],
+				-ab[0] * ac[2] + ab[2] * ac[0],
+				 ab[0] * ac[1] - ab[1] * ac[0],
+			)
+
+			# add normal to each vertex
+
+			for j in range(self.mesh.kind):
+				vertex_i = elems[i * self.mesh.kind + j]
+
+				for k, component in enumerate(n):
+					normals[vertex_i * self.mesh.dim + k] += component
+
+		return normals
+
 	def gen_buffers(self):
 		# create VAO
 
@@ -80,6 +126,22 @@ class Scenery:
 
 		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
 		gl.glEnableVertexAttribArray(0)
+
+		# create normals VBO
+
+		self.normals_vbo = gl.GLuint(0)
+		gl.glGenBuffers(1, ctypes.byref(self.normals_vbo))
+		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.normals_vbo)
+
+		normals_t = gl.GLfloat * len(self.normals)
+
+		gl.glBufferData(gl.GL_ARRAY_BUFFER,
+			ctypes.sizeof(normals_t),
+			(normals_t) (*self.normals),
+			gl.GL_STATIC_DRAW)
+
+		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glEnableVertexAttribArray(1)
 
 		# create IBO
 
