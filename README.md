@@ -54,3 +54,11 @@ python examples/deformation.py
 ```
 
 That's it ;)
+
+To execute a specific LEPL1110 problem:
+
+```console
+python3 lepl1110.py path/to/mesh path/to/problem
+```
+
+This will output `U.txt` and `V.txt` in the `data` directory.
