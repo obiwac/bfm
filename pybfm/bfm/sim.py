@@ -39,11 +39,13 @@ class CSim:
 		for instance in self.instances:
 			instance.update_effects()
 
-	def draw(self, mvp_matrix: Matrix):
+	def draw(self, mvp_matrix: Matrix, anim: float):
 		gl.glEnable(gl.GL_DEPTH_TEST)
 
 		self.shader.use()
+
 		self.shader.mvp_matrix(mvp_matrix)
+		self.shader.anim(anim)
 
 		for instance in self.instances:
 			instance.draw(self.shader)
@@ -51,10 +53,12 @@ class CSim:
 		# draw lines
 
 		self.line_shader.use()
+
 		self.line_shader.mvp_matrix(mvp_matrix)
+		self.line_shader.anim(anim)
 
 		for instance in self.instances:
-			instance.draw(self.shader, True)
+			instance.draw(self.line_shader, True)
 
 class Sim(CSim):
 	def __init__(self, kind: int):

@@ -27,15 +27,22 @@ class Window(pyglet.window.Window):
 
 		# orbit camera
 
+		self.default_recoil = 1
+		self.default_rotation = [0, 0]
+		self.default_origin = [0, 0, 0]
+
 		self.orbit_defaults(True)
 
 		self.mv_matrix = Matrix()
 		self.p_matrix = Matrix()
 
+		self.time = 0
+		self.anim_state = 2
+
 	def orbit_defaults(self, set_real = False):
-		self.target_recoil = 1
-		self.target_rotation = [0, 0]
-		self.target_origin = [0, 0, 0]
+		self.target_recoil = self.default_recoil
+		*self.target_rotation, = self.default_rotation
+		*self.target_origin, = self.default_origin
 
 		if set_real:
 			self.recoil = self.target_recoil
@@ -51,6 +58,8 @@ class Window(pyglet.window.Window):
 		return val + fac * (target - val)
 
 	def update(self, dt):
+		self.time += dt
+
 		self.recoil = self.__anim(self.target_recoil, self.recoil, dt, 10)
 
 		self.rotation[0] = self.__anim(self.target_rotation[0], self.rotation[0], dt, 20)
@@ -90,8 +99,10 @@ class Window(pyglet.window.Window):
 
 		# draw simulation
 
+		anim = math.sin(self.time) / 2 + .5
+
 		if self.current_sim is not None:
-			self.current_sim.draw(mvp_matrix)
+			self.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -131,6 +142,14 @@ class Window(pyglet.window.Window):
 		if key == pyglet.window.key.SPACE:
 			self.orbit_defaults()
 
+		if key == pyglet.window.key.C:
+			print(f"bfm.set_default_recoil({self.target_recoil})")
+			print(f"bfm.set_default_rotation({self.target_rotation})")
+			print(f"bfm.set_default_origin({self.target_origin})")
+
+		if key == pyglet.window.key.A:
+			self.anim_state = (self.anim_state + 1) % 3
+
 	def on_key_release(self, key, modifiers):
 		...
 
@@ -143,6 +162,18 @@ class Bfm:
 		except pyglet.window.NoSuchConfigException:
 			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
 			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
+
+	def set_default_recoil(self, recoil: float):
+		self.window.default_recoil = recoil
+		self.window.orbit_defaults()
+
+	def set_default_rotation(self, rotation: list[float]):
+		*self.window.default_rotation, = rotation
+		self.window.orbit_defaults()
+
+	def set_default_origin(self, origin: list[float]):
+		*self.window.default_origin, = origin
+		self.window.orbit_defaults()
 
 	def add_scenery(self, mesh: Mesh):
 		scenery = Scenery(mesh)
