@@ -7,9 +7,10 @@ out vec3 transformed;
 out vec3 colour;
 
 uniform mat4 mvp_matrix;
+uniform float anim;
 
 void main(void) {
-	transformed = vec3(node.xy + effect * 1e5, node.z * 1.01); // displacement
+	transformed = vec3(node.xy + anim * effect * 3e5, node.z * 1.01); // displacement
 	colour = vec3(0.0);
 
 	gl_Position = mvp_matrix * vec4(transformed, 1.0);

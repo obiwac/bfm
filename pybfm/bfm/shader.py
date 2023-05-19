@@ -60,6 +60,7 @@ class Shader:
 
 		self.mvp_location = self.find_uniform(b"mvp_matrix")
 		self.max_effect_location = self.find_uniform(b"max_effect")
+		self.anim_location = self.find_uniform(b"anim")
 
 	def __del__(self):
 		# XXX work around weird bug
@@ -78,3 +79,6 @@ class Shader:
 
 	def max_effect(self, max_effect: float):
 		gl.glUniform1f(self.max_effect_location, max_effect)
+
+	def anim(self, anim: float):
+		gl.glUniform1f(self.anim_location, anim)

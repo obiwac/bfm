@@ -32,6 +32,8 @@ class Window(pyglet.window.Window):
 		self.mv_matrix = Matrix()
 		self.p_matrix = Matrix()
 
+		self.time = 0
+
 	def orbit_defaults(self, set_real = False):
 		self.target_recoil = 1
 		self.target_rotation = [0, 0]
@@ -51,6 +53,8 @@ class Window(pyglet.window.Window):
 		return val + fac * (target - val)
 
 	def update(self, dt):
+		self.time += dt
+
 		self.recoil = self.__anim(self.target_recoil, self.recoil, dt, 10)
 
 		self.rotation[0] = self.__anim(self.target_rotation[0], self.rotation[0], dt, 20)
@@ -90,8 +94,10 @@ class Window(pyglet.window.Window):
 
 		# draw simulation
 
+		anim = math.sin(self.time) / 2 + .5
+
 		if self.current_sim is not None:
-			self.current_sim.draw(mvp_matrix)
+			self.current_sim.draw(mvp_matrix, anim)
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
