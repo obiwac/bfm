@@ -54,3 +54,12 @@ python examples/deformation.py
 ```
 
 That's it ;)
+
+To execute specific problem from command line
+
+```console
+python lepl1110.py path_to_mesh path_to_problem
+```
+
+
+
