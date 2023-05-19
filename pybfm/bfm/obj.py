@@ -23,10 +23,6 @@ class CObj:
 
 	@functools.cached_property
 	def coords(self):
-		return [self.__c_mesh.coords[i] for i in range(self.__c_mesh.n_nodes * self.mesh.dim)]
-
-	@functools.cached_property
-	def gl_coords(self):
 		coords = []
 
 		for i in range(self.__c_mesh.n_nodes):

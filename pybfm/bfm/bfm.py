@@ -9,6 +9,7 @@ import pyglet.gl as gl
 
 from .matrix import Matrix
 from .mesh import Mesh
+from .scenery import Scenery
 from .sim import Sim
 
 class Window(pyglet.window.Window):
@@ -16,9 +17,10 @@ class Window(pyglet.window.Window):
 		super().__init__(**args)
 		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
 
-		# scene objects
+		# scene
 
 		self.current_sim: Sim = None
+		self.scenery: list[Scenery] = []
 
 		# orbit camera
 
@@ -68,12 +70,19 @@ class Window(pyglet.window.Window):
 
 		mvp_matrix = self.p_matrix @ self.mv_matrix
 
-		# actually draw
+		# set up drawing
 
 		gl.glDisable(gl.GL_CULL_FACE)
 
 		gl.glClearColor(1, 1, 1, 0)
 		self.clear()
+
+		# draw scenery
+
+		for scenery in self.scenery:
+			scenery.draw()
+
+		# draw simulation
 
 		if self.current_sim is not None:
 			self.current_sim.draw(mvp_matrix)
@@ -130,7 +139,8 @@ class Bfm:
 			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
 
 	def add_scenery(self, mesh: Mesh):
-		self.instances.append(instance)
+		scenery = Scenery(mesh)
+		self.window.scenery.append(scenery)
 
 	def show(self, sim: Sim):
 		sim.show()

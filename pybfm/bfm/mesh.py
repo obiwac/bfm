@@ -1,6 +1,8 @@
 from .libbfm import lib, ffi
 from .state import default_state
 
+import functools
+
 class Mesh:
 	SIMPLEX = 3
 	QUAD = 4
@@ -20,6 +22,10 @@ class Mesh:
 
 	def mesh(self):
 		...
+
+	@functools.cached_property
+	def coords(self):
+		return [self.c_mesh.coords[i] for i in range(self.c_mesh.n_nodes * self.dim)]
 
 class Mesh_lepl1110(Mesh):
 	def __init__(self, name: str):
