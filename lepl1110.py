@@ -12,7 +12,7 @@ mesh = Mesh_lepl1110(mesh)
 ez = Ez_lepl1110(mesh, problem)
 
 ez.sim.run()
-ez.write("U.txt", 0)
-ez.write("V.txt", 1)
+ez.write("data/U.txt", 0)
+ez.write("data/V.txt", 1)
 
 bfm.show(ez.sim)

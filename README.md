@@ -55,7 +55,8 @@ python examples/deformation.py
 
 That's it ;)
 
-To execute specific problem from command line
+To execute specific problem for lepl1110 command line
+it will ouput U.txt and V.txt in data folder
 
 ```console
 python lepl1110.py path_to_mesh path_to_problem
