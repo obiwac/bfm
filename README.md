@@ -3,6 +3,12 @@
 Big F'ing Matrix.
 Final assignment for LEPL1110 (Finite Element Method).
 
+## Results
+
+| Pont naif | Pont Alvéoles |
+| ------------ | --------- |
+|![naive](images/naive.gif)       | ![alveole](images/alveole.gif)  |
+
 ## Building
 
 This repo is composed of two components; the backend `libbfm`, which implements all the routines BFM defines, and the frontend `pybfm`, which includes a thin Python wrapper above `libbfm` and visualisation facilities.
