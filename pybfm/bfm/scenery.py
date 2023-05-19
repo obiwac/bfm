@@ -2,6 +2,7 @@ from .mesh import Mesh
 
 import ctypes
 import functools
+import math
 
 import pyglet.gl as gl
 
@@ -101,6 +102,19 @@ class Scenery:
 
 				for k, component in enumerate(n):
 					normals[vertex_i * self.mesh.dim + k] += component
+
+		# normalize the normals
+
+		for i in range(self.__c_mesh.n_nodes):
+			norm_squared = 0
+
+			for j in range(self.mesh.dim):
+				norm_squared += normals[i * self.mesh.dim + j] ** 2
+
+			norm = math.sqrt(norm_squared)
+
+			for j in range(self.mesh.dim):
+				normals[i * self.mesh.dim + j] /= norm
 
 		return normals
 
