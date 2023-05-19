@@ -371,7 +371,7 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 	}
 }
 
-static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition, double value) {
+static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
 	for (size_t i = 0; i < mesh->n_nodes; i++) {
 		if (!condition->nodes[i])
 			continue;
@@ -402,8 +402,8 @@ static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mes
 			}
 		}
 
-		apply_constraint(system, 2 * i + 0, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? tx : -ty));
-		apply_constraint(system, 2 * i + 1, value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? ty : tx));
+		apply_constraint(system, 2 * i + 0, condition->value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? tx : -ty));
+		apply_constraint(system, 2 * i + 1, condition->value * (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT ? ty : tx));
 	}
 }
 
@@ -498,6 +498,8 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
 			}
 		}
+		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL)
+			apply_dirichlet_normal_tangent(system, mesh, condition);
 	}
 
 	return 0;
@@ -548,6 +550,9 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 
 		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y)
 			apply_dirichlet(system, mesh, condition);
+		
+		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL)
+			apply_dirichlet_normal_tangent(system, mesh, condition);
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
