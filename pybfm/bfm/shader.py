@@ -62,7 +62,10 @@ class Shader:
 		self.max_effect_location = self.find_uniform(b"max_effect")
 
 	def __del__(self):
-		gl.glDeleteProgram(self.program)
+		# XXX work around weird bug
+
+		if gl.glDeleteProgram is not None:
+			gl.glDeleteProgram(self.program)
 
 	def find_uniform(self, name):
 		return gl.glGetUniformLocation(self.program, ctypes.create_string_buffer(name))

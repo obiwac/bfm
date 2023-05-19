@@ -7,16 +7,23 @@ pyglet.options["debug_gl"] = False
 
 import pyglet.gl as gl
 
-from .instance import Instance
 from .matrix import Matrix
+from .mesh import Mesh
+from .scenery import Scenery
+from .shader import Shader
 from .sim import Sim
-
-global_bfm = None
 
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
 		super().__init__(**args)
 		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
+
+		# scene
+
+		self.current_sim: Sim = None
+		self.scenery: list[Scenery] = []
+
+		self.scenery_shader = Shader("shaders/scenery.vert", "shaders/scenery.frag")
 
 		# orbit camera
 
@@ -66,15 +73,25 @@ class Window(pyglet.window.Window):
 
 		mvp_matrix = self.p_matrix @ self.mv_matrix
 
-		# actually draw
+		# set up drawing
 
 		gl.glDisable(gl.GL_CULL_FACE)
 
 		gl.glClearColor(1, 1, 1, 0)
 		self.clear()
 
-		if global_bfm.current_sim is not None:
-			global_bfm.current_sim.draw(mvp_matrix)
+		# draw scenery
+
+		self.scenery_shader.use()
+		self.scenery_shader.mvp_matrix(mvp_matrix)
+
+		for scenery in self.scenery:
+			scenery.draw()
+
+		# draw simulation
+
+		if self.current_sim is not None:
+			self.current_sim.draw(mvp_matrix)
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -127,15 +144,11 @@ class Bfm:
 			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
 			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
 
-		self.current_sim: Sim = None
-
-		global global_bfm
-		global_bfm = self
-
-	def add(self, instance: Instance):
-		self.instances.append(instance)
+	def add_scenery(self, mesh: Mesh):
+		scenery = Scenery(mesh)
+		self.window.scenery.append(scenery)
 
 	def show(self, sim: Sim):
 		sim.show()
-		global_bfm.current_sim = sim
+		self.window.current_sim = sim
 		pyglet.app.run()
