@@ -37,6 +37,7 @@ class Window(pyglet.window.Window):
 		self.p_matrix = Matrix()
 
 		self.time = 0
+		self.anim_state = 2
 
 	def orbit_defaults(self, set_real = False):
 		self.target_recoil = self.default_recoil
@@ -101,7 +102,7 @@ class Window(pyglet.window.Window):
 		anim = math.sin(self.time) / 2 + .5
 
 		if self.current_sim is not None:
-			self.current_sim.draw(mvp_matrix, anim)
+			self.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -145,6 +146,9 @@ class Window(pyglet.window.Window):
 			print(f"bfm.set_default_recoil({self.target_recoil})")
 			print(f"bfm.set_default_rotation({self.target_rotation})")
 			print(f"bfm.set_default_origin({self.target_origin})")
+
+		if key == pyglet.window.key.A:
+			self.anim_state = (self.anim_state + 1) % 3
 
 	def on_key_release(self, key, modifiers):
 		...
