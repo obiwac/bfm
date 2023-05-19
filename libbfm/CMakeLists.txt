@@ -49,6 +49,7 @@ target_include_directories(bfm PRIVATE src)
 # TODO is this respectful to *BSD systems?
 
 include(GNUInstallDirs)
+set(CMAKE_INSTALL_LIBDIR /usr/lib) # XXX hack because I don't get why libraries aren't searched in /usr/local/lib even though they're told to be on Alex's computer...
 
 install(
 	TARGETS bfm
