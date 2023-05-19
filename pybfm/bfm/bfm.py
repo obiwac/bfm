@@ -10,6 +10,7 @@ import pyglet.gl as gl
 from .matrix import Matrix
 from .mesh import Mesh
 from .scenery import Scenery
+from .shader import Shader
 from .sim import Sim
 
 class Window(pyglet.window.Window):
@@ -21,6 +22,8 @@ class Window(pyglet.window.Window):
 
 		self.current_sim: Sim = None
 		self.scenery: list[Scenery] = []
+
+		self.scenery_shader = Shader("shaders/scenery.vert", "shaders/scenery.frag")
 
 		# orbit camera
 
@@ -78,6 +81,9 @@ class Window(pyglet.window.Window):
 		self.clear()
 
 		# draw scenery
+
+		self.scenery_shader.use()
+		self.scenery_shader.mvp_matrix(mvp_matrix)
 
 		for scenery in self.scenery:
 			scenery.draw()
