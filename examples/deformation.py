@@ -30,7 +30,7 @@ terrain = Mesh_wavefront("meshes/terrain.obj", True)
 bfm.add_scenery(terrain)
 
 # mesh = Mesh_lepl1110("meshes/8.lepl1110")
-mesh = Mesh_wavefront("meshes/bridge.obj")
+mesh = Mesh_wavefront("meshes/bridge-dam.obj")
 
 # create Dirichlet boundary conditions for mesh
 # add all nodes close to the centre
