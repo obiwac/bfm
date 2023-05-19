@@ -55,12 +55,10 @@ python examples/deformation.py
 
 That's it ;)
 
-To execute specific problem for lepl1110 command line
-it will ouput U.txt and V.txt in data folder
+To execute a specific LEPL1110 problem:
 
 ```console
-python lepl1110.py path_to_mesh path_to_problem
+python3 lepl1110.py path/to/mesh path/to/problem
 ```
 
-
-
+This will output `U.txt` and `V.txt` in the `data` directory.
