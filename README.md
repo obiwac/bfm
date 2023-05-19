@@ -56,7 +56,7 @@ DEB_PYTHON_INSTALL_LAYOUT=deb_system pip install --user ./pybfm
 Assuming everything is built, you can run a simple example as such:
 
 ```console
-python examples/deformation.py
+python3 examples/deformation.py
 ```
 
 That's it ;)
