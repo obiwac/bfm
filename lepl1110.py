@@ -1,8 +1,6 @@
 import sys
 
 from bfm import Bfm, Mesh_lepl1110, Mesh_wavefront, Ez_lepl1110
-
-
 bfm = Bfm()
 
 mesh = sys.argv[1]
