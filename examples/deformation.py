@@ -12,6 +12,10 @@ print("Starting BFM")
 
 bfm = Bfm()
 
+bfm.set_default_recoil(1.7000000000000006)
+bfm.set_default_rotation([-0.42500000000000016, -0.4450000000000002])
+bfm.set_default_origin([-1.134999999999998, -0.9550000000000005, 0])
+
 # create a 2D simplex mesh
 # this is simply a horizontal bar 1 unit wide and 0.2 units tall
 
