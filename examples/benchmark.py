@@ -9,6 +9,7 @@ ez = Ez_lepl1110(mesh, "problems/problem.txt")
 
 avg = 0
 total = 10
+
 for _ in range(total):
     start = time.time()
     ez.sim.run()
