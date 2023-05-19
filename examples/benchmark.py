@@ -14,4 +14,4 @@ for _ in range(total):
     ez.sim.run()
     avg += (time.time() - start) / total
 
-print(f"Average time : {avg}s")
+print(f"Average time taken to simulate: {avg} s")
