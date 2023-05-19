@@ -5,9 +5,9 @@ Final assignment for LEPL1110 (Finite Element Method).
 
 ## Results
 
-| Pont naif | Pont Alvéoles |
-| ------------ | --------- |
-|![naive](images/naive.gif)       | ![alveole](images/alveole.gif)  |
+|Naive bridge desgin|"Beehive" bridge design|
+|-|-|
+|![naive](images/naive.gif)|![alveole](images/alveole.gif)|
 
 ## Building
 
