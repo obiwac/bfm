@@ -5,6 +5,12 @@ FEM/FEA C library (`libbfm`) with Python bindings (`pybfm`) for use as an educat
 
 Originally our [final assignment for LEPL1110](https://github.com/allEyezOnCode/Projet-EF).
 
+## Results
+
+|Naive bridge desgin|"Beehive" bridge design|
+|-|-|
+|![naive](images/naive.gif)|![alveole](images/alveole.gif)|
+
 ## Building
 
 This repo is composed of two components; the backend `libbfm`, which implements all the routines BFM defines, and the frontend `pybfm`, which includes a thin Python wrapper above `libbfm` and visualisation facilities.
@@ -52,7 +58,7 @@ DEB_PYTHON_INSTALL_LAYOUT=deb_system pip install --user ./pybfm
 Assuming everything is built, you can run a simple example as such:
 
 ```console
-python examples/deformation.py
+python3 examples/deformation.py
 ```
 
 That's it ;)
