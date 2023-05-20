@@ -1,7 +1,9 @@
 # BFM
 
 Big F'ing Matrix.
-Final assignment for LEPL1110 (Finite Element Method).
+FEM/FEA C library (`libbfm`) with Python bindings (`pybfm`) for use as an educational tool.
+
+Originally our [final assignment for LEPL1110](https://github.com/allEyezOnCode/Projet-EF).
 
 ## Building
 
