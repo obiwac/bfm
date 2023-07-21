@@ -7,7 +7,7 @@ Originally our [final assignment for LEPL1110](https://github.com/allEyezOnCode/
 
 ## Results
 
-|Naive bridge desgin|"Beehive" bridge design|
+|Classical bridge desgin|"Beehive" bridge design|
 |-|-|
 |![naive](images/naive.gif)|![alveole](images/alveole.gif)|
 
