@@ -175,9 +175,11 @@ class Bfm:
 		*self.window.default_origin, = origin
 		self.window.orbit_defaults()
 
-	def add_scenery(self, mesh: Mesh):
+	def add_scenery(self, mesh: Mesh) -> Scenery:
 		scenery = Scenery(mesh)
 		self.window.scenery.append(scenery)
+
+		return scenery
 
 	def show(self, sim: Sim):
 		sim.show()
