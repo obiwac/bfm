@@ -45,7 +45,7 @@ Then, you may install the `bfm` Python module itself:
 pip install --user ./pybfm
 ```
 
-Ubuntu 22.04, set the `DEB_PYTHON_INSTALL_LAYOUT` environment variable to `deb_system` when running the above command:
+On Ubuntu 22.04, set the `DEB_PYTHON_INSTALL_LAYOUT` environment variable to `deb_system` when running the above command:
 
 ```console
 DEB_PYTHON_INSTALL_LAYOUT=deb_system pip install --user ./pybfm
