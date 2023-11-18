@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>$TITLE</title>
+		<meta charset="utf-8">
+
+		<script>$JS_SRC</script>
+
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+
+			.overlay {
+				width: 100vw;
+				height: 100vh;
+				position: absolute;
+			}
+		</style>
+
+		<script id="vert-shader" type="x-shader/x-vertex">#version 300 es
+			// TODO
+		</script>
+
+		<script id="frag-shader" type="x-shader/x-fragment">#version 300 es
+			// TODO
+		</script>
+	</head>
+
+	<body>
+		<canvas id="canvas" class="overlay" width="$WIDTH" height="$HEIGHT"></canvas>
+	</body>
+</html>
