@@ -1,3 +1,5 @@
+// initial WebGL setup
+
 const canvas = document.getElementById("canvas")
 
 /** @type {WebGLRenderingContext | WebGL2RenderingContext} */
@@ -13,6 +15,8 @@ const y_res = gl.drawingBufferHeight
 
 gl.viewport(0, 0, x_res, y_res)
 gl.enable(gl.DEPTH_TEST)
+
+// utility classes
 
 class Shader {
 	constructor(id) {
@@ -57,7 +61,42 @@ class Shader {
 	}
 }
 
+const FLOAT32_SIZE = 4
+
+class Model {
+	constructor(model) {
+		this.vbo_data = model.vbo_data
+		this.indices = model.indices
+
+		this.vbo = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vbo_data), gl.STATIC_DRAW)
+
+		this.ibo = gl.createBuffer()
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(this.indices), gl.STATIC_DRAW)
+	}
+
+	draw() {
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+
+		gl.enableVertexAttribArray(0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 3, FLOAT32_SIZE * 0)
+
+		gl.enableVertexAttribArray(1)
+		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 3, FLOAT32_SIZE * 3)
+
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0)
+	}
+}
+
+// rest of the loading
+
 const scenery_shader = new Shader("scenery")
+$SCENERY_MODEL_LOADING
+
+// rendering
 
 let prev = 0
 
@@ -71,6 +110,10 @@ function render(now) {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	scenery_shader.use()
+
+	for (const thing of scenery) {
+		thing.draw()
+	}
 
 	requestAnimationFrame(render)
 }
