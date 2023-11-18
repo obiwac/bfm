@@ -178,11 +178,8 @@ class Scenery:
 		gl.glBindVertexArray(self.vao)
 		gl.glDrawElements(gl.GL_TRIANGLES, len(self.indices), gl.GL_UNSIGNED_INT, None)
 
-	def export_js(self, path: str):
-		with open(path, "w") as f:
-			f.write(f"""
-				var scenery_model = {{
-					indices: new Uint16Array({self.indices}),
-					coords: new Float32Array({self.coords}),
-					normals: new Float32Array({self.normals}),
-				}}""")
+	def export_js(self):
+		return f"""{{
+			indices: new Uint32Array({self.indices}),
+			vbo_data: new Float32Array({self.vbo_data}),
+		}}"""
