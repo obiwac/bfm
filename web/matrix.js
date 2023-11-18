@@ -1,14 +1,11 @@
-class Matrix {
+class Mat {
 	// matrices are all 4x4, and are initialized as the identity matrix
 	// I won't comment on the code here all that much because it's pretty much just computations
 
 	/** @function
-	  * @param {Matrix | undefined} template
+	  * @param {Matrix | undefined} template - if we pass a template matrix, copy it; otherwise, initialize it to the 4x4 identity matrix
 	  */
 	constructor(template) {
-		// if we pass a template matrix, copy it
-		// otherwise, initialize it to the 4x4 identity matrix
-
 		if (template !== undefined) {
 			this.data = JSON.parse(JSON.stringify(template.data)) // I hate javascript 🙂 (yes I know structuredClone exists now but it's too recent)
 			return
@@ -67,10 +64,10 @@ class Matrix {
 	}
 
 	/** @function
-	  * @param {number} theta
-	  * @param {number} x
-	  * @param {number} y
-	  * @param {number} z
+	  * @param {number} theta - angle we want to rotate by
+	  * @param {number} x - x component of the eigenvector of the matrix transformation of the rotation
+	  * @param {number} y - y component of the eigenvector of the matrix transformation of the rotation
+	  * @param {number} z - z component of the eigenvector of the matrix transformation of the rotation
 	  */
 	rotate(theta, x, y, z) {
 		// theta represents the angle we want to rotate by
