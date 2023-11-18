@@ -118,9 +118,8 @@ class Scenery:
 
 		return normals
 
-	def gen_buffers(self):
-		# generate VBO data
-
+	@functools.cached_property
+	def vbo_data(self):
 		n = len(self.coords) + len(self.normals)
 		data = [0] * n
 
@@ -133,6 +132,9 @@ class Scenery:
 			data[i * 2 + 4] = self.normals[i + 1]
 			data[i * 2 + 5] = self.normals[i + 2]
 
+		return data
+
+	def gen_buffers(self):
 		# create VAO
 
 		self.vao = gl.GLuint(0)
@@ -145,12 +147,12 @@ class Scenery:
 		gl.glGenBuffers(1, ctypes.byref(self.vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 
-		data_t = gl.GLfloat * n
+		data_t = gl.GLfloat * len(self.vbo_data)
 		float_size = ctypes.sizeof(gl.GLfloat)
 
 		gl.glBufferData(gl.GL_ARRAY_BUFFER,
 			ctypes.sizeof(data_t),
-			(data_t) (*data),
+			(data_t) (*self.vbo_data),
 			gl.GL_STATIC_DRAW)
 
 		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, float_size * 6, 0)
