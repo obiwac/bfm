@@ -57,11 +57,14 @@ def cache_cross():
 def read_cross():
 	global cross
 
-	with open("meshes/cross.py", "r") as f:
+	with open("meshes/cross.py") as f:
 		cross = eval(f.read())
 
-# cache_cross()
-read_cross()
+try:
+	read_cross()
+
+except:
+	cache_cross()
 
 def is_boundary(mesh, coord):
 	x, y = coord
