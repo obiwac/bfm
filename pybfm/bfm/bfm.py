@@ -1,3 +1,4 @@
+import html
 import math
 
 import pyglet
@@ -27,7 +28,7 @@ class Window(pyglet.window.Window):
 
 		# orbit camera
 
-		self.default_recoil = 1
+		self.default_recoil = 1.
 		self.default_rotation = [0, 0]
 		self.default_origin = [0, 0, 0]
 
@@ -185,3 +186,43 @@ class Bfm:
 		sim.show()
 		self.window.current_sim = sim
 		pyglet.app.run()
+
+	# exporting
+
+	def export(self, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+		def read(path):
+			with open(path) as f:
+				return f.read()
+
+		# read templates
+
+		src_html = read("web/index.html")
+		src_js = read("web/index.js")
+		src_matrix_js = read("web/matrix.js")
+		src_scenery_vert = read("shaders/scenery.vert")
+		src_scenery_frag = read("shaders/scenery.frag")
+
+		# generate JS source
+
+		src_js = f"""
+			{src_matrix_js}
+			window.addEventListener("load", () => {{
+				{src_js}
+			}})
+		"""
+
+		# generate HTML source
+
+		src_html = src_html.replace("$TITLE", html.escape(title))
+		src_html = src_html.replace("$JS_SRC", src_js)
+
+		src_html = src_html.replace("$SCENERY_VERT", src_scenery_vert)
+		src_html = src_html.replace("$SCENERY_FRAG", src_scenery_frag)
+
+		src_html = src_html.replace("$WIDTH", str(width))
+		src_html = src_html.replace("$HEIGHT", str(height))
+
+		# write output
+
+		with open(path, "w") as f:
+			f.write(src_html)

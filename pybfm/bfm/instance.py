@@ -1,6 +1,5 @@
 from .condition import Condition
 from .libbfm import lib, ffi
-from .mesh import Mesh
 from .obj import Obj
 from .shader import Shader
 from .state import default_state
@@ -95,7 +94,6 @@ class CInstance:
 
 	@functools.cached_property
 	def max_effect(self):
-		mesh = self.obj.mesh
 		max_effect = 0
 
 		for i in range(self.obj.mesh.c_mesh.n_nodes):
