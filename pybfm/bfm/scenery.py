@@ -119,42 +119,44 @@ class Scenery:
 		return normals
 
 	def gen_buffers(self):
+		# generate VBO data
+
+		n = len(self.coords) + len(self.normals)
+		data = [0] * n
+
+		for i in range(0, len(self.coords), 3):
+			data[i * 2 + 0] = self.coords[i + 0]
+			data[i * 2 + 1] = self.coords[i + 1]
+			data[i * 2 + 2] = self.coords[i + 2]
+
+			data[i * 2 + 3] = self.normals[i + 0]
+			data[i * 2 + 4] = self.normals[i + 1]
+			data[i * 2 + 5] = self.normals[i + 2]
+
 		# create VAO
 
 		self.vao = gl.GLuint(0)
 		gl.glGenVertexArrays(1, ctypes.byref(self.vao))
 		gl.glBindVertexArray(self.vao)
 
-		# create coords VBO
+		# create VBO
 
 		self.vbo = gl.GLuint(0)
 		gl.glGenBuffers(1, ctypes.byref(self.vbo))
 		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.vbo)
 
-		coords_t = gl.GLfloat * len(self.coords)
+		data_t = gl.GLfloat * n
+		float_size = ctypes.sizeof(gl.GLfloat)
 
 		gl.glBufferData(gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(coords_t),
-			(coords_t) (*self.coords),
+			ctypes.sizeof(data_t),
+			(data_t) (*data),
 			gl.GL_STATIC_DRAW)
 
-		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(0, 3, gl.GL_FLOAT, gl.GL_FALSE, float_size * 6, 0)
 		gl.glEnableVertexAttribArray(0)
 
-		# create normals VBO
-
-		self.normals_vbo = gl.GLuint(0)
-		gl.glGenBuffers(1, ctypes.byref(self.normals_vbo))
-		gl.glBindBuffer(gl.GL_ARRAY_BUFFER, self.normals_vbo)
-
-		normals_t = gl.GLfloat * len(self.normals)
-
-		gl.glBufferData(gl.GL_ARRAY_BUFFER,
-			ctypes.sizeof(normals_t),
-			(normals_t) (*self.normals),
-			gl.GL_STATIC_DRAW)
-
-		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, 0, 0)
+		gl.glVertexAttribPointer(1, 3, gl.GL_FLOAT, gl.GL_FALSE, float_size * 6, float_size * 3)
 		gl.glEnableVertexAttribArray(1)
 
 		# create IBO
