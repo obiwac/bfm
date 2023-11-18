@@ -189,7 +189,7 @@ class Bfm:
 
 	# exporting
 
-	def export(self, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+	def export(self, sim: Sim, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
 		def read(path):
 			with open(path) as f:
 				return f.read()
@@ -202,6 +202,15 @@ class Bfm:
 		src_scenery_vert = read("shaders/scenery.vert")
 		src_scenery_frag = read("shaders/scenery.frag")
 
+		# generate models for scenery
+
+		scenery_model_loading_js = "\nconst scenery = ["
+
+		for scenery in self.window.scenery:
+			scenery_model_loading_js += f"new Model({scenery.export_js()}),"
+
+		scenery_model_loading_js += "]\n"
+
 		# generate JS source
 
 		src_js = f"""
@@ -210,6 +219,8 @@ class Bfm:
 				{src_js}
 			}})
 		"""
+
+		src_js = src_js.replace("$SCENERY_MODEL_LOADING", scenery_model_loading_js)
 
 		# generate HTML source
 
