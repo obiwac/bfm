@@ -3,7 +3,7 @@ class Mat {
 	// I won't comment on the code here all that much because it's pretty much just computations
 
 	/** @function
-	  * @param {Matrix | undefined} template - if we pass a template matrix, copy it; otherwise, initialize it to the 4x4 identity matrix
+	  * @param {Mat | undefined} template - if we pass a template matrix, copy it; otherwise, initialize it to the 4x4 identity matrix
 	  */
 	constructor(template) {
 		if (template !== undefined) {
@@ -23,7 +23,7 @@ class Mat {
 	  * @param {number} left
 	  */
 	multiply(left) {
-		const right = new Matrix(this)
+		const right = new Mat(this)
 
 		for (let i = 0; i < 4; i++) {
 			for (let j = 0; j < 4; j++) {
@@ -89,7 +89,7 @@ class Mat {
 		const xy = x * y, yz = y * z, zx = z * x
 		const xs = x * s, ys = y * s, zs = z * s
 
-		const rotation = new Matrix()
+		const rotation = new Mat()
 
 		rotation.data[0][0] = (one_minus_c * xx) + c
 		rotation.data[0][1] = (one_minus_c * xy) - zs

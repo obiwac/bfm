@@ -1,3 +1,8 @@
+// a few constants up top
+
+const TAU = Math.PI * 2
+const FLOAT32_SIZE = 4
+
 // initial WebGL setup
 
 const canvas = document.getElementById("canvas")
@@ -61,8 +66,6 @@ class Shader {
 	}
 }
 
-const FLOAT32_SIZE = 4
-
 class Model {
 	constructor(model) {
 		this.vbo_data = model.vbo_data
@@ -82,10 +85,10 @@ class Model {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 
 		gl.enableVertexAttribArray(0)
-		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 3, FLOAT32_SIZE * 0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 0)
 
 		gl.enableVertexAttribArray(1)
-		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 3, FLOAT32_SIZE * 3)
+		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 3)
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0)
 	}
@@ -95,6 +98,9 @@ class Model {
 
 const scenery_shader = new Shader("scenery")
 $SCENERY_MODEL_LOADING
+
+const mvp_uniform = gl.getUniformLocation(scenery_shader.program, "mvp_matrix")
+const fov = TAU / 6
 
 // rendering
 
@@ -106,14 +112,37 @@ let prev = 0
 function render(now) {
 	const dt = (now - prev) / 1000
 
+	// clear screen
+
 	gl.clearColor(1, 1, 1, 1)
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 	scenery_shader.use()
 
+	// projection stuff
+
+	const proj_mat = new Mat()
+	proj_mat.perspective(fov, 0.2, 200)
+
+	const view_mat = new Mat()
+	view_mat.translate(0, 0, -10)
+
+	const vp_mat = new Mat(view_mat)
+	vp_mat.multiply(proj_mat)
+
+	const model_mat = new Mat()
+	const mvp_mat = new Mat(model_mat)
+	mvp_mat.multiply(vp_mat)
+
+	gl.uniformMatrix4fv(mvp_uniform, false, mvp_mat.data.flat())
+
+	// render scenery
+
 	for (const thing of scenery) {
 		thing.draw()
 	}
+
+	// continue render loop
 
 	requestAnimationFrame(render)
 }
