@@ -78,7 +78,12 @@ class CSim:
 
 		# generate JS source
 
-		src_js = f"{src_matrix_js}{src_js}"
+		src_js = f"""
+			{src_matrix_js}
+			window.addEventListener("load", () => {{
+				{src_js}
+			}})
+		"""
 
 		# generate HTML source
 
