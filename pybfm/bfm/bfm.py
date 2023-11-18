@@ -20,7 +20,7 @@ class Window(pyglet.window.Window):
 
 		# scene
 
-		self.current_sim: Sim = None
+		self.current_sim: Sim | None = None
 		self.scenery: list[Scenery] = []
 
 		self.scenery_shader = Shader("shaders/scenery.vert", "shaders/scenery.frag")

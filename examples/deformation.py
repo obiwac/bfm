@@ -127,4 +127,4 @@ sim.export()
 # display results
 # resulting effects from the simulation will automatically be applied to the instance we added to our scene previously
 
-# bfm.show(sim)
+bfm.show(sim)

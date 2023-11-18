@@ -1,5 +1,4 @@
 import html
-import os
 import pyglet.gl as gl
 
 from .force import Force
@@ -65,16 +64,17 @@ class CSim:
 	# exporting
 
 	def export(self, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+		def read(path):
+			with open(path) as f:
+				return f.read()
+
 		# read templates
 
-		with open("web/index.html") as f:
-			src_html = f.read()
-
-		with open("web/index.js") as f:
-			src_js = f.read()
-
-		with open("web/matrix.js") as f:
-			src_matrix_js = f.read()
+		src_html = read("web/index.html")
+		src_js = read("web/index.js")
+		src_matrix_js = read("web/matrix.js")
+		src_scenery_vert = read("shaders/scenery.vert")
+		src_scenery_frag = read("shaders/scenery.frag")
 
 		# generate JS source
 
@@ -84,6 +84,9 @@ class CSim:
 
 		src_html = src_html.replace("$TITLE", html.escape(title))
 		src_html = src_html.replace("$JS_SRC", src_js)
+
+		src_html = src_html.replace("$SCENERY_VERT", src_scenery_vert)
+		src_html = src_html.replace("$SCENERY_FRAG", src_scenery_frag)
 
 		src_html = src_html.replace("$WIDTH", str(width))
 		src_html = src_html.replace("$HEIGHT", str(height))
