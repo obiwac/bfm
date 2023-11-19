@@ -59,10 +59,22 @@ class Shader {
 			console.error(frag_compilation_log)
 			console.error(log)
 		}
+
+		// common uniforms
+
+		this.mvp_uniform = gl.getUniformLocation(this.program, "mvp_matrix")
 	}
 
 	use() {
 		gl.useProgram(this.program)
+		cur_shader = this
+	}
+
+	/** @function
+	  * @param mat: Mat
+	  */
+	mvp(mat) {
+		gl.uniformMatrix4fv(this.mvp_uniform, false, mat.data.flat())
 	}
 }
 
@@ -170,7 +182,6 @@ const line_deformation_shader = new Shader("line_deformation")
 
 $SCENERY_LOADING
 
-const mvp_uniform = gl.getUniformLocation(scenery_shader.program, "mvp_matrix")
 const fov = TAU / 4
 
 // orbit controls
@@ -243,8 +254,6 @@ function render(now) {
 	gl.clearColor(1, 1, 1, 1)
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-	scenery_shader.use()
-
 	// projection stuff
 
 	const proj_mat = new Mat()
@@ -262,9 +271,10 @@ function render(now) {
 	const mvp_mat = new Mat(model_mat)
 	mvp_mat.multiply(vp_mat)
 
-	gl.uniformMatrix4fv(mvp_uniform, false, mvp_mat.data.flat())
-
 	// render scenery
+
+	scenery_shader.use()
+	scenery_shader.mvp(mvp_mat)
 
 	for (const thing of scenery) {
 		thing.draw()
