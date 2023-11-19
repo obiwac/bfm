@@ -178,7 +178,7 @@ class Scenery:
 		gl.glBindVertexArray(self.vao)
 		gl.glDrawElements(gl.GL_TRIANGLES, len(self.indices), gl.GL_UNSIGNED_INT, None)
 
-	def export_js(self):
+	def export_js(self) -> str:
 		return f"""{{
 			indices: new Uint32Array({self.indices}),
 			vbo_data: new Float32Array({self.vbo_data}),

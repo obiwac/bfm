@@ -68,7 +68,10 @@ class Shader {
 
 class Scenery {
 	constructor(model) {
+		/** @type: Float32Array */
 		this.vbo_data = model.vbo_data
+
+		/** @type: Uint32Array */
 		this.indices = model.indices
 
 		this.vbo = gl.createBuffer()
