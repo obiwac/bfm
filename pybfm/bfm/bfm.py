@@ -213,7 +213,7 @@ class Bfm:
 
 	# exporting
 
-	def export(self, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+	def export(self, out_path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
 		def read(path):
 			with open(path) as f:
 				return f.read()
@@ -284,5 +284,5 @@ class Bfm:
 
 		# write output
 
-		with open(path, "w") as f:
+		with open(out_path, "w") as f:
 			f.write(src_html)
