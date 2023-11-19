@@ -246,6 +246,7 @@ let prev = 0
   */
 function render(now) {
 	const dt = (now - prev) / 1000
+	prev = now
 
 	// update camera parameters
 
