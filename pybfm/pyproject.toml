@@ -1,6 +1,6 @@
 [project]
 name = "bfm"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python wrapper around BFM library for FEM/FEA"
 authors = [
 	{name = "Alexandre Dewilde", email = "alexandredewilde.contact@gmail.com"},

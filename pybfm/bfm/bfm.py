@@ -1,3 +1,4 @@
+import html
 import math
 
 import pyglet
@@ -13,21 +14,28 @@ from .scenery import Scenery
 from .shader import Shader
 from .sim import Sim
 
+class State:
+	def __init__(self):
+		# scene
+
+		self.current_sim: Sim | None = None
+		self.scenery: list[Scenery] = []
+
 class Window(pyglet.window.Window):
 	def __init__(self, **args):
+		self.state: State = args["state"]
+		del args["state"]
+
 		super().__init__(**args)
 		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
 
-		# scene
-
-		self.current_sim: Sim = None
-		self.scenery: list[Scenery] = []
+		# scenery
 
 		self.scenery_shader = Shader("shaders/scenery.vert", "shaders/scenery.frag")
 
 		# orbit camera
 
-		self.default_recoil = 1
+		self.default_recoil = 1.
 		self.default_rotation = [0, 0]
 		self.default_origin = [0, 0, 0]
 
@@ -94,15 +102,15 @@ class Window(pyglet.window.Window):
 		self.scenery_shader.use()
 		self.scenery_shader.mvp_matrix(mvp_matrix)
 
-		for scenery in self.scenery:
+		for scenery in self.state.scenery:
 			scenery.draw()
 
 		# draw simulation
 
 		anim = math.sin(self.time) / 2 + .5
 
-		if self.current_sim is not None:
-			self.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
+		if self.state.current_sim is not None:
+			self.state.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -154,32 +162,127 @@ class Window(pyglet.window.Window):
 		...
 
 class Bfm:
-	def __init__(self):
-		try:
-			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16, sample_buffers = 1, samples = 4)
-			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
+	def __init__(self, headless=False):
+		self.headless = headless
+		self.state = State()
 
-		except pyglet.window.NoSuchConfigException:
-			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
-			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
+		if not self.headless:
+			try:
+				self.config = gl.Config(double_buffer=True, major_version=3, minor_version=3, depth_size=16, sample_buffers=1, samples=4)
+				self.window = Window(config=self.config, width=480, height=480, caption="BFM", resizable=True, vsync=False, state=self.state)
+
+			except pyglet.window.NoSuchConfigException:
+				self.config = gl.Config(double_buffer=True, major_version=3, minor_version=3, depth_size=16)
+				self.window = Window(config=self.config, width=480, height=480, caption="BFM (no AA)", resizable=True, vsync=False, state=self.state)
 
 	def set_default_recoil(self, recoil: float):
+		if self.headless:
+			return
+
 		self.window.default_recoil = recoil
 		self.window.orbit_defaults()
 
 	def set_default_rotation(self, rotation: list[float]):
+		if self.headless:
+			return
+
 		*self.window.default_rotation, = rotation
 		self.window.orbit_defaults()
 
 	def set_default_origin(self, origin: list[float]):
+		if self.headless:
+			return
+
 		*self.window.default_origin, = origin
 		self.window.orbit_defaults()
 
-	def add_scenery(self, mesh: Mesh):
+	def add_scenery(self, mesh: Mesh) -> Scenery:
 		scenery = Scenery(mesh)
-		self.window.scenery.append(scenery)
+		self.state.scenery.append(scenery)
+
+		return scenery
 
 	def show(self, sim: Sim):
 		sim.show()
-		self.window.current_sim = sim
+		self.state.current_sim = sim
+
+		if self.headless:
+			return
+
 		pyglet.app.run()
+
+	# exporting
+
+	def export(self, out_path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+		def read(path):
+			with open(path) as f:
+				return f.read()
+
+		# read templates
+
+		src_html = read("web/index.html")
+		src_js = read("web/index.js")
+		src_matrix_js = read("web/matrix.js")
+
+		# generate scenery
+
+		scenery_loading_js = "\nconst scenery = ["
+
+		for scenery in self.state.scenery:
+			scenery_loading_js += f"new Scenery({scenery.export_js()}),"
+
+		scenery_loading_js += "]\n"
+
+		# generate instances
+
+		instance_loading_js = "\nconst instances = ["
+
+		if self.state.current_sim is not None:
+			for instance in self.state.current_sim.instances:
+				instance_loading_js += f"new Instance({instance.export_js()}),"
+
+		instance_loading_js += "]\n"
+
+		# generate JS source
+
+		src_js = f"""
+			{src_matrix_js}
+			window.addEventListener("load", () => {{
+				{src_js}
+			}})
+		"""
+
+		src_js = src_js.replace("$SCENERY_LOADING", scenery_loading_js)
+		src_js = src_js.replace("$INSTANCE_LOADING", instance_loading_js)
+
+		# generate HTML source
+
+		src_html = src_html.replace("$TITLE", html.escape(title))
+		src_html = src_html.replace("$JS_SRC", src_js)
+
+		src_html = src_html.replace("$WIDTH", str(width))
+		src_html = src_html.replace("$HEIGHT", str(height))
+
+		# add shaders
+
+		shaders = (
+			("scenery", "shaders/scenery"),
+			("deformation", "shaders/sim/deformation"),
+			("line_deformation", "shaders/sim/line_deformation"),
+		)
+
+		shaders_src = ""
+
+		for name, path in shaders:
+			src_vert = read(path + ".vert")
+			src_frag = read(path + ".frag")
+
+			shaders_src += f"<script id='{name}-vert' type='x-shader/x-vertex'>{src_vert}</script>"
+			shaders_src += f"<script id='{name}-frag' type='x-shader/x-fragment'>{src_frag}</script>"
+
+		src_html = src_html.replace("$SHADERS", shaders_src)
+
+		# write output
+
+		with open(out_path, "w") as f:
+			f.write(src_html)

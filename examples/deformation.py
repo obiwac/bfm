@@ -1,16 +1,14 @@
 import faulthandler
 faulthandler.enable()
 
-import math
-
-from bfm import Bfm, Condition, Force_linear, Instance, Mesh_lepl1110, Mesh_wavefront, Material, Obj, Rule_gauss_legendre, Sim
+from bfm import Bfm, Condition, Force_linear, Instance, Mesh_wavefront, Material, Obj, Rule_gauss_legendre, Sim
 
 # create initial BFM context
 # TODO should this be renamed something a little clearer, e.g. Scene?
 
 print("Starting BFM")
 
-bfm = Bfm()
+bfm = Bfm(headless=True)
 
 bfm.set_default_recoil(1.7000000000000006)
 bfm.set_default_rotation([-0.42500000000000016, -0.4450000000000002])
@@ -57,11 +55,14 @@ def cache_cross():
 def read_cross():
 	global cross
 
-	with open("meshes/cross.py", "r") as f:
+	with open("meshes/cross.py") as f:
 		cross = eval(f.read())
 
-# cache_cross()
-read_cross()
+try:
+	read_cross()
+
+except:
+	cache_cross()
 
 def is_boundary(mesh, coord):
 	x, y = coord
@@ -124,3 +125,4 @@ sim.run()
 # resulting effects from the simulation will automatically be applied to the instance we added to our scene previously
 
 bfm.show(sim)
+bfm.export()

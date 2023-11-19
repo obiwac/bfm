@@ -1,9 +1,9 @@
 from .condition import Condition
 from .libbfm import lib, ffi
-from .mesh import Mesh
 from .obj import Obj
 from .shader import Shader
 from .state import default_state
+from .util import jsify_list
 
 import ctypes
 import functools
@@ -95,7 +95,6 @@ class CInstance:
 
 	@functools.cached_property
 	def max_effect(self):
-		mesh = self.obj.mesh
 		max_effect = 0
 
 		for i in range(self.obj.mesh.c_mesh.n_nodes):
@@ -129,6 +128,15 @@ class CInstance:
 		else:
 			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 			gl.glDrawElements(gl.GL_TRIANGLES, len(self.obj.indices), gl.GL_UNSIGNED_INT, None)
+
+	def export_js(self) -> str:
+		return f"""{{
+			indices: new Uint32Array({jsify_list(self.obj.indices)}),
+			line_indices: new Uint32Array({jsify_list(self.obj.line_indices)}),
+			coords: new Float32Array({jsify_list(self.obj.coords)}),
+			effects: new Float32Array({self.effects}),
+			max_effect: {self.max_effect},
+		}}"""
 
 class Instance(CInstance):
 	def __init__(self, obj: Obj):

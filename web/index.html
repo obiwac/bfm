@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>$TITLE</title>
+		<meta charset="utf-8">
+
+		<script>$JS_SRC</script>
+
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+
+			.overlay {
+				width: 100vw;
+				height: 100vh;
+				position: absolute;
+			}
+		</style>
+
+		$SHADERS
+	</head>
+
+	<body>
+		<canvas id="canvas" class="overlay" width="$WIDTH" height="$HEIGHT"></canvas>
+	</body>
+</html>
