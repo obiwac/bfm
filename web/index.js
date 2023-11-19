@@ -66,6 +66,7 @@ class Shader {
 		// common uniforms
 
 		this.mvp_uniform = gl.getUniformLocation(this.program, "mvp_matrix")
+		this.anim_uniform = gl.getUniformLocation(this.program, "anim")
 	}
 
 	use() {
@@ -78,6 +79,13 @@ class Shader {
 	  */
 	mvp(mat) {
 		gl.uniformMatrix4fv(this.mvp_uniform, false, mat.data.flat())
+	}
+
+	/** @function
+	  * @param x: number
+	  */
+	anim(x) {
+		gl.uniform1f(this.anim_uniform, x)
 	}
 }
 
@@ -240,6 +248,7 @@ canvas.addEventListener("wheel", e => {
 // rendering
 
 let prev = 0
+let time = 0
 
 /** @function
   * @param {number} now
@@ -247,6 +256,7 @@ let prev = 0
 function render(now) {
 	const dt = (now - prev) / 1000
 	prev = now
+	time += dt
 
 	// update camera parameters
 
@@ -287,8 +297,11 @@ function render(now) {
 
 	// render instances
 
+	const effect = Math.sin(time) / 2 + .5
+
 	deformation_shader.use()
 	deformation_shader.mvp(mvp_mat)
+	deformation_shader.anim(effect)
 
 	for (const instance of instances) {
 		instance.draw(false)
@@ -296,6 +309,7 @@ function render(now) {
 
 	line_deformation_shader.use()
 	line_deformation_shader.mvp(mvp_mat)
+	line_deformation_shader.anim(effect)
 
 	for (const instance of instances) {
 		instance.draw(true)
