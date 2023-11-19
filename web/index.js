@@ -137,6 +137,13 @@ canvas.addEventListener("mousemove", e => {
 
 		target_rotation[1] = Math.max(-TAU / 4, Math.min(TAU / 4, target_rotation[1]))
 	}
+
+	// TODO make panning better
+
+	if (e.buttons & 0b10) {
+		target_origin[0] += e.movementX / 200
+		target_origin[1] += e.movementY / 200
+	}
 })
 
 canvas.addEventListener("wheel", e => {
