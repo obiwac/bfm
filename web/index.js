@@ -100,7 +100,35 @@ const scenery_shader = new Shader("scenery")
 $SCENERY_MODEL_LOADING
 
 const mvp_uniform = gl.getUniformLocation(scenery_shader.program, "mvp_matrix")
-const fov = TAU / 6
+const fov = TAU / 4
+
+// orbit controls
+
+let recoil = 1.7
+let rotation = [-0.425, -0.445]
+let origin = [-1.135, -0.955, 0]
+
+let target_recoil = 1.7
+let target_rotation = [-0.425, -0.445]
+let target_origin = [-1.135, -0.955, 0]
+
+function anim(x, target, multiplier) {
+	if (multiplier > 1) {
+		return target
+	}
+
+	return x + (target - x) * multiplier
+}
+
+function anim_vec(x, target, multiplier) {
+	let vec = structuredClone(x)
+
+	for (let i = 0; i < x.length; i++) {
+		vec[i] = anim(x[i], target[i], multiplier)
+	}
+
+	return vec
+}
 
 // rendering
 
@@ -111,6 +139,12 @@ let prev = 0
   */
 function render(now) {
 	const dt = (now - prev) / 1000
+
+	// update camera parameters
+
+	recoil = anim(recoil, target_recoil, dt * 10)
+	rotation = anim_vec(rotation, target_rotation, dt * 20)
+	origin = anim_vec(origin, target_origin, dt * 20)
 
 	// clear screen
 
@@ -125,7 +159,9 @@ function render(now) {
 	proj_mat.perspective(fov, 0.2, 200)
 
 	const view_mat = new Mat()
-	view_mat.translate(0, 0, -10)
+	view_mat.translate(0, 0, -Math.pow(recoil, 2))
+	view_mat.rotate_2d(...rotation)
+	view_mat.translate(...origin)
 
 	const vp_mat = new Mat(view_mat)
 	vp_mat.multiply(proj_mat)
