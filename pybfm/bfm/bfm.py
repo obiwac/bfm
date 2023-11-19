@@ -224,14 +224,14 @@ class Bfm:
 		src_js = read("web/index.js")
 		src_matrix_js = read("web/matrix.js")
 
-		# generate models for scenery
+		# generate scenery
 
-		scenery_model_loading_js = "\nconst scenery = ["
+		scenery_loading_js = "\nconst scenery = ["
 
 		for scenery in self.state.scenery:
-			scenery_model_loading_js += f"new Model({scenery.export_js()}),"
+			scenery_loading_js += f"new Scenery({scenery.export_js()}),"
 
-		scenery_model_loading_js += "]\n"
+		scenery_loading_js += "]\n"
 
 		# generate JS source
 
@@ -242,7 +242,7 @@ class Bfm:
 			}})
 		"""
 
-		src_js = src_js.replace("$SCENERY_MODEL_LOADING", scenery_model_loading_js)
+		src_js = src_js.replace("$SCENERY_LOADING", scenery_loading_js)
 
 		# generate HTML source
 

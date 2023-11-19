@@ -66,7 +66,7 @@ class Shader {
 	}
 }
 
-class Model {
+class Scenery {
 	constructor(model) {
 		this.vbo_data = model.vbo_data
 		this.indices = model.indices
@@ -97,7 +97,10 @@ class Model {
 // rest of the loading
 
 const scenery_shader = new Shader("scenery")
-$SCENERY_MODEL_LOADING
+const deformation_shader = new Shader("deformation")
+const line_deformation_shader = new Shader("line_deformation")
+
+$SCENERY_LOADING
 
 const mvp_uniform = gl.getUniformLocation(scenery_shader.program, "mvp_matrix")
 const fov = TAU / 4
