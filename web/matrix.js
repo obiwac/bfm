@@ -120,13 +120,14 @@ class Mat {
 
 	/** @function
 	  * @param {number} fov
+	  * @param {number} aspect_ratio
 	  * @param {number} near
 	  * @param {number} far
 	  */
-	perspective(fov, near, far) {
+	perspective(fov, aspect_ratio, near, far) {
 		const scale = 1 / Math.tan(fov / 2)
 
-		this.data[0][0] = scale
+		this.data[0][0] = scale / aspect_ratio
 		this.data[1][1] = scale
 		this.data[2][2] = -far / (far - near)
 		this.data[3][2] = -far * near / (far - near)

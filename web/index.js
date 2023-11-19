@@ -272,7 +272,7 @@ function render(now) {
 	// projection stuff
 
 	const proj_mat = new Mat()
-	proj_mat.perspective(fov, 0.2, 200)
+	proj_mat.perspective(fov, x_res / y_res, 0.2, 200)
 
 	const view_mat = new Mat()
 	view_mat.translate(0, 0, -Math.pow(recoil, 2))
