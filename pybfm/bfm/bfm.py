@@ -14,15 +14,22 @@ from .scenery import Scenery
 from .shader import Shader
 from .sim import Sim
 
-class Window(pyglet.window.Window):
-	def __init__(self, **args):
-		super().__init__(**args)
-		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
-
+class State:
+	def __init__(self):
 		# scene
 
 		self.current_sim: Sim | None = None
 		self.scenery: list[Scenery] = []
+
+class Window(pyglet.window.Window):
+	def __init__(self, **args):
+		self.state: State = args["state"]
+		del args["state"]
+
+		super().__init__(**args)
+		pyglet.clock.schedule_interval(self.update, 1.0 / 60)
+
+		# scenery
 
 		self.scenery_shader = Shader("shaders/scenery.vert", "shaders/scenery.frag")
 
@@ -95,15 +102,15 @@ class Window(pyglet.window.Window):
 		self.scenery_shader.use()
 		self.scenery_shader.mvp_matrix(mvp_matrix)
 
-		for scenery in self.scenery:
+		for scenery in self.state.scenery:
 			scenery.draw()
 
 		# draw simulation
 
 		anim = math.sin(self.time) / 2 + .5
 
-		if self.current_sim is not None:
-			self.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
+		if self.state.current_sim is not None:
+			self.state.current_sim.draw(mvp_matrix, (0, 1, anim)[self.anim_state])
 
 	def on_resize(self, width, height):
 		print(f"Resize {width} * {height}")
@@ -155,41 +162,58 @@ class Window(pyglet.window.Window):
 		...
 
 class Bfm:
-	def __init__(self):
-		try:
-			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16, sample_buffers = 1, samples = 4)
-			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM", resizable = True, vsync = False)
+	def __init__(self, headless=False):
+		self.headless = headless
+		self.state = State()
 
-		except pyglet.window.NoSuchConfigException:
-			self.config = gl.Config(double_buffer = True, major_version = 3, minor_version = 3, depth_size = 16)
-			self.window = Window(config = self.config, width = 480, height = 480, caption = "BFM (no AA)", resizable = True, vsync = False)
+		if not self.headless:
+			try:
+				self.config = gl.Config(double_buffer=True, major_version=3, minor_version=3, depth_size=16, sample_buffers=1, samples=4)
+				self.window = Window(config=self.config, width=480, height=480, caption="BFM", resizable=True, vsync=False, state=self.state)
+
+			except pyglet.window.NoSuchConfigException:
+				self.config = gl.Config(double_buffer=True, major_version=3, minor_version=3, depth_size=16)
+				self.window = Window(config=self.config, width=480, height=480, caption="BFM (no AA)", resizable=True, vsync=False, state=self.state)
 
 	def set_default_recoil(self, recoil: float):
+		if self.headless:
+			return
+
 		self.window.default_recoil = recoil
 		self.window.orbit_defaults()
 
 	def set_default_rotation(self, rotation: list[float]):
+		if self.headless:
+			return
+
 		*self.window.default_rotation, = rotation
 		self.window.orbit_defaults()
 
 	def set_default_origin(self, origin: list[float]):
+		if self.headless:
+			return
+
 		*self.window.default_origin, = origin
 		self.window.orbit_defaults()
 
 	def add_scenery(self, mesh: Mesh) -> Scenery:
 		scenery = Scenery(mesh)
-		self.window.scenery.append(scenery)
+		self.state.scenery.append(scenery)
 
 		return scenery
 
 	def show(self, sim: Sim):
 		sim.show()
-		self.window.current_sim = sim
+		self.state.current_sim = sim
+
+		if self.headless:
+			return
+
 		pyglet.app.run()
 
 	# exporting
 
-	def export(self, sim: Sim, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
+	def export(self, path="index.html", title="BFM Web Export", width: int=1280, height: int=720):
 		def read(path):
 			with open(path) as f:
 				return f.read()
@@ -206,7 +230,7 @@ class Bfm:
 
 		scenery_model_loading_js = "\nconst scenery = ["
 
-		for scenery in self.window.scenery:
+		for scenery in self.state.scenery:
 			scenery_model_loading_js += f"new Model({scenery.export_js()}),"
 
 		scenery_model_loading_js += "]\n"
