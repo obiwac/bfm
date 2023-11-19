@@ -139,6 +139,11 @@ canvas.addEventListener("mousemove", e => {
 	}
 })
 
+canvas.addEventListener("wheel", e => {
+	target_recoil -= e.deltaY / 500
+	target_recoil = Math.max(target_recoil, 0.5)
+})
+
 // rendering
 
 let prev = 0
