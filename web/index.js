@@ -23,6 +23,9 @@ gl.enable(gl.DEPTH_TEST)
 
 // utility classes
 
+/** @type: Shader | undefined */
+let cur_shader = undefined
+
 class Shader {
 	constructor(id) {
 		const vert_id = `${id}-vert`
