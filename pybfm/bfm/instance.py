@@ -3,6 +3,7 @@ from .libbfm import lib, ffi
 from .obj import Obj
 from .shader import Shader
 from .state import default_state
+from .util import jsify_list
 
 import ctypes
 import functools
@@ -130,9 +131,9 @@ class CInstance:
 
 	def export_js(self) -> str:
 		return f"""{{
-			indices: new Uint32Array({self.obj.indices}),
-			line_indices: new Uint32Array({self.obj.line_indices}),
-			coords: new Float32Array({self.obj.coords}),
+			indices: new Uint32Array({jsify_list(self.obj.indices)}),
+			line_indices: new Uint32Array({jsify_list(self.obj.line_indices)}),
+			coords: new Float32Array({jsify_list(self.obj.coords)}),
 			effects: new Float32Array({self.effects}),
 			max_effect: {self.max_effect},
 		}}"""

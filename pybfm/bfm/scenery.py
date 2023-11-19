@@ -1,4 +1,5 @@
 from .mesh import Mesh
+from .util import jsify_list
 
 import ctypes
 import functools
@@ -180,6 +181,6 @@ class Scenery:
 
 	def export_js(self) -> str:
 		return f"""{{
-			indices: new Uint32Array({self.indices}),
-			vbo_data: new Float32Array({self.vbo_data}),
+			indices: new Uint32Array({jsify_list(self.indices)}),
+			vbo_data: new Float32Array({jsify_list(self.vbo_data)}),
 		}}"""
