@@ -75,14 +75,14 @@ class Shader {
 	}
 
 	/** @function
-	  * @param mat: Mat
+	  * @param {Mat} mat
 	  */
 	mvp(mat) {
 		gl.uniformMatrix4fv(this.mvp_uniform, false, mat.data.flat())
 	}
 
 	/** @function
-	  * @param x: number
+	  * @param {number} x
 	  */
 	anim(x) {
 		gl.uniform1f(this.anim_uniform, x)
@@ -165,7 +165,7 @@ class Instance {
 	}
 
 	/** @function
-	  * @param lines: boolean
+	  * @param {boolean} lines
 	  */
 	draw(lines) {
 		const location = gl.getUniformLocation(cur_shader.program, "max_effect")
