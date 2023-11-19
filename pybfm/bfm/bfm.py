@@ -233,6 +233,16 @@ class Bfm:
 
 		scenery_loading_js += "]\n"
 
+		# generate instances
+
+		instance_loading_js = "\nconst instances = ["
+
+		if self.state.current_sim is not None:
+			for instance in self.state.current_sim.instances:
+				instance_loading_js += f"new Instance({instance.export_js()}),"
+
+		instance_loading_js += "]\n"
+
 		# generate JS source
 
 		src_js = f"""
@@ -243,6 +253,7 @@ class Bfm:
 		"""
 
 		src_js = src_js.replace("$SCENERY_LOADING", scenery_loading_js)
+		src_js = src_js.replace("$INSTANCE_LOADING", instance_loading_js)
 
 		# generate HTML source
 
