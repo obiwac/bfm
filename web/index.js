@@ -74,26 +74,91 @@ class Scenery {
 		/** @type: Uint32Array */
 		this.indices = model.indices
 
+		this.vao = gl.createVertexArray()
+		gl.bindVertexArray(this.vao)
+
 		this.vbo = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
 		gl.bufferData(gl.ARRAY_BUFFER, this.vbo_data, gl.STATIC_DRAW)
 
-		this.ibo = gl.createBuffer()
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
-		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW)
-	}
-
-	draw() {
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
-
 		gl.enableVertexAttribArray(0)
 		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 0)
 
+		this.ibo = gl.createBuffer()
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW)
+
 		gl.enableVertexAttribArray(1)
 		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 3)
+	}
 
+	draw() {
+		gl.bindVertexArray(this.vao)
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0)
+	}
+}
+
+class Instance {
+	constructor(model) {
+		/** @type: Uint32Array */
+		this.indices = model.indices
+
+		/** @type: Uint32Array */
+		this.line_indices = model.line_indices
+
+		/** @type: Float32Array */
+		this.coords = model.coords
+
+		/** @type: Float32Array */
+		this.effects = model.effects
+
+		/** @type: number */
+		this.max_effect = model.max_effect
+
+		this.vao = gl.createVertexArray()
+		gl.bindVertexArray(this.vao)
+
+		this.vbo = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vbo)
+		gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.STATIC_DRAW)
+
+		gl.enableVertexAttribArray(0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 0, 0)
+
+		this.effects_vbo = gl.createBuffer()
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.effects_vbo)
+		gl.bufferData(gl.ARRAY_BUFFER, this.effects, gl.STATIC_DRAW)
+
+		gl.enableVertexAttribArray(1)
+		gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 0, 0)
+
+		this.ibo = gl.createBuffer()
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW)
+
+		this.line_ibo = gl.createBuffer()
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.line_ibo)
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.line_indices, gl.STATIC_DRAW)
+	}
+
+	/** @function
+	  * @param lines: boolean
+	  */
+	draw(lines) {
+		const location = gl.getUniformLocation(cur_shader.program, "max_effect")
+		gl.uniform1f(location, this.max_effect)
+
+		gl.bindVertexArray(this.vao)
+
+		if (lines) {
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.line_ibo)
+			gl.drawElements(gl.LINES, this.line_indices.length, gl.UNSIGNED_INT, 0)
+		}
+
+		else {
+			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
+			gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_INT, 0)
+		}
 	}
 }
 
