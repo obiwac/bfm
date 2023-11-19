@@ -181,6 +181,7 @@ const deformation_shader = new Shader("deformation")
 const line_deformation_shader = new Shader("line_deformation")
 
 $SCENERY_LOADING
+$INSTANCE_LOADING
 
 const fov = TAU / 4
 
@@ -278,6 +279,22 @@ function render(now) {
 
 	for (const thing of scenery) {
 		thing.draw()
+	}
+
+	// render instances
+
+	deformation_shader.use()
+	deformation_shader.mvp(mvp_mat)
+
+	for (const instance of instances) {
+		instance.draw(false)
+	}
+
+	line_deformation_shader.use()
+	line_deformation_shader.mvp(mvp_mat)
+
+	for (const instance of instances) {
+		instance.draw(true)
 	}
 
 	// continue render loop
