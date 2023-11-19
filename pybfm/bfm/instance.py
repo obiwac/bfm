@@ -128,6 +128,15 @@ class CInstance:
 			gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, self.ibo)
 			gl.glDrawElements(gl.GL_TRIANGLES, len(self.obj.indices), gl.GL_UNSIGNED_INT, None)
 
+	def export_js(self) -> str:
+		return f"""{{
+			indices: new Uint32Array({self.obj.indices}),
+			line_indices: new Uint32Array({self.obj.line_indices}),
+			coords: new Float32Array({self.obj.coords}),
+			effects: new Float32Array({self.effects}),
+			max_effect: {self.max_effect},
+		}}"""
+
 class Instance(CInstance):
 	def __init__(self, obj: Obj):
 		c_instance = ffi.new("bfm_instance_t*")
