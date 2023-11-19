@@ -58,4 +58,4 @@ build
 __pycache__
 libbfm.c
 *.core
-index.html
+/index.html
