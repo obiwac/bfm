@@ -130,6 +130,15 @@ function anim_vec(x, target, multiplier) {
 	return vec
 }
 
+canvas.addEventListener("mousemove", e => {
+	if (e.buttons & 0b1) {
+		target_rotation[0] += e.movementX / 200
+		target_rotation[1] -= e.movementY / 200
+
+		target_rotation[1] = Math.max(-TAU / 4, Math.min(TAU / 4, target_rotation[1]))
+	}
+})
+
 // rendering
 
 let prev = 0
