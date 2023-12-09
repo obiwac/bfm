@@ -105,14 +105,14 @@ class Scenery {
 		gl.bufferData(gl.ARRAY_BUFFER, this.vbo_data, gl.STATIC_DRAW)
 
 		gl.enableVertexAttribArray(0)
-		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, FLOAT32_SIZE * 6, FLOAT32_SIZE * 0)
 
 		this.ibo = gl.createBuffer()
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW)
 
 		gl.enableVertexAttribArray(1)
-		gl.vertexAttribPointer(1, 3, gl.FLOAT, gl.FALSE, FLOAT32_SIZE * 6, FLOAT32_SIZE * 3)
+		gl.vertexAttribPointer(1, 3, gl.FLOAT, false, FLOAT32_SIZE * 6, FLOAT32_SIZE * 3)
 	}
 
 	draw() {
@@ -146,14 +146,14 @@ class Instance {
 		gl.bufferData(gl.ARRAY_BUFFER, this.coords, gl.STATIC_DRAW)
 
 		gl.enableVertexAttribArray(0)
-		gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 0, 0)
+		gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
 
 		this.effects_vbo = gl.createBuffer()
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.effects_vbo)
 		gl.bufferData(gl.ARRAY_BUFFER, this.effects, gl.STATIC_DRAW)
 
 		gl.enableVertexAttribArray(1)
-		gl.vertexAttribPointer(1, 2, gl.FLOAT, gl.FALSE, 0, 0)
+		gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0)
 
 		this.ibo = gl.createBuffer()
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ibo)
