@@ -6,14 +6,17 @@ int bfm_system_create(bfm_system_t* system, bfm_state_t* state, size_t n) {
 	system->state = state;
 	system->n = n;
 
-	if (bfm_perm_create(&system->perm, state, n) < 0)
+	if (bfm_perm_create(&system->perm, state, n) < 0) {
 		goto err_perm;
+	}
 
-	if (bfm_matrix_full_create(&system->A, state, BFM_MATRIX_MAJOR_ROW, n) < 0)
+	if (bfm_matrix_full_create(&system->A, state, BFM_MATRIX_MAJOR_ROW, n) < 0) {
 		goto err_matrix;
+	}
 
-	if (bfm_vec_create(&system->b, state, n) < 0)
+	if (bfm_vec_create(&system->b, state, n) < 0) {
 		goto err_vec;
+	}
 
 	return 0;
 
@@ -43,24 +46,28 @@ int bfm_system_renumber(bfm_system_t* system) {
 
 	// create RCM permutation vector
 
-	if (bfm_perm_rcm(&system->perm, &system->A) < 0)
+	if (bfm_perm_rcm(&system->perm, &system->A) < 0) {
 		return -1;
+	}
 
 	// apply permutation to system matrix and vector
 
-	if (bfm_perm_perm_matrix(&system->perm, &system->A, false) < 0)
+	if (bfm_perm_perm_matrix(&system->perm, &system->A, false) < 0) {
 		return -1;
+	}
 
-	if (bfm_perm_perm_vec(&system->perm, &system->b, false) < 0)
+	if (bfm_perm_perm_vec(&system->perm, &system->b, false) < 0) {
 		return -1;
+	}
 
 	// turn full matrix into band matrix
 
 	size_t const bandwidth = bfm_matrix_bandwidth(&system->A);
 	bfm_matrix_t A;
 
-	if (bfm_matrix_band_create(&A, state, system->A.major, system->A.m, bandwidth) < 0)
+	if (bfm_matrix_band_create(&A, state, system->A.major, system->A.m, bandwidth) < 0) {
 		return -1;
+	}
 
 	if (bfm_matrix_copy(&A, &system->A) < 0) {
 		bfm_matrix_destroy(&A);
@@ -93,8 +100,9 @@ static void get_elem(elem_t* elem, bfm_mesh_t* mesh, size_t i) {
 		size_t const map = mesh->elems[kind * i + j];
 		elem->map[j] = map;
 
-		for (size_t k = 0; k < dim; k++)
+		for (size_t k = 0; k < dim; k++) {
 			elem->coord[k][j] = mesh->coords[map * dim + k];
+		}
 	}
 }
 
@@ -113,13 +121,15 @@ static int fill_elasticity_elem(elem_t* elem, bfm_system_t* system, bfm_instance
 
 	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) pos;
 
-	if (bfm_vec_create(&pos, state, dim) < 0)
+	if (bfm_vec_create(&pos, state, dim) < 0) {
 		return -1;
+	}
 
 	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) applied_force;
 
-	if (bfm_vec_create(&applied_force, state, dim) < 0)
+	if (bfm_vec_create(&applied_force, state, dim) < 0) {
 		return -1;
+	}
 
 	// go through integration points
 
@@ -237,13 +247,15 @@ static int fill_axisymmetric_elem(elem_t* elem, bfm_system_t* system, bfm_instan
 
 	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) pos;
 
-	if (bfm_vec_create(&pos, state, dim) < 0)
+	if (bfm_vec_create(&pos, state, dim) < 0) {
 		return -1;
+	}
 
 	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) applied_force;
 
-	if (bfm_vec_create(&applied_force, state, dim) < 0)
+	if (bfm_vec_create(&applied_force, state, dim) < 0) {
 		return -1;
+	}
 
 	// go through integration points
 
@@ -353,8 +365,9 @@ static void apply_constraint(bfm_system_t* system, size_t node, double value) {
 		bfm_matrix_set(&system->A, i, node, 0);
 	}
 
-	for (size_t i = 0; i < system->A.m; i++)
+	for (size_t i = 0; i < system->A.m; i++) {
 		bfm_matrix_set(&system->A, node, i, 0);
+	}
 
 	bfm_matrix_set(&system->A, node, node, 1);
 	system->b.data[node] = value;
@@ -364,8 +377,9 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 	size_t const shift = condition->kind == BFM_CONDITION_KIND_DIRICHLET_X ? 0 : 1;
 
 	for (size_t j = 0; j < mesh->n_nodes; j++) {
-		if (!condition->nodes[j])
+		if (!condition->nodes[j]) {
 			continue;
+		}
 
 		apply_constraint(system, j * mesh->dim + shift, condition->value);
 	}
@@ -373,9 +387,10 @@ static void apply_dirichlet(bfm_system_t* system, bfm_mesh_t* mesh, bfm_conditio
 
 static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mesh, bfm_condition_t* condition) {
 	for (size_t i = 0; i < mesh->n_nodes; i++) {
-		if (!condition->nodes[i])
+		if (!condition->nodes[i]) {
 			continue;
-		
+		}
+
 		double tx = 0;
 		double ty = 0;
 
@@ -385,7 +400,8 @@ static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mes
 
 				double const length = sqrt(
 					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
-					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)
+				);
 
 				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
 				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
@@ -395,7 +411,8 @@ static void apply_dirichlet_normal_tangent(bfm_system_t* system, bfm_mesh_t* mes
 
 				double const length = sqrt(
 					pow(mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
-					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2));
+					pow(mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)
+				);
 
 				tx += (mesh->coords[i * 2 + 0] - mesh->coords[n2 * 2 + 0]) / length / 2;
 				ty += (mesh->coords[i * 2 + 1] - mesh->coords[n2 * 2 + 1]) / length / 2;
@@ -416,36 +433,36 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 
 	// check that mesh is supported
 
-	if (mesh->dim != 2)
+	if (mesh->dim != 2) {
 		return -1;
+	}
 
-	if (mesh->kind != BFM_ELEM_KIND_SIMPLEX && mesh->kind != BFM_ELEM_KIND_QUAD)
+	if (mesh->kind != BFM_ELEM_KIND_SIMPLEX && mesh->kind != BFM_ELEM_KIND_QUAD) {
 		return -1;
+	}
 
 	// create system object
 
-	if (bfm_system_create(system, state, n) < 0)
+	if (bfm_system_create(system, state, n) < 0) {
 		return -1;
+	}
 
 	// go through all elements
 
 	elem_t elem;
 
-	double const a = !stress ?
-		material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu) :
-		material->E / (1 - material->nu * material->nu);
+	double const a = !stress ? material->E * (1 - material->nu) / (1 + material->nu) / (1 - 2 * material->nu) : material->E / (1 - material->nu * material->nu);
 
-	double const b = !stress ?
-		material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu) :
-		material->E * material->nu / (1 - material->nu * material->nu);
+	double const b = !stress ? material->E * material->nu / (1 + material->nu) / (1 - 2 * material->nu) : material->E * material->nu / (1 - material->nu * material->nu);
 
 	double const c = material->E / (2 * (1 + material->nu));
 
 	for (size_t i = 0; i < mesh->n_elems; i++) {
 		get_elem(&elem, mesh, i);
 
-		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces, a, b, c) < 0)
+		if (fill_elasticity_elem(&elem, system, instance, n_forces, forces, a, b, c) < 0) {
 			return -1;
+		}
 	}
 
 	// apply conditions
@@ -453,8 +470,9 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y)
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y) {
 			apply_dirichlet(system, mesh, condition);
+		}
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
@@ -463,12 +481,15 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
 
-				if (!condition->nodes[n1] || !condition->nodes[n2])
+				if (!condition->nodes[n1] || !condition->nodes[n2]) {
 					continue;
+				}
 
-				double const jacobian = sqrt(
+				double const c2 =
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
-					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
+					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2);
+
+				double const jacobian = sqrt(c2) / 2;
 
 				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
 				system->b.data[n1 * 2 + shift] += jacobian * condition->value;
@@ -483,8 +504,9 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
 
-				if (!condition->nodes[n1] || !condition->nodes[n2])
+				if (!condition->nodes[n1] || !condition->nodes[n2]) {
 					continue;
+				}
 
 				// found on https://stackoverflow.com/questions/1243614/how-do-i-calculate-the-normal-vector-of-a-line-segment
 
@@ -498,8 +520,9 @@ static int create_planar(bfm_system_t* system, bfm_instance_t* instance, size_t 
 				system->b.data[n2 * 2 + 1] += 0.5 * condition->value * (BFM_CONDITION_KIND_NEUMANN_TANGENT == condition->kind ? dy : dx);
 			}
 		}
-		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL)
+		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL) {
 			apply_dirichlet_normal_tangent(system, mesh, condition);
+		}
 	}
 
 	return 0;
@@ -521,16 +544,19 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 
 	// check that mesh is supported
 
-	if (mesh->dim != 2)
+	if (mesh->dim != 2) {
 		return -1;
+	}
 
-	if (mesh->kind != BFM_ELEM_KIND_SIMPLEX && mesh->kind != BFM_ELEM_KIND_QUAD)
+	if (mesh->kind != BFM_ELEM_KIND_SIMPLEX && mesh->kind != BFM_ELEM_KIND_QUAD) {
 		return -1;
+	}
 
 	// create system object
 
-	if (bfm_system_create(system, state, n) < 0)
+	if (bfm_system_create(system, state, n) < 0) {
 		return -1;
+	}
 
 	// go through all elements
 
@@ -539,8 +565,9 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 	for (size_t i = 0; i < mesh->n_elems; i++) {
 		get_elem(&elem, mesh, i);
 
-		if (fill_axisymmetric_elem(&elem, system, instance, n_forces, forces) < 0)
+		if (fill_axisymmetric_elem(&elem, system, instance, n_forces, forces) < 0) {
 			return -1;
+		}
 	}
 
 	// apply conditions
@@ -548,11 +575,13 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 	for (size_t i = 0; i < instance->n_conditions; i++) {
 		bfm_condition_t* const condition = instance->conditions[i];
 
-		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y)
+		if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_X || condition->kind == BFM_CONDITION_KIND_DIRICHLET_Y) {
 			apply_dirichlet(system, mesh, condition);
-		
-		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL)
+		}
+
+		else if (condition->kind == BFM_CONDITION_KIND_DIRICHLET_TANGENT || condition->kind == BFM_CONDITION_KIND_DIRICHLET_NORMAL) {
 			apply_dirichlet_normal_tangent(system, mesh, condition);
+		}
 
 		else if (condition->kind == BFM_CONDITION_KIND_NEUMANN_X || condition->kind == BFM_CONDITION_KIND_NEUMANN_Y) {
 			for (size_t j = 0; j < mesh->n_edges; j++) {
@@ -561,8 +590,9 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 				size_t const n1 = edge->nodes[0];
 				size_t const n2 = edge->nodes[1];
 
-				if (!condition->nodes[n1] || !condition->nodes[n2])
+				if (!condition->nodes[n1] || !condition->nodes[n2]) {
 					continue;
+				}
 
 				double const r1 =
 					mesh->coords[n1 * 2 + 0] * (1 - 1 / sqrt(3)) / 2 +
@@ -574,9 +604,11 @@ int bfm_system_create_axisymmetric_strain(bfm_system_t* system, bfm_instance_t* 
 
 				double const fac = r1 + r2;
 
-				double const jacobian = sqrt(
+				double const c2 =
 					pow(mesh->coords[n1 * 2 + 0] - mesh->coords[n2 * 2 + 0], 2) +
-					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2)) / 2;
+					pow(mesh->coords[n1 * 2 + 1] - mesh->coords[n2 * 2 + 1], 2);
+
+				double const jacobian = sqrt(c2) / 2;
 
 				size_t const shift = condition->kind == BFM_CONDITION_KIND_NEUMANN_X ? 0 : 1;
 

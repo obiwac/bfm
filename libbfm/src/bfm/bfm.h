@@ -12,9 +12,9 @@ typedef struct {
 	size_t line;
 } bfm_err_t;
 
-typedef void* (*bfm_alloc_t) (size_t size);
-typedef void* (*bfm_realloc_t) (void* ptr, size_t size);
-typedef void (*bfm_free_t) (void* ptr);
+typedef void* (*bfm_alloc_t)(size_t size);
+typedef void* (*bfm_realloc_t)(void* ptr, size_t size);
+typedef void (*bfm_free_t)(void* ptr);
 
 typedef struct {
 	bfm_err_t err;

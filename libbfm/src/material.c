@@ -11,8 +11,9 @@ int bfm_material_create(bfm_material_t* material, bfm_state_t* state, char* name
 
 	material->name = strdup(name);
 
-	if (!material->name)
+	if (!material->name) {
 		return -1;
+	}
 
 	material->rho = rho;
 	material->E = E;

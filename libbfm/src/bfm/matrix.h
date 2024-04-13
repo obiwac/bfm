@@ -1,8 +1,8 @@
 #pragma once
 
 #include <math.h>
-#include <sys/types.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include <bfm/bfm.h>
 #include <bfm/math.h>
@@ -33,6 +33,7 @@ typedef struct {
 	bfm_matrix_major_t major; // TODO should this be called 'majority'?
 
 	size_t m;
+
 	// TODO property for symmetric matrices
 
 	union {
@@ -114,7 +115,7 @@ int bfm_matrix_lu(bfm_matrix_t* matrix);
  * @param y, a vector 
  * @return int, 0 if success, -1 if failure
  */
-int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t *y);
+int bfm_matrix_lu_solve(bfm_matrix_t* matrix, bfm_vec_t* y);
 
 /**
  * @brief solve a Ax = y system using LU decomposition

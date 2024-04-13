@@ -16,8 +16,8 @@ typedef struct {
 	bfm_colour_t colour;
 
 	double rho; // density
-	double E; // Young's modulus (at room temperature)
-	double nu; // Poisson's ratio
+	double E;   // Young's modulus (at room temperature)
+	double nu;  // Poisson's ratio
 } bfm_material_t;
 
 int bfm_material_create(bfm_material_t* material, bfm_state_t* state, char* name, double rho, double E, double nu);

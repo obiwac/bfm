@@ -11,8 +11,9 @@ int bfm_condition_create(bfm_condition_t* condition, bfm_state_t* state, bfm_mes
 	size_t const size = mesh->n_nodes * sizeof *condition->nodes;
 	condition->nodes = state->alloc(size);
 
-	if (!condition->nodes)
+	if (!condition->nodes) {
 		return -1;
+	}
 
 	memset(condition->nodes, 0, size);
 

@@ -29,17 +29,19 @@ int bfm_mesh_destroy(bfm_mesh_t* mesh) {
 	return 0;
 }
 
-static int cmp_edge(const void* e1, const void* e2) {
+static int cmp_edge(void const* e1, void const* e2) {
 	bfm_edge_t* edge1 = (bfm_edge_t*) e1;
 	bfm_edge_t* edge2 = (bfm_edge_t*) e2;
 	// Can I use unsigned int for m1, m2 with substraction afterwards?
 	int m1 = BFM_MIN(edge1->nodes[0], edge1->nodes[1]);
 	int m2 = BFM_MIN(edge2->nodes[0], edge2->nodes[1]);
 	int diff = m1 - m2;
-	if (diff > 0)
+	if (diff > 0) {
 		return -1;
-	if (diff < 0)
+	}
+	if (diff < 0) {
 		return 1;
+	}
 
 	int M1 = BFM_MAX(edge1->nodes[0], edge1->nodes[1]);
 	int M2 = BFM_MAX(edge2->nodes[0], edge2->nodes[1]);
@@ -56,8 +58,9 @@ static int compute_edges(bfm_mesh_t* mesh) {
 
 	mesh->edges = state->alloc(n_elems * n_local_nodes * sizeof *mesh->edges);
 
-	if (mesh->edges == NULL)
+	if (mesh->edges == NULL) {
 		return -1;
+	}
 
 	for (size_t i = 0; i < n_elems; i++) {
 		for (size_t j = 0; j < n_local_nodes; j++) {
@@ -81,8 +84,9 @@ static int compute_edges(bfm_mesh_t* mesh) {
 			i++;
 		}
 
-		else
+		else {
 			mesh->edges[current] = mesh->edges[i - 1];
+		}
 
 		current++;
 	}
@@ -90,8 +94,9 @@ static int compute_edges(bfm_mesh_t* mesh) {
 	mesh->n_edges = current;
 	mesh->edges = mesh->state->realloc(mesh->edges, current * sizeof *mesh->edges);
 
-	if (mesh->edges == NULL)
+	if (mesh->edges == NULL) {
 		return -1;
+	}
 
 	return 0;
 }
@@ -106,8 +111,9 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 
 	FILE* const fp = fopen(name, "r");
 
-	if (fp == NULL)
+	if (fp == NULL) {
 		goto err_fopen; // TODO error message
+	}
 
 	// read nodes
 
@@ -116,16 +122,18 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 
 	size_t _;
 
-	for (size_t i = 0; i < mesh->n_nodes; i++)
+	for (size_t i = 0; i < mesh->n_nodes; i++) {
 		fscanf(fp, "\t%zu :\t%lf\t%lf\n", &_, &mesh->coords[i * 2], &mesh->coords[i * 2 + 1]);
+	}
 
 	// read edges
 
 	fscanf(fp, "Number of edges %zu\n", &mesh->n_edges);
 	mesh->edges = state->alloc(mesh->n_edges * sizeof *mesh->edges);
 
-	if (mesh->edges == NULL)
+	if (mesh->edges == NULL) {
 		return -1;
+	}
 
 	for (size_t i = 0; i < mesh->n_edges; i++) {
 		fscanf(fp, "\t%zd :\t%zu\t%zu\n", &mesh->edges[i].elems[0], &mesh->edges[i].nodes[0], &mesh->edges[i].nodes[1]);
@@ -137,23 +145,27 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 	char kind_str[16];
 	fscanf(fp, "Number of %15s %zu\n", kind_str, &mesh->n_elems);
 
-	if (strcmp(kind_str, "triangles") == 0)
+	if (strcmp(kind_str, "triangles") == 0) {
 		mesh->kind = BFM_ELEM_KIND_SIMPLEX;
+	}
 
-	else if (strcmp(kind_str, "quads") == 0)
+	else if (strcmp(kind_str, "quads") == 0) {
 		mesh->kind = BFM_ELEM_KIND_QUAD;
+	}
 
-	else
+	else {
 		goto err_kind; // TODO error message
+	}
 
 	mesh->elems = state->alloc(mesh->n_elems * mesh->kind * sizeof *mesh->elems);
 
-	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_SIMPLEX && i < mesh->n_elems; i++)
+	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_SIMPLEX && i < mesh->n_elems; i++) {
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 3], &mesh->elems[i * 3 + 1], &mesh->elems[i * 3 + 2]);
+	}
 
-	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++)
+	for (size_t i = 0; mesh->kind == BFM_ELEM_KIND_QUAD && i < mesh->n_elems; i++) {
 		fscanf(fp, "\t%zu :\t%zu\t%zu\t%zu\t%zu\n", &_, &mesh->elems[i * 4], &mesh->elems[i * 4 + 1], &mesh->elems[i * 4 + 2], &mesh->elems[i * 4 + 3]);
-
+	}
 
 	fscanf(fp, "Number of domains %zu\n", &mesh->n_domains);
 	mesh->domains = state->alloc(mesh->n_domains * sizeof *mesh->domains);
@@ -169,8 +181,9 @@ int bfm_mesh_read_lepl1110(bfm_mesh_t* mesh, bfm_state_t* state, char const* nam
 
 		for (size_t j = 0; j < domain->n_elements; j++) {
 			fscanf(fp, "%zu", &domain->elements[j]);
-			if (j + 1 != domain->n_elements && (j + 1) % 10 == 0)
+			if (j + 1 != domain->n_elements && (j + 1) % 10 == 0) {
 				fscanf(fp, "\n");
+			}
 		}
 		fscanf(fp, "\n");
 	}
@@ -200,16 +213,18 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 
 	FILE* const fp = fopen(name, "r");
 
-	if (fp == NULL)
+	if (fp == NULL) {
 		goto err_fopen; // TODO error message
+	}
 
 	// read lines
 
 	char obj_name[256];
 
 	for (char header[16]; fscanf(fp, "%15s", header) != EOF;) {
-		if (!strcmp(header, "o"))
+		if (!strcmp(header, "o")) {
 			fscanf(fp, "%255s\n", obj_name);
+		}
 
 		else if (!strcmp(header, "v")) {
 			mesh->coords = state->realloc(mesh->coords, ++mesh->n_nodes * mesh->dim * sizeof *mesh->coords);
@@ -245,7 +260,7 @@ int bfm_mesh_read_wavefront(bfm_mesh_t* mesh, bfm_state_t* state, char const* na
 
 	if (compute_edges(mesh) < 0) {
 		state->free(mesh->coords); // TODO idiosyncratic
-		state->free(mesh->elems); // TODO idiosyncratic
+		state->free(mesh->elems);  // TODO idiosyncratic
 
 		goto err_kind;
 	}

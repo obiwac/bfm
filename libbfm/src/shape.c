@@ -1,8 +1,9 @@
 #include <bfm/shape.h>
 
 static int default_phi(bfm_shape_t* shape, double* point, double* phi) {
-	if (shape->dim != 2)
+	if (shape->dim != 2) {
 		return -1;
+	}
 
 	double const xsi = point[0];
 	double const eta = point[1];
@@ -37,8 +38,9 @@ static int default_phi(bfm_shape_t* shape, double* point, double* phi) {
 }
 
 static int default_dphi(bfm_shape_t* shape, size_t wrt, double* point, double* dphi) {
-	if (shape->dim != 2)
+	if (shape->dim != 2) {
 		return -1;
+	}
 
 	double const xsi = point[0];
 	double const eta = point[1];
@@ -52,10 +54,10 @@ static int default_dphi(bfm_shape_t* shape, size_t wrt, double* point, double* d
 	}
 
 	if (shape->kind == BFM_ELEM_KIND_QUAD) {
-		dphi[0] = (wrt == 0 ?  1 + eta :  1 + xsi) / 4;
-		dphi[1] = (wrt == 0 ? -1 - eta :  1 - xsi) / 4;
+		dphi[0] = (wrt == 0 ? 1 + eta : 1 + xsi) / 4;
+		dphi[1] = (wrt == 0 ? -1 - eta : 1 - xsi) / 4;
 		dphi[2] = (wrt == 0 ? -1 + eta : -1 + xsi) / 4;
-		dphi[3] = (wrt == 0 ?  1 - eta : -1 - xsi) / 4;
+		dphi[3] = (wrt == 0 ? 1 - eta : -1 - xsi) / 4;
 
 		return 0;
 	}
@@ -67,13 +69,13 @@ static int default_dphi(bfm_shape_t* shape, size_t wrt, double* point, double* d
 			dphi[2] = 0;
 			dphi[3] = 4 - 8 * xsi - 4 * eta;
 			dphi[4] = 4 * eta;
-			dphi[5] = - 4 * eta;
+			dphi[5] = -4 * eta;
 		}
 		else {
-			dphi[0] =  -3 + 4 * (xsi + eta);
+			dphi[0] = -3 + 4 * (xsi + eta);
 			dphi[1] = 0;
 			dphi[2] = 4 * eta - 1;
-			dphi[3] = - 4 * xsi;
+			dphi[3] = -4 * xsi;
 			dphi[4] = 4 * xsi;
 			dphi[5] = 4 - 4 * xsi - 8 * eta;
 		}

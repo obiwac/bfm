@@ -36,8 +36,9 @@ int bfm_set_free(bfm_state_t* state, bfm_free_t free) {
 int bfm_err_print(bfm_state_t* state) {
 	bfm_err_t* const err = &state->err;
 
-	if (!err->has)
+	if (!err->has) {
 		return 0;
+	}
 
 	printf("[BFM %s:%zu (%s)] %s\n", err->file, err->line, err->func, err->msg);
 

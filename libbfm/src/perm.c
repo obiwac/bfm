@@ -26,26 +26,31 @@ int bfm_perm_destroy(bfm_perm_t* perm) {
 int bfm_perm_perm_matrix(bfm_perm_t* perm, bfm_matrix_t* matrix, bool inv) {
 	bfm_state_t* const state = perm->state;
 
-	if (!perm->has_perm)
+	if (!perm->has_perm) {
 		return -1;
+	}
 
 	size_t* const cur_perm = inv ? perm->inv_perm : perm->perm;
 
-	if (matrix->m != perm->m)
+	if (matrix->m != perm->m) {
 		return -1;
+	}
 
-	if (matrix->kind != BFM_MATRIX_KIND_FULL)
+	if (matrix->kind != BFM_MATRIX_KIND_FULL) {
 		return -1;
+	}
 
 	// copy old matrix to copy from
 
-	bfm_matrix_t __attribute__((cleanup(bfm_matrix_destroy))) old = { 0 };
+	bfm_matrix_t __attribute__((cleanup(bfm_matrix_destroy))) old = {0};
 
-	if (bfm_matrix_full_create(&old, state, matrix->major, matrix->m) < 0)
+	if (bfm_matrix_full_create(&old, state, matrix->major, matrix->m) < 0) {
 		return -1;
+	}
 
-	if (bfm_matrix_copy(&old, matrix) < 0)
+	if (bfm_matrix_copy(&old, matrix) < 0) {
 		return -1;
+	}
 
 	// actually permute matrix
 
@@ -65,23 +70,27 @@ int bfm_perm_perm_matrix(bfm_perm_t* perm, bfm_matrix_t* matrix, bool inv) {
 int bfm_perm_perm_vec(bfm_perm_t* perm, bfm_vec_t* vec, bool inv) {
 	bfm_state_t* const state = perm->state;
 
-	if (!perm->has_perm)
+	if (!perm->has_perm) {
 		return -1;
+	}
 
 	size_t* const cur_perm = inv ? perm->inv_perm : perm->perm;
 
-	if (vec->n != perm->m)
+	if (vec->n != perm->m) {
 		return -1;
+	}
 
 	// copy old vector to copy from
 
-	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) old = { 0 };
+	bfm_vec_t __attribute__((cleanup(bfm_vec_destroy))) old = {0};
 
-	if (bfm_vec_create(&old, state, vec->n) < 0)
+	if (bfm_vec_create(&old, state, vec->n) < 0) {
 		return -1;
+	}
 
-	if (bfm_vec_copy(&old, vec) < 0)
+	if (bfm_vec_copy(&old, vec) < 0) {
 		return -1;
+	}
 
 	// actually permute vec
 
@@ -113,16 +122,18 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 	// permutation object must have the same size as the matrix
 
-	if (perm->m != n)
+	if (perm->m != n) {
 		goto err_size;
+	}
 
 	// Cuthill-McKee algorithm
 	// start by getting a vector of all the degrees of the nodes in the adjacency matrix
 
 	size_t* const degs = state->alloc(n * sizeof *degs);
 
-	if (degs == NULL)
+	if (degs == NULL) {
 		goto err_degs_alloc;
+	}
 
 	memset(degs, 0, n * sizeof *degs);
 
@@ -138,46 +149,52 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 	bool* const in_queue = state->alloc(n * sizeof *in_queue);
 
-	if (in_queue == NULL)
+	if (in_queue == NULL) {
 		goto err_in_queue_alloc;
+	}
 
 	memset(in_queue, 0, n * sizeof *in_queue);
 
 	size_t* const queue = state->alloc(n * sizeof *queue);
 
-	if (queue == NULL)
+	if (queue == NULL) {
 		goto err_queue_alloc;
+	}
 
 	size_t queue_start = 0;
 	size_t queue_end = 0;
 
 #define QUEUE_INDEX(i) (queue[(i) % n])
 
-#define PUSH_QUEUE(val) { \
-	in_queue[val] = true; \
-	QUEUE_INDEX(queue_end) = val; \
-	queue_end++; \
-}
+#define PUSH_QUEUE(val)             \
+	{                                \
+		in_queue[val] = true;         \
+		QUEUE_INDEX(queue_end) = val; \
+		queue_end++;                  \
+	}
 
-#define POP_QUEUE(res) { \
-	res = QUEUE_INDEX(queue_start); \
-	in_queue[res] = false; \
-	queue_start++; \
-}
+#define POP_QUEUE(res)                \
+	{                                  \
+		res = QUEUE_INDEX(queue_start); \
+		in_queue[res] = false;          \
+		queue_start++;                  \
+	}
 
 	// for later, doesn't need to be zeroed out
 
 	rcm_node_t* const to_sort = state->alloc(n * sizeof *to_sort);
 
-	if (to_sort == NULL)
+	if (to_sort == NULL) {
 		goto err_to_sort_alloc;
+	}
 
 	// create map of visited nodes
 
 	bool* const visited = state->alloc(n * sizeof *visited);
 
-	if (visited == NULL)
+	if (visited == NULL) {
 		goto err_visited_alloc;
+	}
 
 	memset(visited, 0, n * sizeof *visited);
 
@@ -187,8 +204,9 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 	perm->inv_perm = state->alloc(n * sizeof *perm->inv_perm);
 
-	if (perm->inv_perm == NULL)
+	if (perm->inv_perm == NULL) {
 		goto err_inv_perm_alloc;
+	}
 
 	// continue while there are still unvisited nodes
 
@@ -202,8 +220,9 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 		size_t min_deg_i = 0; // XXX we don't care if this is initialized or not, but GCC complains if we don't
 
 		for (size_t i = 0; i < n; i++) {
-			if (visited[i])
+			if (visited[i]) {
 				continue;
+			}
 
 			// important that this is <= so we get the *last* one!
 
@@ -236,11 +255,13 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 			// use heapsort(3) to guarantee O(n log n) complexity
 
 			for (size_t i = 0; i < n; i++) {
-				if (visited[i])
+				if (visited[i]) {
 					continue;
+				}
 
-				if (!bfm_matrix_get(A, cur, i))
+				if (!bfm_matrix_get(A, cur, i)) {
 					continue;
+				}
 
 				rcm_node_t* const node = &to_sort[to_sort_count++];
 
@@ -254,8 +275,9 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 
 			// add sorted nodes to queue in order
 
-			for (size_t i = 0; i < to_sort_count; i++)
+			for (size_t i = 0; i < to_sort_count; i++) {
 				PUSH_QUEUE(to_sort[i].i);
+			}
 
 			// add to inverse permutation vector, reversed
 
@@ -272,8 +294,9 @@ int bfm_perm_rcm(bfm_perm_t* perm, bfm_matrix_t* A) {
 		goto err_perm_alloc;
 	}
 
-	for (size_t i = 0; i < n; i++)
+	for (size_t i = 0; i < n; i++) {
 		perm->perm[perm->inv_perm[i]] = i;
+	}
 
 	// success
 

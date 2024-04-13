@@ -15,7 +15,7 @@ typedef struct {
 
 typedef struct bfm_force_t bfm_force_t; // forward declaration
 
-typedef int (*bfm_force_funky_func_t) (bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref, void* data);
+typedef int (*bfm_force_funky_func_t)(bfm_force_t* force, bfm_vec_t* pos, bfm_vec_t* force_ref, void* data);
 
 typedef struct {
 	bfm_force_funky_func_t func;
